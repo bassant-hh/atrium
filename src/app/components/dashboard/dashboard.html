@@ -1,0 +1,177 @@
+<div class="dashboard-wrapper">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-icon-wrapper">
+                <span class="material-symbols-outlined">pedal_bike</span>
+            </div>
+            <span class="logo-text">Makook</span>
+        </div>
+        <nav class="nav-menu">
+            <button routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+                Dashboard
+            </button>
+            <button routerLink="/requests" routerLinkActive="active" class="nav-link">
+                Requests
+            </button>
+            <button routerLink="/active" routerLinkActive="active" class="nav-link">
+                Active Deliveries
+            </button>
+            <button routerLink="/profile" routerLinkActive="active" class="nav-link">
+                Profile
+            </button>
+        </nav>
+       <div class="sidebar-footer">
+  <div class="user-pill shadow-soft">
+    <div class="avatar-wrapper">
+      <div class="avatar">AA</div>
+      <div class="status-dot"></div> </div>
+    
+    <div class="user-meta">
+      <span class="user-name">Ahmed Ali</span>
+      <span class="user-role">Student Rider</span>
+    </div>
+
+    <button class="btn-settings">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+  </div>
+</div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-box">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" placeholder="Search orders...">
+            </div>
+            <div class="top-btns">
+                <button class="btn-baby-blue" (click)="toggleOnline()">
+                    {{ isOnline() ? 'Go Offline' : 'Go Online' }}
+                </button>
+                <button class="btn-baby-blue btn-outline">Take Break</button>
+            </div>
+        </header>
+
+        <div class="content-scroll">
+            <div class="page-intro">
+                <h1>Rider Dashboard</h1>
+                <p>Track your deliveries and earnings</p>
+            </div>
+
+            <section class="stats-row">
+                <div class="stat-card shadow-premium">
+                    <div class="icon-wrap teal"><span class="material-symbols-outlined">payments</span></div>
+                    <div class="data">
+                        <h3>1,250 SAR</h3>
+                        <p>Total Earnings</p>
+                    </div>
+                </div>
+                <div class="stat-card shadow-premium">
+                    <div class="icon-wrap orange"><span class="material-symbols-outlined">package_2</span></div>
+                    <div class="data">
+                        <h3>8</h3>
+                        <p>Deliveries Today</p>
+                    </div>
+                </div>
+                <div class="stat-card shadow-premium">
+                    <div class="icon-wrap blue"><span class="material-symbols-outlined">verified</span></div>
+                    <div class="data">
+                        <h3>156</h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+                <div class="stat-card shadow-premium">
+                    <div class="icon-wrap gold"><span class="material-symbols-outlined">star</span></div>
+                    <div class="data">
+                        <h3>4.9</h3>
+                        <p>Avg. Rating</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="body-grid">
+                <section class="requests-column">
+                    <header class="section-header">
+                        <h2 class="font-headline">Active Requests</h2>
+                        <span class="count-badge">3 available</span>
+                    </header>
+
+                    @for (req of activeRequests(); track req.id) {
+                    <div class="order-card shadow-premium animate-in">
+                        <div class="order-top">
+                            <div class="client-info">
+                                <h3>{{req.customerName}}</h3>
+                                <p class="order-type">{{req.item}}</p>
+                                <span class="order-id">#{{req.id}} • 5 mins ago</span>
+                            </div>
+                            <div class="price-distance">
+                                <span class="price">{{req.price}} SAR</span>
+                                <span class="distance">0.8 km</span>
+                            </div>
+                        </div>
+
+                        <div class="location-brief">
+                            <div class="loc-tag"><span class="dot pickup"></span> Pickup: {{req.pickup}}</div>
+                        </div>
+
+                        <div class="order-footer">
+                            <button class="btn-accept" (click)="acceptOrder(req.id)">Accept Order</button>
+                            <button class="btn-decline-ghost">Decline</button>
+                        </div>
+                    </div>
+                    }
+
+
+                    <div class="card-map shadow-premium">
+                        <h3 class="card-title">Nearby Orders Map</h3>
+                        <div class="map-container">
+                            <span class="material-symbols-outlined">map</span>
+                            <p>Map View Coming Soon</p>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="summary-column">
+                    <div class="card-summary shadow-premium">
+                        <h3 class="card-title">Today's Summary</h3>
+                        <div class="stat-row">
+                            <span class="label">Online Time</span>
+                            <span class="val">4h 30m</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="label">Deliveries</span>
+                            <span class="val">8</span>
+                        </div>
+                        <div class="stat-row highlight">
+                            <span class="label">Earnings</span>
+                            <span class="val">180 SAR</span>
+                        </div>
+                    </div>
+
+
+
+
+                    <div class="recent-deliveries-card shadow-premium">
+                        <h3 class="card-title">Recent Deliveries</h3>
+                        <div class="delivery-mini-card">
+                            <div class="d-info">
+                                <b>Ahmed S.</b>
+                                <small>#M1238</small>
+                            </div>
+                            <div class="d-amount">20 SAR</div>
+                        </div>
+                        <div class="delivery-mini-card">
+                            <div class="d-info">
+                                <b>Fatima A.</b>
+                                <small>#M1237</small>
+                            </div>
+                            <div class="d-amount">15 SAR</div>
+                        </div>
+                    </div>
+
+
+                </aside>
+            </div>
+        </div>
+    </main>
+</div>

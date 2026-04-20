@@ -1,0 +1,88 @@
+<main class="main-canvas">
+    @if (!isSubmitted()) {
+    <div class="form-card">
+        <h1 class="font-headline" style="text-align: center; color: var(--primary);">Makook</h1>
+
+        <div class="stepper">
+            <div class="step-circle" [class.active]="currentStep() >= 1">1</div>
+            <div class="step-circle" [class.active]="currentStep() >= 2">2</div>
+            <div class="step-circle" [class.active]="currentStep() >= 3">3</div>
+        </div>
+
+        <form [formGroup]="registerForm">
+            
+            @if (currentStep() === 1) {
+            <div class="input-wrapper animate-in">
+                <label>Full Name</label>
+                <input class="custom-input" formControlName="fullName" placeholder="Enter your full name">
+            </div>
+
+            <div class="input-wrapper animate-in">
+                <label>University</label>
+                <input class="custom-input" formControlName="university" placeholder="Enter your University">
+            </div>
+
+            <div class="input-wrapper animate-in">
+                <label>Phone Number</label>
+                <input class="custom-input" formControlName="phone" placeholder="Enter your phone Number">
+            </div>
+            }
+
+            @if (currentStep() === 2) {
+            <div class="input-wrapper animate-in">
+                <label>Identity Verification</label>
+                <input type="file" (change)="onFileSelected($event)" class="custom-input">
+                <p style="font-size: 10px; margin-top: 5px; color: var(--primary);">
+                    Supported: JPG, PNG or PDF (ID or Student Card)
+                </p>
+            </div>
+            }
+
+            @if (currentStep() === 3) {
+            <div class="input-wrapper animate-in">
+                <label>Vehicle Type</label>
+                <select class="custom-input" formControlName="bikeType">
+                    <option value="" disabled selected>Select your vehicle type</option>
+                    <option value="mountain">Mountain Bike</option>
+                    <option value="road">Road Bike</option>
+                    <option value="electric">Electric Bike</option>
+                    <option value="scooter">Electric Scooter</option>
+                </select>
+            </div>
+
+            <div class="input-wrapper" style="display: flex; align-items: center; gap: 10px; margin-top: 1rem;">
+                <input type="checkbox" formControlName="hasBicycle" id="confirm-bike"
+                    style="width: 20px; height: 20px; accent-color: var(--primary);">
+                <label for="confirm-bike" style="margin-bottom: 0; text-transform: none; font-size: 14px;">
+                    I confirm that I own this vehicle and it's in good condition.
+                </label>
+            </div>
+            }
+
+            <div style="margin-top: 2rem;">
+                  <button class="btn-primary" type="button"       
+                (click)="currentStep() === 3 ?
+                    router.navigate(['/dashboard']) : nextStep()"
+                       >
+                    @if (isLoading()) {
+                        <span>Loading...</span>
+                    } @else {
+                        {{ currentStep() === 3 ? 'Register' : 'Continue' }}
+                    }
+                </button>
+
+                @if (currentStep() > 1 && !isLoading()) {
+                <button style="width: 100%; margin-top: 1rem; background: none; border: none; cursor: pointer; color: var(--on-surface-variant);"
+                    (click)="prevStep()">Back</button>
+                }
+            </div>
+        </form>
+    </div>
+    } @else {
+    <div class="form-card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;">✓</div>
+        <h2 class="font-headline">Success!</h2>
+        <p>Application under review. We will contact you soon.</p>
+    </div>
+    }
+</main>

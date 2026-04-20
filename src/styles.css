@@ -1,0 +1,26 @@
+/* src/styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    /* Tonal Architecture - Exact Hex Codes */
+    --primary: #3b889d;
+    --primary-container: #87ceeb;
+    --surface: #f8f9fb;
+    --surface-container-low: #f3f4f6;
+    --surface-container-lowest: #ffffff;
+    --on-surface: #191c1e;
+    --on-surface-variant: #3f484c;
+    --outline-variant: rgba(191, 200, 205, 0.3);
+    --error: #ba1a1a;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    overflow-x: hidden;
+}
+
+.font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }

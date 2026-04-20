@@ -1,0 +1,33 @@
+<main class="main-canvas">
+    <div class="form-card animate-in">
+        <header style="text-align: center; margin-bottom: 2.5rem;">
+            <h1 class="font-headline" style="color: var(--primary); font-size: 2.2rem; margin: 0;">Makook</h1>
+            <p style="color: var(--on-surface-variant); font-size: 14px; margin-top: 5px;">Rider Login</p>
+        </header>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+            <div class="input-wrapper">
+                <label>Phone Number</label>
+                <input class="custom-input" formControlName="phone" placeholder="01xxxxxxxxx" type="tel">
+            </div>
+
+            <div class="input-wrapper" style="margin-top: 1.5rem;">
+                <label>National ID (14 Digits)</label>
+                <input class="custom-input" formControlName="nationalId" placeholder="2990101xxxxxxx" type="text">
+            </div>
+
+            <div style="margin-top: 2.5rem;">
+                <button class="btn-primary" type="submit" [disabled]="loginForm.invalid || isLoading()">
+                    {{ isLoading() ? 'Verifying...' : 'Login' }}
+                </button>
+                
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p style="font-size: 13px; color: var(--on-surface-variant);">
+                        Not a rider yet? 
+                        <a routerLink="/register" style="color: var(--primary); font-weight: 800; text-decoration: none;">Apply Now</a>
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>

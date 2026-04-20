@@ -1,0 +1,143 @@
+<div class="dashboard-container">
+  
+  <aside class="sidebar">
+    <div class="brand-area">
+      <span class="material-symbols-outlined logo-icon">pedal_bike</span>
+      <span class="logo-text">Makook</span>
+    </div>
+
+    <nav class="nav-menu">
+      <button routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">grid_view</span> Dashboard
+      </button>
+      <button routerLink="/requests" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">inventory_2</span> Requests
+      </button>
+      <button routerLink="/active" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">delivery_dining</span> Active Deliveries
+      </button>
+      <button routerLink="/profile" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">person</span> Profile
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+  <div class="user-pill shadow-soft">
+    <div class="avatar-wrapper">
+      <div class="avatar">AA</div>
+      <div class="status-dot"></div> </div>
+    
+    <div class="user-meta">
+      <span class="user-name">Ahmed Ali</span>
+      <span class="user-role">Student Rider</span>
+    </div>
+
+    <button class="btn-settings">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+  </div>
+</div>
+  </aside>
+
+  <main class="main-layout">
+    
+    <header class="top-navbar">
+      <div class="search-container">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Search orders, destinations...">
+      </div>
+      <div class="status-pill shadow-soft">
+        <div class="dot active"></div> <span>Online</span>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="page-header">
+        <h1>Active Deliveries</h1>
+        <p>2 ongoing deliveries</p>
+      </div>
+
+      <div class="delivery-grid">
+        @for (item of activeDeliveries(); track item.id) {
+          <div class="delivery-card shadow-premium">
+            <div class="card-header">
+              <div class="user-meta">
+                <h3>{{item.customerName}}</h3>
+                <p>{{item.item}}</p>
+                <small>#{{item.id}}</small>
+              </div>
+              <div class="price-box">
+                <span class="price-val">{{item.price}} SAR</span>
+                <small>Your earnings</small>
+              </div>
+            </div>
+
+            <div class="status-indicator">
+               <span class="badge" [class.transit]="item.status === 'In Transit'">{{item.status}}</span>
+            </div>
+
+            <div class="loc-details">
+              <div class="loc-item">
+                <span class="material-symbols-outlined pickup">location_on</span>
+                <div><b>Pickup Location</b><p>{{item.pickupLoc}}</p></div>
+              </div>
+              <div class="loc-item">
+                <span class="material-symbols-outlined delivery">location_on</span>
+                <div><b>Delivery Location</b><p>{{item.deliveryLoc}}</p></div>
+              </div>
+            </div>
+
+            <div class="meta-row">
+                <div class="meta-item">
+                    <span class="material-symbols-outlined">near_me</span>
+                    {{item.distance}}
+                </div>
+                <div class="meta-item">
+                    <span class="material-symbols-outlined">schedule</span>
+                    ETA: {{item.eta}}
+                </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-navigate"><span class="material-symbols-outlined">navigation</span> Navigate</button>
+              <div class="sub-btns">
+                <button class="btn-call">Call Customer</button>
+                <button class="btn-complete">Complete</button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+
+
+      <section class="completed-section shadow-premium">
+            <h2 class="sec-title">Completed Today</h2>
+            <div class="completed-list">
+                @for (c of completedToday(); track c.id) {
+                    <div class="comp-item">
+                        <div class="c-info">
+                            <b>{{c.customerName}}</b>
+                            <p>{{c.items}} • #{{c.id}}</p>
+                        </div>
+                        <div class="c-results">
+                            <div class="stars">
+                                <span class="material-symbols-outlined active">star</span>
+                                <span class="material-symbols-outlined active">star</span>
+                                <span class="material-symbols-outlined active">star</span>
+                                <span class="material-symbols-outlined active">star</span>
+                                <span class="material-symbols-outlined">star</span>
+                            </div>
+                            <span class="c-earn">{{c.earnings}} SAR</span>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="comp-footer">
+                <span>Total Earned Today</span>
+                <span class="total">18 SAR</span>
+            </div>
+      </section>
+    </div>
+  </main>
+</div>
