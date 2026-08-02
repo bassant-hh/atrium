@@ -1,0 +1,42 @@
+.welcome-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.welcome-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.welcome-subtitle {
+  color: #6c757d;
+  margin: 0;
+}
+
+.new-order-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+
+  background-color: #34809a;
+  border: 1px solid #0c6780;
+  color: white;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.new-order-btn:hover {
+  opacity: 0.9;
+}
+
+.btn-icon {
+  font-size: 14px;
+}

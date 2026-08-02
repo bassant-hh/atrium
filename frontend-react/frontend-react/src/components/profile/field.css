@@ -1,0 +1,27 @@
+.field {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 12px;
+  gap: 10px;
+  border: 1px solid transparent;
+  transition: 0.2s;
+}
+
+.field:hover {
+  border-color: #e5e7eb;
+}
+
+.field-icon {
+  opacity: 0.6;
+  font-size: 14px;
+}
+
+.field input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
