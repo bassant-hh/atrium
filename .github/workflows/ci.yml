@@ -1,0 +1,41 @@
+name: Atrium Monorepo CI
+
+on:
+  push:
+    branches:
+      - main
+      - monorepo-migration
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+
+      - name: Install Dependencies
+        run: npm install --workspaces
+
+      - name: Build Angular
+        run: npm run build:angular
+
+      - name: Build React
+        run: npm run build:react
+
+      - name: Build Backend
+        run: npm run build:backend

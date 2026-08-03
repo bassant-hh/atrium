@@ -1,0 +1,28 @@
+{
+  "name": "atrium-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend-angular",
+    "frontend-react",
+    "backend"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "start:angular": "npm run start --workspace=makook-rider-dashboard",
+    "start:react": "npm run dev --workspace=frontend-react",
+    "start:backend": "npm run start:dev --workspace=atrium",
+    "build:angular": "npm run build --workspace=makook-rider-dashboard",
+    "build:react": "npm run build --workspace=frontend-react",
+    "build:backend": "npm run build --workspace=atrium",
+    "test:angular": "npm run test --workspace=makook-rider-dashboard",
+    "test:backend": "npm run test --workspace=atrium",
+    "lint:react": "npm run lint --workspace=frontend-react",
+    "lint:backend": "npm run lint --workspace=atrium",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
+  }
+}
