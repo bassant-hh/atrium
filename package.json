@@ -20,9 +20,17 @@
     "lint:react": "npm run lint --workspace=frontend-react",
     "lint:backend": "npm run lint --workspace=atrium",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "9.1.7",
+    "lint-staged": "17.3.0",
     "prettier": "3.9.6"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md,css,scss,html}": [
+      "prettier --write"
+    ]
   }
 }
