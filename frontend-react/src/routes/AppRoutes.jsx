@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 import HomePage from "../pages/home/HomePage.jsx";
-import Myorders from "../pages/MyOrders/Myorders.jsx";
+import MyOrders from "../pages/MyOrders/MyOrders.jsx";
 import TrackOrders from "../pages/trackOrders/TrackOrders.jsx";
 import Notification from "../pages/notification/Notification.jsx";
 import Profile from "../pages/profile/Profile.jsx";
@@ -13,7 +13,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route index element={<HomePage />} />
-      <Route path="/my-orders" element={<Myorders />} />
+      <Route path="/my-orders" element={<MyOrders />} />
       <Route path="/track-orders/:id" element={<TrackOrders />} />
       <Route path="/notifications" element={<Notification />} />
       <Route path="/profile" element={<Profile />} />
