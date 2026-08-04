@@ -4,24 +4,28 @@ import { Model } from 'mongoose';
 
 import jwt from 'jsonwebtoken';
 
-import { Order } from './../schemas/order.schema';
+import { Order } from './order.schema';
 
 @Injectable()
 export class OrderService {
-    constructor(@InjectModel(Order.name) private orderModel: Model<Order>) { }
+  constructor(@InjectModel(Order.name) private orderModel: Model<Order>) {}
 
-    async getAll(req: any, res: any) {
-        const token = req.headers.authorization?.split(' ')[1];
-        const userData = jwt.verify(token, 'somesecretkey');
+  async getAll(req: any, res: any) {
+    const token = req.headers.authorization?.split(' ')[1];
+    const userData = jwt.verify(token, 'somesecretkey');
 
-        if (userData && userData._id) {
-            const orders = await this.orderModel.find({ clientId: userData._id }).exec();
+    if (userData && userData._id) {
+      const orders = await this.orderModel
+        .find({ clientId: userData._id })
+        .exec();
 
-            if (orders) {
-                return res.status(200).send({ message: "Orders Retrived Successfully", status: 200 });
-            }
-        }
-
-        return res.status(400).send({ message: "Invalid Request", status: 400 });
+      if (orders) {
+        return res
+          .status(200)
+          .send({ message: 'Orders Retrived Successfully', status: 200 });
+      }
     }
+
+    return res.status(400).send({ message: 'Invalid Request', status: 400 });
+  }
 }
