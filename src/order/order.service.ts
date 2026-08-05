@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import jwt from 'jsonwebtoken';
 
 import { Order } from './order.schema';
+import { JwtUserPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class OrderService {
@@ -12,7 +13,10 @@ export class OrderService {
 
   async getAll(req: any, res: any) {
     const token = req.headers.authorization?.split(' ')[1];
-    const userData = jwt.verify(token, 'somesecretkey');
+    const userData = jwt.verify(token, 'somesecretkey') as JwtUserPayload & {
+      _id: string;
+      role: string;
+    };
 
     if (userData && userData._id) {
       const orders = await this.orderModel
