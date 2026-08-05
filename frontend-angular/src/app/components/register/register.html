@@ -10,43 +10,73 @@
       </div>
 
       <form [formGroup]="registerForm">
+        <!-- ── Step 1: Personal Info ── -->
         @if (currentStep() === 1) {
           <div class="input-wrapper animate-in">
-            <label>Full Name</label>
+            <label for="firstName">First Name</label>
             <input
+              id="firstName"
               class="custom-input"
-              formControlName="fullName"
-              placeholder="Enter your full name"
+              formControlName="firstName"
+              placeholder="Enter your first name"
             />
+            @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
+              <span class="field-error">First name is required.</span>
+            }
           </div>
 
           <div class="input-wrapper animate-in">
-            <label>University</label>
+            <label for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              class="custom-input"
+              formControlName="lastName"
+              placeholder="Enter your last name"
+            />
+            @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
+              <span class="field-error">Last name is required.</span>
+            }
+          </div>
 
-            <select class="custom-input" formControlName="university">
+          <div class="input-wrapper animate-in">
+            <label for="university">University</label>
+            <select id="university" class="custom-input" formControlName="university">
               <option value="" disabled>Select your university</option>
-
               @for (university of universities; track university.id) {
-                <option [value]="university.id">
-                  {{ university.name }}
-                </option>
+                <option [value]="university.id">{{ university.name }}</option>
               }
             </select>
+            @if (
+              registerForm.get('university')?.invalid && registerForm.get('university')?.touched
+            ) {
+              <span class="field-error">Please select your university.</span>
+            }
           </div>
 
           <div class="input-wrapper animate-in">
-            <label>Phone Number</label>
+            <label for="phone">Phone Number</label>
             <input
+              id="phone"
               class="custom-input"
               formControlName="phone"
-              placeholder="Enter your phone Number"
+              placeholder="01xxxxxxxxx"
             />
+            @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
+              @if (registerForm.get('phone')?.hasError('required')) {
+                <span class="field-error">Phone number is required.</span>
+              } @else if (registerForm.get('phone')?.hasError('pattern')) {
+                <span class="field-error"
+                  >Enter a valid Egyptian phone number (e.g. 01xxxxxxxxx).</span
+                >
+              }
+            }
           </div>
         }
+
+        <!-- ── Step 2: ID Upload ── -->
         @if (currentStep() === 2) {
           <div class="input-wrapper animate-in">
             <label>National ID (Front Side)</label>
-
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.pdf"
@@ -61,7 +91,6 @@
 
           <div class="input-wrapper animate-in" style="margin-top: 20px">
             <label>National ID (Back Side)</label>
-
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.pdf"
@@ -79,58 +108,95 @@
           </p>
         }
 
+        <!-- ── Step 3: Account Details ── -->
         @if (currentStep() === 3) {
           <div class="input-wrapper animate-in">
-            <div class="input-wrapper animate-in">
-              <label>Email</label>
+            <label for="email">Email</label>
+            <input
+              id="email"
+              class="custom-input"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+            />
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+              @if (registerForm.get('email')?.hasError('required')) {
+                <span class="field-error">Email is required.</span>
+              } @else if (registerForm.get('email')?.hasError('email')) {
+                <span class="field-error">Please enter a valid email address.</span>
+              }
+            }
+          </div>
 
-              <input
-                class="custom-input"
-                type="email"
-                formControlName="email"
-                placeholder="Enter your email"
-              />
-            </div>
+          <div class="input-wrapper animate-in">
+            <label for="username">Username</label>
+            <input
+              id="username"
+              class="custom-input"
+              formControlName="username"
+              placeholder="Choose a username"
+            />
+            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+              @if (registerForm.get('username')?.hasError('required')) {
+                <span class="field-error">Username is required.</span>
+              } @else if (registerForm.get('username')?.hasError('minlength')) {
+                <span class="field-error">Username must be at least 4 characters.</span>
+              } @else if (registerForm.get('username')?.hasError('pattern')) {
+                <span class="field-error"
+                  >Username must start with a letter and contain only letters, numbers, dots or
+                  underscores.</span
+                >
+              }
+            }
+          </div>
 
-            <div class="input-wrapper animate-in">
-              <label>Username</label>
+          <div class="input-wrapper animate-in">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              class="custom-input"
+              type="password"
+              formControlName="password"
+              placeholder="Create a password"
+            />
+            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+              @if (registerForm.get('password')?.hasError('required')) {
+                <span class="field-error">Password is required.</span>
+              } @else if (registerForm.get('password')?.hasError('minlength')) {
+                <span class="field-error">Password must be at least 8 characters.</span>
+              }
+            }
+          </div>
 
-              <input
-                class="custom-input"
-                formControlName="username"
-                placeholder="Choose a username"
-              />
-            </div>
+          <div class="input-wrapper animate-in">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              class="custom-input"
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirm your password"
+            />
+            @if (
+              registerForm.get('confirmPassword')?.touched &&
+              registerForm.hasError('passwordMismatch')
+            ) {
+              <span class="field-error">Passwords do not match.</span>
+            }
+          </div>
 
-            <div class="input-wrapper animate-in">
-              <label>Password</label>
-
-              <input
-                class="custom-input"
-                type="password"
-                formControlName="password"
-                placeholder="Create a password"
-              />
-            </div>
-            <div class="input-wrapper animate-in">
-              <label>Confirm Password</label>
-
-              <input
-                class="custom-input"
-                type="password"
-                formControlName="confirmPassword"
-                placeholder="Confirm your password"
-              />
-            </div>
-
-            <label>Vehicle Type</label>
-            <select class="custom-input" formControlName="bikeType">
+          <div class="input-wrapper animate-in">
+            <label for="bikeType">Vehicle Type</label>
+            <select id="bikeType" class="custom-input" formControlName="bikeType">
               <option value="" disabled selected>Select your vehicle type</option>
               <option value="mountain">Mountain Bike</option>
               <option value="road">Road Bike</option>
               <option value="electric">Electric Bike</option>
               <option value="scooter">Electric Scooter</option>
             </select>
+            @if (registerForm.get('bikeType')?.invalid && registerForm.get('bikeType')?.touched) {
+              <span class="field-error">Please select a vehicle type.</span>
+            }
           </div>
 
           <div

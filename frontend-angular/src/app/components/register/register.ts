@@ -1,10 +1,22 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { RegisterRequest } from '../../models/register-request';
+
+function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
+  const password = group.get('password')?.value as string;
+  const confirm = group.get('confirmPassword')?.value as string;
+  return password === confirm ? null : { passwordMismatch: true };
+}
 
 @Component({
   selector: 'app-register',
@@ -32,35 +44,40 @@ export class Register {
     { id: 'NEW_VALLEY', name: 'New Valley University' },
   ];
 
-  registerForm = this.fb.group({
-    fullName: ['', [Validators.required, Validators.minLength(3)]],
+  registerForm = this.fb.group(
+    {
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
 
-    university: ['', Validators.required],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
 
-    phone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
+      university: ['', Validators.required],
 
-    idFront: [null as File | null, Validators.required],
+      phone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
 
-    idBack: [null as File | null, Validators.required],
+      idFront: [null as File | null, Validators.required],
 
-    email: ['', [Validators.required, Validators.email]],
+      idBack: [null as File | null, Validators.required],
 
-    username: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(4),
-        Validators.maxLength(20),
-        Validators.pattern(/^[A-Za-z][A-Za-z0-9._]*$/),
+      email: ['', [Validators.required, Validators.email]],
+
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(4),
+          Validators.maxLength(20),
+          Validators.pattern(/^[A-Za-z][A-Za-z0-9._]*$/),
+        ],
       ],
-    ],
 
-    password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
 
-    confirmPassword: ['', Validators.required],
+      confirmPassword: ['', Validators.required],
 
-    bikeType: ['', Validators.required],
-  });
+      bikeType: ['', Validators.required],
+    },
+    { validators: passwordsMatchValidator },
+  );
 
   nextStep(): void {
     if (!this.canGoNext()) {
@@ -79,7 +96,12 @@ export class Register {
   }
 
   onSubmit(): void {
-    if (this.registerForm.valid) {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched();
+      return;
+    }
+
+    if (true) {
       this.isLoading.set(true);
 
       const val = this.registerForm.value;
@@ -90,13 +112,9 @@ export class Register {
         .uploadIds(frontFile, backFile)
         .pipe(
           switchMap((uploadRes) => {
-            const nameParts = (val.fullName ?? '').trim().split(' ');
-            const firstName = nameParts[0] || 'Rider';
-            const lastName = nameParts.slice(1).join(' ') || 'User';
-
             const payload: RegisterRequest = {
-              firstName,
-              lastName,
+              firstName: val.firstName ?? '',
+              lastName: val.lastName ?? '',
               email: val.email ?? '',
               username: val.username ?? '',
               password: val.password ?? '',
@@ -150,7 +168,8 @@ export class Register {
     switch (this.currentStep()) {
       case 1:
         return !!(
-          this.registerForm.get('fullName')?.valid &&
+          this.registerForm.get('firstName')?.valid &&
+          this.registerForm.get('lastName')?.valid &&
           this.registerForm.get('university')?.valid &&
           this.registerForm.get('phone')?.valid
         );

@@ -15,13 +15,28 @@ export class User {
   email: string;
 
   @Prop({ required: true })
-  fullname: string;
+  firstName: string;
+
+  @Prop({ required: true })
+  lastName: string;
+
+  @Prop({ required: true })
+  phone: string;
+
+  @Prop({ required: true })
+  university: string;
 
   @Prop()
   role: 'ADMIN' | 'CLIENT' | 'DELIVERY' = 'CLIENT';
 
-  @Prop({ required: false })
-  idCard?: string;
+  @Prop({ required: true })
+  idFront: string;
+
+  @Prop({ required: true })
+  idBack: string;
+
+  @Prop({ default: 'PENDING' })
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING';
 
   @Prop({ required: false })
   token?: string;

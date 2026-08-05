@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { AuthResponse } from '../models/rider';
 import { RegisterRequest } from '../models/register-request';
 import { UploadIdResponse } from '../models/upload-response';
+import { LoginRequest } from '../models/login-request';
+import { LoginResponse } from '../models/login-response';
 
 @Injectable({
   providedIn: 'root',
@@ -23,8 +25,8 @@ export class AuthService {
     return this.http.post<UploadIdResponse>(`${this.baseUrl}upload/image`, formData);
   }
 
-  login(credentials: { phone: string; nationalId: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}user/login`, credentials);
+  login(payload: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}user/login`, payload);
   }
 
   saveToken(token: string): void {

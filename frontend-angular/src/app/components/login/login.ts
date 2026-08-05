@@ -3,9 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LoginRequest } from '../../models/login-request';
+import { LoginResponse } from '../../models/login-response';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
@@ -16,31 +19,61 @@ export class Login {
   private router = inject(Router);
 
   isLoading = signal<boolean>(false);
+  isSubmitted = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   loginForm = this.fb.group({
-    phone: ['', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
-    nationalId: ['', [Validators.required, Validators.minLength(14), Validators.maxLength(14)]]
+    username: ['', [Validators.required]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   onLogin(): void {
-    if (this.loginForm.valid) {
-      this.isLoading.set(true);
-      
-      const credentials = { 
-        phone: this.loginForm.value.phone!,
-        nationalId: this.loginForm.value.nationalId!
-      };
+    if (this.loginForm.invalid) {
+      return;
+    }
 
-      this.authService.login(credentials).subscribe({
-        next: (res) => {
-          this.authService.saveToken(res.token);
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          console.error('Login error', err);
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const payload: LoginRequest = {
+      username: this.loginForm.value.username!,
+      password: this.loginForm.value.password!,
+    };
+
+    this.authService.login(payload).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.isSubmitted.set(true);
+        this.authService.saveToken(res.token);
+        this.handleLoginSuccess(res);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+
+        const status: number = err?.status ?? 0;
+
+        if (status === 401) {
+          this.errorMessage.set('Invalid username or password.');
+        } else if (status === 403) {
+          this.errorMessage.set('Your account is not authorized to log in.');
+        } else if (status === 500) {
+          this.errorMessage.set('A server error occurred. Please try again later.');
+        } else {
+          this.errorMessage.set('Login failed. Please check your connection and try again.');
         }
-      });
+      },
+    });
+  }
+
+  private handleLoginSuccess(response: LoginResponse): void {
+    // TODO: if role === 'ADMIN' → implement admin routing
+
+    if (response.status === 'PENDING') {
+      this.router.navigate(['/pending']);
+    } else if (response.status === 'APPROVED') {
+      this.router.navigate(['/dashboard']);
+    } else if (response.status === 'REJECTED') {
+      this.router.navigate(['/rejected']);
     }
   }
 }

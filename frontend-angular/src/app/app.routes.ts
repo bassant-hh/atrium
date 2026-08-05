@@ -16,7 +16,6 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard').then((c) => c.Dashboard),
   },
-
   { path: 'requests', component: Requists },
   { path: 'active', component: Activedeliveries },
   {
