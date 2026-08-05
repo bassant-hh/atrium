@@ -43,8 +43,9 @@
   <button
     class="btn-primary btn-delivery-action"
     type="button"
-    aria-label="Continue Active Delivery"
+    (click)="onAction()"
+    aria-label="Active Delivery Action Button"
   >
-    Continue Delivery
+    {{ activeDelivery.status === 'PICKED_UP' ? 'Delivered' : 'Picked Up' }}
   </button>
 </section>

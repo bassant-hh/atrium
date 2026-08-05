@@ -26,7 +26,13 @@
     <div class="operations-grid">
       <!-- Left Column: Active Delivery & Nearby Orders Stream -->
       <div class="left-column">
-        <app-active-delivery-card [activeDelivery]="activeDelivery()" />
+        @if (activeDelivery()) {
+          <app-active-delivery-card
+            [activeDelivery]="activeDelivery()!"
+            (pickup)="onPickupOrder()"
+            (deliver)="onDeliverOrder()"
+          />
+        }
 
         <app-nearby-orders
           [orders]="nearbyOrders()"

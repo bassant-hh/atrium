@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ActiveDelivery } from '../../../../models/dashboard/order.models';
 
 @Component({
@@ -9,4 +9,14 @@ import { ActiveDelivery } from '../../../../models/dashboard/order.models';
 })
 export class ActiveDeliveryCardComponent {
   @Input() activeDelivery!: ActiveDelivery;
+  @Output() pickup = new EventEmitter<void>();
+  @Output() deliver = new EventEmitter<void>();
+
+  onAction(): void {
+    if (this.activeDelivery?.status === 'PICKED_UP') {
+      this.deliver.emit();
+    } else {
+      this.pickup.emit();
+    }
+  }
 }

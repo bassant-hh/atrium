@@ -51,4 +51,18 @@ export class Dashboard {
   onDeclineOrder(order: NearbyOrder): void {
     this.dashboardService.declineOrder(order);
   }
+
+  onPickupOrder(): void {
+    const active = this.activeDelivery();
+    if (active && active.orderId) {
+      this.dashboardService.pickupOrder(active.orderId);
+    }
+  }
+
+  onDeliverOrder(): void {
+    const active = this.activeDelivery();
+    if (active && active.orderId) {
+      this.dashboardService.deliverOrder(active.orderId);
+    }
+  }
 }

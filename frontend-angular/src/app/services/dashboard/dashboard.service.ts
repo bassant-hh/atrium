@@ -1,80 +1,274 @@
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../auth';
 import { RiderDutyStatus, VerificationStatus } from '../../models/dashboard/rider.models';
-import { ActiveDelivery, NearbyOrder } from '../../models/dashboard/order.models';
+import {
+  AcceptOrderResponse,
+  ActiveDelivery,
+  DeclineOrderResponse,
+  DeliverOrderResponse,
+  NearbyOrder,
+  PickupOrderResponse,
+} from '../../models/dashboard/order.models';
+import {
+  DashboardStatsResponse,
+  RiderStatusResponse,
+} from '../../models/dashboard/dashboard.models';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardService {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  // ==========================================================================
+  // 1. Dependencies
+  // ==========================================================================
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   // ==========================================================================
-  // 1. Verification Signals
+  // 2. Configuration & Endpoints
   // ==========================================================================
+  private readonly endpoints = {
+    riderStatus: `${environment.apiUrl}/rider/status`,
+    nearbyOrders: `${environment.apiUrl}/orders/nearby`,
+    acceptOrder: (id: string) => `${environment.apiUrl}/orders/${id}/accept`,
+    declineOrder: (id: string) => `${environment.apiUrl}/orders/${id}/decline`,
+    pickupOrder: (id: string) => `${environment.apiUrl}/orders/${id}/pickup`,
+    deliverOrder: (id: string) => `${environment.apiUrl}/orders/${id}/deliver`,
+    dashboardStats: `${environment.apiUrl}/dashboard/stats`,
+    activeOrder: `${environment.apiUrl}/orders/active`,
+  };
+
+  // ==========================================================================
+  // 3. Signals & Application State
+  // ==========================================================================
+  readonly loading = signal<boolean>(false);
+  readonly apiError = signal<string | null>(null);
+
   readonly verificationStatus = signal<VerificationStatus>('APPROVED');
-
-  // ==========================================================================
-  // 2. Rider Duty Signals
-  // ==========================================================================
   readonly riderStatus = signal<RiderDutyStatus>('OFFLINE');
 
-  // ==========================================================================
-  // 3. Performance Statistics Signals
-  // ==========================================================================
-  readonly earnings = signal<string>('EGP 240');
-  readonly completed = signal<number>(12);
-  readonly onlineHours = signal<string>('5.3 hrs');
-  readonly rating = signal<string>('4.9★');
+  readonly earnings = signal<string>('EGP 0');
+  readonly completed = signal<number>(0);
+  readonly onlineHours = signal<string>('0 hrs');
+  readonly rating = signal<string>('0.0★');
+
+  readonly activeDelivery = signal<ActiveDelivery | null>(null);
+  readonly nearbyOrders = signal<NearbyOrder[]>([]);
+
+  constructor() {
+    this.fetchRiderStatus();
+    this.loadNearbyOrders();
+    this.loadDashboardStats();
+    this.loadActiveDelivery();
+  }
 
   // ==========================================================================
-  // 4. Active Delivery Signals
+  // 4. Private Helpers
   // ==========================================================================
-  readonly activeDelivery = signal<ActiveDelivery>({
-    orderId: '#M1240',
-    customerName: 'Sarah M.',
-    pickup: 'Central Cafeteria (Building A)',
-    dropoff: 'Engineering Hall (Room 205)',
-    estimatedTime: '15 mins',
-  });
+  private updateStatusSignals(res: RiderStatusResponse): void {
+    if (res.verificationStatus) {
+      this.verificationStatus.set(res.verificationStatus);
+    }
+    if (res.riderStatus) {
+      this.riderStatus.set(res.riderStatus);
+    }
+  }
 
   // ==========================================================================
-  // 5. Nearby Orders Queue Signals
+  // 5. Public API (REST Operations)
   // ==========================================================================
-  readonly nearbyOrders = signal<NearbyOrder[]>([
-    {
-      id: 'M1241',
-      customerName: 'Omar K.',
-      pickup: 'Library Center',
-      destination: 'Faculty of Arts (Room 101)',
-      distance: '0.8 km',
-      earnings: 'EGP 25',
-    },
-    {
-      id: 'M1242',
-      customerName: 'Fatima A.',
-      pickup: 'Science Lab B',
-      destination: 'Dormitory Block 3',
-      distance: '1.2 km',
-      earnings: 'EGP 30',
-    },
-    {
-      id: 'M1243',
-      customerName: 'Khaled M.',
-      pickup: 'Student Hub',
-      destination: 'Sports Complex',
-      distance: '0.5 km',
-      earnings: 'EGP 20',
-    },
-  ]);
+  fetchRiderStatus(): void {
+    this.loading.set(true);
+    this.http.get<RiderStatusResponse>(this.endpoints.riderStatus).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+        this.updateStatusSignals(res);
+      },
+      error: (_err) => {
+        this.loading.set(false);
+        this.apiError.set('Unable to communicate with server.');
+      },
+    });
+  }
 
-  // ==========================================================================
-  // 6. User Actions
-  // ==========================================================================
+  loadNearbyOrders(): void {
+    this.loading.set(true);
+    this.http.get<NearbyOrder[]>(this.endpoints.nearbyOrders).subscribe({
+      next: (orders) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+        this.nearbyOrders.set(orders);
+      },
+      error: (_err) => {
+        this.loading.set(false);
+        this.apiError.set('Unable to communicate with server.');
+      },
+    });
+  }
+
+  loadDashboardStats(): void {
+    this.loading.set(true);
+    this.http.get<DashboardStatsResponse>(this.endpoints.dashboardStats).subscribe({
+      next: (stats) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+        this.earnings.set(`EGP ${stats.earnings}`);
+        this.completed.set(stats.completed);
+        this.rating.set(`${stats.rating}★`);
+        this.onlineHours.set(`${stats.onlineHours} hrs`);
+      },
+      error: (_err) => {
+        this.loading.set(false);
+        this.apiError.set('Unable to communicate with server.');
+      },
+    });
+  }
+
+  loadActiveDelivery(): void {
+    this.loading.set(true);
+    this.http.get<ActiveDelivery | null>(this.endpoints.activeOrder).subscribe({
+      next: (active) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+        if (active) {
+          this.activeDelivery.set(active);
+          this.riderStatus.set('DELIVERING');
+        } else {
+          this.activeDelivery.set(null);
+        }
+      },
+      error: (_err) => {
+        this.loading.set(false);
+        this.apiError.set('Unable to communicate with server.');
+      },
+    });
+  }
+
   toggleStatus(): void {
-    this.riderStatus.update((current) => (current === 'OFFLINE' ? 'ONLINE' : 'OFFLINE'));
+    const nextDutyStatus: RiderDutyStatus = this.riderStatus() === 'OFFLINE' ? 'ONLINE' : 'OFFLINE';
+
+    this.loading.set(true);
+    this.http
+      .patch<RiderStatusResponse>(this.endpoints.riderStatus, {
+        status: nextDutyStatus,
+      })
+      .subscribe({
+        next: (res) => {
+          this.loading.set(false);
+          this.apiError.set(null);
+          this.updateStatusSignals(res);
+        },
+        error: (_err) => {
+          this.loading.set(false);
+          this.apiError.set('Unable to communicate with server.');
+        },
+      });
+  }
+
+  acceptOrder(order: NearbyOrder): void {
+    this.loading.set(true);
+    this.http.patch<AcceptOrderResponse>(this.endpoints.acceptOrder(order.id), {}).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+
+        // 1. Remove accepted order from nearbyOrders list reactively
+        this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
+
+        // 2. Update activeDelivery signal reactively
+        if (res.activeDelivery) {
+          this.activeDelivery.set({
+            orderId: res.activeDelivery.orderId,
+            customerName: res.activeDelivery.customerName,
+            pickup: res.activeDelivery.pickup,
+            dropoff: res.activeDelivery.dropoff,
+            estimatedTime: res.activeDelivery.estimatedTime,
+            status: res.activeDelivery.status,
+          });
+          this.riderStatus.set('DELIVERING');
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        const message =
+          err?.error?.message ||
+          'Unable to accept order. Please verify your duty status and try again.';
+        this.apiError.set(message);
+      },
+    });
+  }
+
+  declineOrder(order: NearbyOrder): void {
+    this.loading.set(true);
+    this.http.patch<DeclineOrderResponse>(this.endpoints.declineOrder(order.id), {}).subscribe({
+      next: (_res) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+
+        // Remove declined order from nearbyOrders signal list
+        this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
+      },
+      error: (err) => {
+        this.loading.set(false);
+        const message = err?.error?.message || 'Unable to decline order. Please try again.';
+        this.apiError.set(message);
+      },
+    });
+  }
+
+  pickupOrder(orderId: string): void {
+    this.loading.set(true);
+    this.http.patch<PickupOrderResponse>(this.endpoints.pickupOrder(orderId), {}).subscribe({
+      next: (res) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+
+        if (res.activeDelivery) {
+          this.activeDelivery.set({
+            orderId: res.activeDelivery.orderId,
+            customerName: res.activeDelivery.customerName,
+            pickup: res.activeDelivery.pickup,
+            dropoff: res.activeDelivery.dropoff,
+            estimatedTime: res.activeDelivery.estimatedTime,
+            status: res.activeDelivery.status,
+          });
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        const message = err?.error?.message || 'Unable to pickup order. Please try again.';
+        this.apiError.set(message);
+      },
+    });
+  }
+
+  deliverOrder(orderId: string): void {
+    this.loading.set(true);
+    this.http.patch<DeliverOrderResponse>(this.endpoints.deliverOrder(orderId), {}).subscribe({
+      next: (_res) => {
+        this.loading.set(false);
+        this.apiError.set(null);
+
+        // 1. Refresh dashboard statistics from real backend API
+        this.loadDashboardStats();
+
+        // 2. Set riderStatus signal to ONLINE
+        this.riderStatus.set('ONLINE');
+
+        // 3. Clear activeDelivery signal
+        this.activeDelivery.set(null);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        const message = err?.error?.message || 'Unable to deliver order. Please try again.';
+        this.apiError.set(message);
+      },
+    });
   }
 
   logout(): void {
@@ -82,27 +276,10 @@ export class DashboardService {
     this.router.navigate(['/login']);
   }
 
-  acceptOrder(_order: NearbyOrder): void {
-    // TODO: Implement order acceptance backend API call in Phase 3
-  }
-
-  declineOrder(_order: NearbyOrder): void {
-    // TODO: Implement order decline backend API call in Phase 3
-  }
-
   // ==========================================================================
-  // 7. Future HTTP Region (Phase 3 Integration)
+  // 6. Future Extension Points (Phase 5+ Blueprints)
   // ==========================================================================
-  // TODO: loadDashboard()
-  // TODO: loadMetrics()
-  // TODO: loadNearbyOrders()
-  // TODO: refreshStatistics()
-  // TODO: updateDutyStatus()
-
-  // ==========================================================================
-  // 8. Future WebSocket Region (Phase 3 Integration)
-  // ==========================================================================
+  // TODO Phase 5: Compute rating from customer reviews.
+  // TODO Phase 5: Compute online hours from rider activity logs.
   // TODO: connectSocket()
-  // TODO: subscribeToDispatches()
-  // TODO: subscribeToOrderUpdates()
 }

@@ -4,6 +4,7 @@ export interface ActiveDelivery {
   pickup: string;
   dropoff: string;
   estimatedTime: string;
+  status?: string;
 }
 
 export interface NearbyOrder {
@@ -13,4 +14,26 @@ export interface NearbyOrder {
   destination: string;
   distance: string;
   earnings: string;
+}
+
+export interface AcceptOrderResponse {
+  success: boolean;
+  message: string;
+  activeDelivery: ActiveDelivery;
+}
+
+export interface DeclineOrderResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface PickupOrderResponse {
+  success: boolean;
+  message: string;
+  activeDelivery: ActiveDelivery;
+}
+
+export interface DeliverOrderResponse {
+  success: boolean;
+  message: string;
 }
