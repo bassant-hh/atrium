@@ -1,0 +1,8 @@
+.page-container {
+  padding: 1rem 0;
+}
+
+.page-title {
+  color: var(--on-surface);
+  margin: 0;
+}

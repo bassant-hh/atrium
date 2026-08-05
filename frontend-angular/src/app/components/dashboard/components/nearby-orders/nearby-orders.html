@@ -1,0 +1,47 @@
+<section class="nearby-orders-section" aria-label="Nearby Available Orders">
+  <header class="section-title-wrap">
+    <h2 class="section-title font-headline">Nearby Orders</h2>
+    <span class="badge-count">{{ orders.length }} Available</span>
+  </header>
+
+  <div class="orders-list">
+    @for (order of orders; track order.id) {
+      <article class="request-card shadow-card" aria-label="Order Request">
+        <div class="request-top">
+          <div>
+            <h3 class="customer-name font-headline">{{ order.customerName }}</h3>
+            <span class="order-chip">#{{ order.id }}</span>
+          </div>
+          <div class="request-financials">
+            <span class="earnings-pill font-headline">{{ order.earnings }}</span>
+            <span class="distance-text">{{ order.distance }}</span>
+          </div>
+        </div>
+
+        <div class="route-summary">
+          <p class="route-point"><strong>Pickup:</strong> {{ order.pickup }}</p>
+          <p class="route-point"><strong>Dropoff:</strong> {{ order.destination }}</p>
+        </div>
+
+        <div class="request-actions">
+          <button
+            class="btn-accept"
+            type="button"
+            (click)="onAccept(order)"
+            aria-label="Accept Order Request"
+          >
+            Accept
+          </button>
+          <button
+            class="btn-decline"
+            type="button"
+            (click)="onDecline(order)"
+            aria-label="Decline Order Request"
+          >
+            Decline
+          </button>
+        </div>
+      </article>
+    }
+  </div>
+</section>

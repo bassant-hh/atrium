@@ -1,0 +1,41 @@
+<div
+  class="verification-overlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="overlay-title"
+  aria-describedby="overlay-desc"
+>
+  <div class="overlay-card shadow-card">
+    <div
+      class="overlay-icon-wrap"
+      [class.wrap-pending]="verificationStatus === 'PENDING'"
+      [class.wrap-rejected]="verificationStatus === 'REJECTED'"
+      aria-hidden="true"
+    >
+      <span class="material-symbols-outlined">
+        {{ verificationStatus === 'PENDING' ? 'hourglass_top' : 'gpp_bad' }}
+      </span>
+    </div>
+
+    <h2 id="overlay-title" class="overlay-title font-headline">
+      {{ verificationStatus === 'PENDING' ? 'Verification Pending' : 'Verification Rejected' }}
+    </h2>
+
+    <p id="overlay-desc" class="overlay-description">
+      {{
+        verificationStatus === 'PENDING'
+          ? 'Your application and document verification are currently under review by our administration team. You will be able to start delivering once approved.'
+          : 'Your verification was not approved. Please contact support or update your National ID documents to proceed.'
+      }}
+    </p>
+
+    <div class="overlay-actions">
+      <button class="btn-overlay-secondary" type="button" aria-label="Contact Support">
+        Contact Support
+      </button>
+      <button class="btn-overlay-primary" type="button" (click)="onLogout()" aria-label="Logout">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>

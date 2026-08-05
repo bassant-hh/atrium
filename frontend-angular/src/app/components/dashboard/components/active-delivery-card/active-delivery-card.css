@@ -1,0 +1,127 @@
+.active-delivery-card {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.header-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.tag-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin: 0;
+}
+
+.order-id-chip {
+  background: var(--surface-container-low);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.delivery-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.loc-icon {
+  margin-top: 3px;
+  font-size: 1.35rem;
+}
+
+.icon-pickup {
+  color: var(--primary);
+}
+.icon-dropoff {
+  color: var(--error);
+}
+
+.detail-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  margin: 0.2rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.meta-strip {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--outline-variant);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  font-weight: 500;
+}
+
+.btn-delivery-action {
+  width: 100%;
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  .meta-strip {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+}

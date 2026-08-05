@@ -1,0 +1,43 @@
+<aside class="sidebar-container" role="navigation" aria-label="Main Navigation">
+  <div class="brand">
+    <div class="logo-icon-wrapper" aria-hidden="true">
+      <span class="material-symbols-outlined">pedal_bike</span>
+    </div>
+    <span class="logo-text font-headline">Makook</span>
+  </div>
+
+  <nav class="nav-menu">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" aria-label="Dashboard">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">dashboard</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <a routerLink="/requests" routerLinkActive="active" class="nav-link" aria-label="Requests">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">local_shipping</span>
+      <span class="nav-label">Requests</span>
+    </a>
+    <a
+      routerLink="/active"
+      routerLinkActive="active"
+      class="nav-link"
+      aria-label="Active Deliveries"
+    >
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">directions_run</span>
+      <span class="nav-label">Active</span>
+    </a>
+    <a routerLink="/history" routerLinkActive="active" class="nav-link" aria-label="Order History">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="nav-link" aria-label="Profile">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">account_circle</span>
+      <span class="nav-label">Profile</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="logout()" aria-label="Logout">
+      <span class="material-symbols-outlined nav-icon" aria-hidden="true">logout</span>
+      <span class="nav-label">Logout</span>
+    </button>
+  </div>
+</aside>

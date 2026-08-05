@@ -1,93 +1,54 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActiveRequest } from '../../models/request';
-import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-
-interface UserProfile {
-  _id?: string;
-  firstName?: string;
-  lastName?: string;
-  username?: string;
-  email?: string;
-  phone?: string;
-  university?: string;
-  status?: string;
-}
+import { Component, inject } from '@angular/core';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { VerificationOverlayComponent } from './components/verification-overlay/verification-overlay';
+import { RiderStatusCardComponent } from './components/rider-status-card/rider-status-card';
+import { DashboardStatsComponent } from './components/dashboard-stats/dashboard-stats';
+import { ActiveDeliveryCardComponent } from './components/active-delivery-card/active-delivery-card';
+import { NearbyOrdersComponent } from './components/nearby-orders/nearby-orders';
+import { HeatmapPlaceholderComponent } from './components/heatmap-placeholder/heatmap-placeholder';
+import { NearbyOrder } from '../../models/dashboard/order.models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [
+    VerificationOverlayComponent,
+    RiderStatusCardComponent,
+    DashboardStatsComponent,
+    ActiveDeliveryCardComponent,
+    NearbyOrdersComponent,
+    HeatmapPlaceholderComponent,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit {
-  private http = inject(HttpClient);
+export class Dashboard {
+  private dashboardService = inject(DashboardService);
 
-  isOnline = signal<boolean>(false);
-  userProfile = signal<UserProfile | null>(null);
+  // ── State Signal References (Delegated to DashboardService) ──
+  readonly verificationStatus = this.dashboardService.verificationStatus;
+  readonly riderStatus = this.dashboardService.riderStatus;
+  readonly earnings = this.dashboardService.earnings;
+  readonly completed = this.dashboardService.completed;
+  readonly onlineHours = this.dashboardService.onlineHours;
+  readonly rating = this.dashboardService.rating;
+  readonly activeDelivery = this.dashboardService.activeDelivery;
+  readonly nearbyOrders = this.dashboardService.nearbyOrders;
 
-  stats = signal({
-    earnings: '1,250',
-    deliveriesToday: 8,
-    completed: 156,
-    rating: 4.9,
-  });
-
-  activeRequests = signal<ActiveRequest[]>([
-    {
-      id: 'M1240',
-      customerName: 'Sarah M.',
-      item: 'Chicken Shawarma',
-      price: 25,
-      pickup: 'Building A, Cafeteria',
-      delivery: 'Building C, Room 205',
-    },
-    {
-      id: 'M1241',
-      customerName: 'Omar K.',
-      item: 'Print Documents',
-      price: 10,
-      pickup: 'Library Center',
-      delivery: 'Building D, Room 101',
-    },
-  ]);
-
-  ngOnInit(): void {
-    this.http.get<UserProfile>('http://localhost:3000/user/profile').subscribe({
-      next: (profile) => {
-        this.userProfile.set(profile);
-      },
-      error: (err) => {
-        console.error('Failed to load profile', err);
-      },
-    });
+  // ── Action Delegations ──
+  toggleStatus(): void {
+    this.dashboardService.toggleStatus();
   }
 
-  toggleOnline(): void {
-    this.isOnline.update((v) => !v);
+  logout(): void {
+    this.dashboardService.logout();
   }
 
-  acceptOrder(id: string): void {
-    console.log('Accepted order:', id);
-    this.activeRequests.update((reqs) => reqs.filter((r) => r.id !== id));
+  onAcceptOrder(order: NearbyOrder): void {
+    this.dashboardService.acceptOrder(order);
   }
 
-  getUserInitials(): string {
-    const p = this.userProfile();
-    if (!p) return 'AA';
-    const first = p.firstName ? p.firstName.charAt(0).toUpperCase() : '';
-    const last = p.lastName ? p.lastName.charAt(0).toUpperCase() : '';
-    return first + last || 'AA';
-  }
-
-  getUserDisplayName(): string {
-    const p = this.userProfile();
-    if (!p) return 'Ahmed Ali';
-    if (p.firstName && p.lastName) {
-      return `${p.firstName} ${p.lastName}`;
-    }
-    return p.firstName || p.username || 'Ahmed Ali';
+  onDeclineOrder(order: NearbyOrder): void {
+    this.dashboardService.declineOrder(order);
   }
 }

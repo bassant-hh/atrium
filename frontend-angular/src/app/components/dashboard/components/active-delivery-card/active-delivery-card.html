@@ -1,0 +1,50 @@
+<section class="active-delivery-card shadow-card" aria-label="Current Active Delivery">
+  <header class="card-header">
+    <div class="header-tag">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span class="tag-title font-headline">Active Delivery</span>
+    </div>
+    <span class="order-id-chip">{{ activeDelivery.orderId }}</span>
+  </header>
+
+  <div class="delivery-details">
+    <div class="detail-row">
+      <span class="material-symbols-outlined loc-icon icon-pickup" aria-hidden="true"
+        >storefront</span
+      >
+      <div>
+        <span class="detail-label">Pickup Point</span>
+        <p class="detail-value">{{ activeDelivery.pickup }}</p>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <span class="material-symbols-outlined loc-icon icon-dropoff" aria-hidden="true"
+        >location_on</span
+      >
+      <div>
+        <span class="detail-label">Destination</span>
+        <p class="detail-value">{{ activeDelivery.dropoff }}</p>
+      </div>
+    </div>
+
+    <div class="meta-strip">
+      <div class="meta-item">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span>{{ activeDelivery.customerName }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+        <span>Est. {{ activeDelivery.estimatedTime }}</span>
+      </div>
+    </div>
+  </div>
+
+  <button
+    class="btn-primary btn-delivery-action"
+    type="button"
+    aria-label="Continue Active Delivery"
+  >
+    Continue Delivery
+  </button>
+</section>

@@ -1,0 +1,118 @@
+.verification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.overlay-card {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.overlay-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.wrap-pending {
+  background: rgba(234, 179, 8, 0.15);
+  color: #ca8a04;
+}
+
+.wrap-rejected {
+  background: rgba(186, 26, 26, 0.15);
+  color: var(--error);
+}
+
+.overlay-icon-wrap .material-symbols-outlined {
+  font-size: 2.5rem;
+}
+
+.overlay-title {
+  font-size: 1.4rem;
+  margin: 0 0 0.5rem;
+  color: var(--on-surface);
+}
+
+.overlay-description {
+  font-size: 0.9rem;
+  color: var(--on-surface-variant);
+  margin: 0 0 1.75rem;
+  line-height: 1.55;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.btn-overlay-primary {
+  flex: 1;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  background: var(--error);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-overlay-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-overlay-secondary {
+  flex: 1;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-overlay-secondary:hover {
+  background: var(--surface-container-low);
+}
+
+@media (max-width: 480px) {
+  .overlay-actions {
+    flex-direction: column;
+  }
+
+  .btn-overlay-secondary {
+    width: 100%;
+  }
+}

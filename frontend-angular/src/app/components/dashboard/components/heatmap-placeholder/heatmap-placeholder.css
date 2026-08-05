@@ -1,0 +1,58 @@
+.map-placeholder-card {
+  background: var(--surface-container-lowest);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-xl);
+  padding: 3.5rem 2rem;
+  text-align: center;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(59, 136, 157, 0.1);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.map-icon-circle .material-symbols-outlined {
+  font-size: 2.5rem;
+}
+
+.map-title {
+  font-size: 1.35rem;
+  margin: 0 0 0.35rem;
+  color: var(--on-surface);
+}
+
+.map-subtitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.map-description {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  max-width: 260px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+@media (max-width: 1023px) {
+  .map-placeholder-card {
+    padding: 2.5rem 1.5rem;
+  }
+}

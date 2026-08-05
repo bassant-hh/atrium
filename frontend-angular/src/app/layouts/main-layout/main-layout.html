@@ -1,0 +1,59 @@
+<div class="layout-wrapper">
+  <!-- Desktop Sidebar -->
+  <div class="sidebar-wrapper">
+    <app-sidebar></app-sidebar>
+  </div>
+
+  <!-- Main Content Column -->
+  <div class="content-wrapper">
+    <app-topbar></app-topbar>
+
+    <main class="page-content" role="main">
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar (Placeholder Anchor) -->
+    <nav class="mobile-bottom-nav" role="navigation" aria-label="Mobile Bottom Navigation">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="mobile-nav-link"
+        aria-label="Dashboard"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+        <span class="label">Dashboard</span>
+      </a>
+      <a
+        routerLink="/requests"
+        routerLinkActive="active"
+        class="mobile-nav-link"
+        aria-label="Requests"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+        <span class="label">Requests</span>
+      </a>
+      <a routerLink="/active" routerLinkActive="active" class="mobile-nav-link" aria-label="Active">
+        <span class="material-symbols-outlined" aria-hidden="true">directions_run</span>
+        <span class="label">Active</span>
+      </a>
+      <a
+        routerLink="/history"
+        routerLinkActive="active"
+        class="mobile-nav-link"
+        aria-label="History"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">history</span>
+        <span class="label">History</span>
+      </a>
+      <a
+        routerLink="/profile"
+        routerLinkActive="active"
+        class="mobile-nav-link"
+        aria-label="Profile"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+        <span class="label">Profile</span>
+      </a>
+    </nav>
+  </div>
+</div>
