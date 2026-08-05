@@ -1,0 +1,65 @@
+/* src/styles/forms.css */
+
+.input-wrapper {
+  margin-bottom: var(--space-lg);
+}
+
+.input-wrapper label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.custom-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-container-low);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  color: var(--on-surface);
+  transition:
+    border-color var(--transition-normal),
+    background var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.custom-input:focus {
+  background: #ffffff;
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 136, 157, 0.2);
+}
+
+.custom-input[aria-invalid='true'] {
+  border-color: var(--error);
+  background: rgba(186, 26, 26, 0.02);
+}
+
+/* Validation Feedback Styles */
+.field-error {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--error);
+  margin-top: 0.4rem;
+  line-height: 1.3;
+}
+
+.api-error {
+  background: var(--color-error-bg);
+  border: 1px solid rgba(186, 26, 26, 0.3);
+  color: var(--error);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.85rem 1.2rem;
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+  text-align: center;
+}

@@ -1,12 +1,12 @@
 <main class="main-canvas">
   @if (!isSubmitted()) {
     <div class="form-card">
-      <h1 class="font-headline" style="text-align: center; color: var(--primary)">Makook</h1>
+      <h1 class="font-headline form-title">Makook</h1>
 
-      <div class="stepper">
-        <div class="step-circle" [class.active]="currentStep() >= 1">1</div>
-        <div class="step-circle" [class.active]="currentStep() >= 2">2</div>
-        <div class="step-circle" [class.active]="currentStep() >= 3">3</div>
+      <div class="stepper" role="navigation" aria-label="Registration Steps">
+        <div class="step-circle" [class.active]="currentStep() >= 1" aria-label="Step 1">1</div>
+        <div class="step-circle" [class.active]="currentStep() >= 2" aria-label="Step 2">2</div>
+        <div class="step-circle" [class.active]="currentStep() >= 3" aria-label="Step 3">3</div>
       </div>
 
       <form [formGroup]="registerForm">
@@ -19,9 +19,15 @@
               class="custom-input"
               formControlName="firstName"
               placeholder="Enter your first name"
+              [attr.aria-invalid]="
+                registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched
+              "
+              aria-describedby="firstname-error"
             />
             @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
-              <span class="field-error">First name is required.</span>
+              <span id="firstname-error" class="field-error" role="alert"
+                >First name is required.</span
+              >
             }
           </div>
 
@@ -32,15 +38,29 @@
               class="custom-input"
               formControlName="lastName"
               placeholder="Enter your last name"
+              [attr.aria-invalid]="
+                registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched
+              "
+              aria-describedby="lastname-error"
             />
             @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
-              <span class="field-error">Last name is required.</span>
+              <span id="lastname-error" class="field-error" role="alert"
+                >Last name is required.</span
+              >
             }
           </div>
 
           <div class="input-wrapper animate-in">
             <label for="university">University</label>
-            <select id="university" class="custom-input" formControlName="university">
+            <select
+              id="university"
+              class="custom-input"
+              formControlName="university"
+              [attr.aria-invalid]="
+                registerForm.get('university')?.invalid && registerForm.get('university')?.touched
+              "
+              aria-describedby="university-error"
+            >
               <option value="" disabled>Select your university</option>
               @for (university of universities; track university.id) {
                 <option [value]="university.id">{{ university.name }}</option>
@@ -49,7 +69,9 @@
             @if (
               registerForm.get('university')?.invalid && registerForm.get('university')?.touched
             ) {
-              <span class="field-error">Please select your university.</span>
+              <span id="university-error" class="field-error" role="alert"
+                >Please select your university.</span
+              >
             }
           </div>
 
@@ -60,15 +82,19 @@
               class="custom-input"
               formControlName="phone"
               placeholder="01xxxxxxxxx"
+              [attr.aria-invalid]="
+                registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched
+              "
+              aria-describedby="phone-error"
             />
             @if (registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched) {
-              @if (registerForm.get('phone')?.hasError('required')) {
-                <span class="field-error">Phone number is required.</span>
-              } @else if (registerForm.get('phone')?.hasError('pattern')) {
-                <span class="field-error"
-                  >Enter a valid Egyptian phone number (e.g. 01xxxxxxxxx).</span
-                >
-              }
+              <span id="phone-error" class="field-error" role="alert">
+                @if (registerForm.get('phone')?.hasError('required')) {
+                  Phone number is required.
+                } @else if (registerForm.get('phone')?.hasError('pattern')) {
+                  Enter a valid Egyptian phone number (e.g. 01xxxxxxxxx).
+                }
+              </span>
             }
           </div>
         }
@@ -76,36 +102,50 @@
         <!-- ── Step 2: ID Upload ── -->
         @if (currentStep() === 2) {
           <div class="input-wrapper animate-in">
-            <label>National ID (Front Side)</label>
+            <label for="idFrontInput">National ID (Front Side)</label>
             <input
+              id="idFrontInput"
               type="file"
               accept=".jpg,.jpeg,.png,.pdf"
               class="custom-input"
               (change)="onFrontSelected($event)"
+              [attr.aria-invalid]="
+                registerForm.get('idFront')?.invalid && registerForm.get('idFront')?.touched
+              "
+              aria-describedby="idfront-error"
             />
+            @if (registerForm.get('idFront')?.invalid && registerForm.get('idFront')?.touched) {
+              <span id="idfront-error" class="field-error" role="alert">Front ID is required.</span>
+            }
           </div>
 
           @if (registerForm.get('idFront')?.value) {
-            <p style="font-size: 12px; color: green; margin-top: 6px">✓ Front side selected</p>
+            <p class="file-selected-text">✓ Front side selected</p>
           }
 
-          <div class="input-wrapper animate-in" style="margin-top: 20px">
-            <label>National ID (Back Side)</label>
+          <div class="input-wrapper animate-in upload-group">
+            <label for="idBackInput">National ID (Back Side)</label>
             <input
+              id="idBackInput"
               type="file"
               accept=".jpg,.jpeg,.png,.pdf"
               class="custom-input"
               (change)="onBackSelected($event)"
+              [attr.aria-invalid]="
+                registerForm.get('idBack')?.invalid && registerForm.get('idBack')?.touched
+              "
+              aria-describedby="idback-error"
             />
+            @if (registerForm.get('idBack')?.invalid && registerForm.get('idBack')?.touched) {
+              <span id="idback-error" class="field-error" role="alert">Back ID is required.</span>
+            }
           </div>
 
           @if (registerForm.get('idBack')?.value) {
-            <p style="font-size: 12px; color: green; margin-top: 6px">✓ Back side selected</p>
+            <p class="file-selected-text">✓ Back side selected</p>
           }
 
-          <p style="font-size: 11px; margin-top: 15px; color: var(--primary)">
-            Accepted formats: JPG PNG PDF
-          </p>
+          <p class="file-hint-text">Accepted formats: JPG PNG PDF</p>
         }
 
         <!-- ── Step 3: Account Details ── -->
@@ -118,13 +158,19 @@
               type="email"
               formControlName="email"
               placeholder="Enter your email"
+              [attr.aria-invalid]="
+                registerForm.get('email')?.invalid && registerForm.get('email')?.touched
+              "
+              aria-describedby="email-error"
             />
             @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-              @if (registerForm.get('email')?.hasError('required')) {
-                <span class="field-error">Email is required.</span>
-              } @else if (registerForm.get('email')?.hasError('email')) {
-                <span class="field-error">Please enter a valid email address.</span>
-              }
+              <span id="email-error" class="field-error" role="alert">
+                @if (registerForm.get('email')?.hasError('required')) {
+                  Email is required.
+                } @else if (registerForm.get('email')?.hasError('email')) {
+                  Please enter a valid email address.
+                }
+              </span>
             }
           </div>
 
@@ -135,18 +181,22 @@
               class="custom-input"
               formControlName="username"
               placeholder="Choose a username"
+              [attr.aria-invalid]="
+                registerForm.get('username')?.invalid && registerForm.get('username')?.touched
+              "
+              aria-describedby="username-error"
             />
             @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
-              @if (registerForm.get('username')?.hasError('required')) {
-                <span class="field-error">Username is required.</span>
-              } @else if (registerForm.get('username')?.hasError('minlength')) {
-                <span class="field-error">Username must be at least 4 characters.</span>
-              } @else if (registerForm.get('username')?.hasError('pattern')) {
-                <span class="field-error"
-                  >Username must start with a letter and contain only letters, numbers, dots or
-                  underscores.</span
-                >
-              }
+              <span id="username-error" class="field-error" role="alert">
+                @if (registerForm.get('username')?.hasError('required')) {
+                  Username is required.
+                } @else if (registerForm.get('username')?.hasError('minlength')) {
+                  Username must be at least 4 characters.
+                } @else if (registerForm.get('username')?.hasError('pattern')) {
+                  Username must start with a letter and contain only letters, numbers, dots or
+                  underscores.
+                }
+              </span>
             }
           </div>
 
@@ -158,13 +208,19 @@
               type="password"
               formControlName="password"
               placeholder="Create a password"
+              [attr.aria-invalid]="
+                registerForm.get('password')?.invalid && registerForm.get('password')?.touched
+              "
+              aria-describedby="password-error"
             />
             @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-              @if (registerForm.get('password')?.hasError('required')) {
-                <span class="field-error">Password is required.</span>
-              } @else if (registerForm.get('password')?.hasError('minlength')) {
-                <span class="field-error">Password must be at least 8 characters.</span>
-              }
+              <span id="password-error" class="field-error" role="alert">
+                @if (registerForm.get('password')?.hasError('required')) {
+                  Password is required.
+                } @else if (registerForm.get('password')?.hasError('minlength')) {
+                  Password must be at least 8 characters.
+                }
+              </span>
             }
           </div>
 
@@ -176,36 +232,61 @@
               type="password"
               formControlName="confirmPassword"
               placeholder="Confirm your password"
+              [attr.aria-invalid]="
+                registerForm.get('confirmPassword')?.touched &&
+                (registerForm.get('confirmPassword')?.invalid ||
+                  registerForm.hasError('passwordMismatch'))
+              "
+              aria-describedby="confirmpassword-error"
             />
             @if (
               registerForm.get('confirmPassword')?.touched &&
-              registerForm.hasError('passwordMismatch')
+              (registerForm.get('confirmPassword')?.invalid ||
+                registerForm.hasError('passwordMismatch'))
             ) {
-              <span class="field-error">Passwords do not match.</span>
+              <span id="confirmpassword-error" class="field-error" role="alert">
+                @if (registerForm.get('confirmPassword')?.hasError('required')) {
+                  Confirm password is required.
+                } @else if (registerForm.hasError('passwordMismatch')) {
+                  Passwords do not match.
+                }
+              </span>
             }
           </div>
 
           <div class="input-wrapper animate-in">
             <label for="bikeType">Vehicle Type</label>
-            <select id="bikeType" class="custom-input" formControlName="bikeType">
-              <option value="" disabled selected>Select your vehicle type</option>
+            <select
+              id="bikeType"
+              class="custom-input"
+              formControlName="bikeType"
+              [attr.aria-invalid]="
+                registerForm.get('bikeType')?.invalid && registerForm.get('bikeType')?.touched
+              "
+              aria-describedby="biketype-error"
+            >
+              <option value="" disabled>Select your vehicle type</option>
               <option value="mountain">Mountain Bike</option>
               <option value="road">Road Bike</option>
               <option value="electric">Electric Bike</option>
               <option value="scooter">Electric Scooter</option>
             </select>
             @if (registerForm.get('bikeType')?.invalid && registerForm.get('bikeType')?.touched) {
-              <span class="field-error">Please select a vehicle type.</span>
+              <span id="biketype-error" class="field-error" role="alert"
+                >Please select a vehicle type.</span
+              >
             }
           </div>
-
-          <div
-            class="input-wrapper"
-            style="display: flex; align-items: center; gap: 10px; margin-top: 1rem"
-          ></div>
         }
 
-        <div style="margin-top: 2rem">
+        <!-- API error message -->
+        @if (errorMessage()) {
+          <div class="api-error" role="alert">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div class="form-actions">
           <button
             class="btn-primary"
             type="button"
@@ -213,35 +294,26 @@
             (click)="currentStep() === 3 ? onSubmit() : nextStep()"
           >
             @if (isLoading()) {
-              <span>Loading...</span>
+              <span class="spinner" aria-hidden="true"></span>
+              Loading...
             } @else {
               {{ currentStep() === 3 ? 'Register' : 'Continue' }}
             }
           </button>
 
           @if (currentStep() > 1 && !isLoading()) {
-            <button
-              style="
-                width: 100%;
-                margin-top: 1rem;
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--on-surface-variant);
-              "
-              (click)="prevStep()"
-            >
-              Back
-            </button>
+            <button class="btn-back" type="button" (click)="prevStep()">Back</button>
           }
         </div>
       </form>
     </div>
   } @else {
-    <div class="form-card" style="text-align: center; padding: 4rem 2rem">
-      <div style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem">✓</div>
-      <h2 class="font-headline">Success!</h2>
-      <p>Application under review. We will contact you soon.</p>
+    <div class="form-card success-card">
+      <div class="success-icon">✓</div>
+      <h2 class="font-headline">Registration Submitted</h2>
+      <p>Your registration has been submitted successfully.</p>
+      <p>Your account is currently under review by our team.</p>
+      <p>You'll be able to start delivering once your identity has been verified.</p>
     </div>
   }
 </main>

@@ -1,33 +1,42 @@
-import { Controller, Get, Post, Body, Response, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Response,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtUserPayload } from '../auth/interfaces/jwt-payload.interface';
+import type {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 
 @Controller('user')
 export class UserController {
-    constructor(private userService: UserService) { }
+  constructor(private userService: UserService) {}
 
-    @Get('profile')
-    profile(@Request() req, @Response() res) {
-        return this.userService.getProfile(req, res);
-    }
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  profile(
+    @Req() req: ExpressRequest & { user: JwtUserPayload },
+    @Response() res: ExpressResponse,
+  ) {
+    return this.userService.getProfile(req.user._id, res);
+  }
 
-    @Get('check')
-    check(@Request() req, @Response() res) {
-        const token = req.cookies.accessToken;
+  @Post('login')
+  login(@Body() login: LoginDto, @Response() res: ExpressResponse) {
+    return this.userService.signin(login, res);
+  }
 
-        return this.userService.check(token, res);
-    }
-
-    @Post('login')
-    login(
-        @Body() login: LoginDto,
-        @Response() res) {
-        return this.userService.signin(login, res);
-    }
-
-    @Post('register')
-    register(@Body() register: RegisterDto, @Response() res) {
-        return this.userService.signup(register, res);
-    }
+  @Post('register')
+  register(@Body() register: RegisterDto, @Response() res: ExpressResponse) {
+    return this.userService.signup(register, res);
+  }
 }

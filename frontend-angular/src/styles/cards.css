@@ -1,0 +1,32 @@
+/* src/styles/cards.css */
+
+.main-canvas {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-container-low) 100%);
+}
+
+.form-card {
+  width: 100%;
+  max-width: 500px;
+  box-sizing: border-box;
+  background: var(--surface-container-lowest);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 3.5rem;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .main-canvas {
+    padding: var(--space-md);
+  }
+  .form-card {
+    padding: var(--space-xl) var(--space-lg);
+    border-radius: var(--radius-xl);
+  }
+}

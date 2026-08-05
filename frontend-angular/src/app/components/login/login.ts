@@ -2,14 +2,13 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { LoginRequest } from '../../models/login-request';
 import { LoginResponse } from '../../models/login-response';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -29,6 +28,7 @@ export class Login {
 
   onLogin(): void {
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 

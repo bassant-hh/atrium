@@ -13,6 +13,7 @@ import { LoginResponse } from '../models/login-response';
 export class AuthService {
   private http = inject(HttpClient);
   private readonly baseUrl = 'http://localhost:3000/';
+  private readonly TOKEN_KEY = 'makook_token';
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}user/register`, payload);
@@ -30,14 +31,16 @@ export class AuthService {
   }
 
   saveToken(token: string): void {
-    localStorage.setItem('makook_token', token);
+    if (token) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    }
   }
 
   getToken(): string | null {
-    return localStorage.getItem('makook_token');
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   logout(): void {
-    localStorage.removeItem('makook_token');
+    localStorage.removeItem(this.TOKEN_KEY);
   }
 }

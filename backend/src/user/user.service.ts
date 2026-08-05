@@ -1,37 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
 import { Model } from 'mongoose';
 
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-
 import { User, UserDocument } from './../schemas/user.schema';
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private configService: ConfigService,
+  ) {}
 
-  async getProfile(req: Request, res: Response) {
-    const token = (req.headers.authorization ?? '').split(' ')[1];
+  private generateToken(payload: { _id: unknown; role: string }): string {
+    const secret =
+      this.configService.get<string>('JWT_SECRET') ?? 'somesecretkey';
+    return jwt.sign(payload, secret, { expiresIn: '7d' });
+  }
+
+  async getProfile(userId: string, res: Response) {
     try {
-      const user = jwt.verify(token, 'somesecretkey') as { _id?: string };
+      const userData = await this.userModel
+        .findById(userId)
+        .select('-password -role -__v')
+        .exec();
 
-      if (user._id) {
-        const userData = await this.userModel
-          .findById(user._id)
-          .select('-password -role -__v')
-          .exec();
-
-        if (userData) {
-          return res.status(200).send(userData);
-        } else {
-          return res
-            .status(400)
-            .send({ status: 400, message: 'Invalid Request' });
-        }
+      if (userData) {
+        return res.status(200).send(userData);
       } else {
         return res
           .status(400)
@@ -39,25 +39,6 @@ export class UserService {
       }
     } catch {
       return res.status(400).send({ status: 400, message: 'Invalid Request' });
-    }
-  }
-
-  async check(token: string, res: Response) {
-    try {
-      const user = await this.userModel
-        .findOne({ token })
-        .select('-password -__v -createdAt -updatedAt')
-        .exec();
-
-      if (user) {
-        return res
-          .status(200)
-          .send({ status: 200, message: 'Authorized', data: user });
-      } else {
-        return res.status(200).send({ status: 401, message: 'Unauthorized' });
-      }
-    } catch {
-      return res.status(401).send({ status: 401, message: 'Unauthorized' });
     }
   }
 
@@ -86,20 +67,12 @@ export class UserService {
       });
     }
 
-    const token = await jwt.sign(
-      {
-        _id: user._id,
-        role: user.role,
-      },
-      'somesecretkey',
-    );
+    const token = this.generateToken({
+      _id: user._id,
+      role: user.role,
+    });
 
     await user.updateOne({ token }).exec();
-
-    res.cookie('accessToken', token, {
-      expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
-      httpOnly: true,
-    });
 
     return res.send({
       token,
@@ -123,20 +96,12 @@ export class UserService {
     const newUser = await this.userModel.create({ ...data, password });
 
     if (newUser) {
-      const token = await jwt.sign(
-        {
-          _id: newUser._id,
-          role: newUser.role,
-        },
-        'somesecretkey',
-      );
+      const token = this.generateToken({
+        _id: newUser._id,
+        role: newUser.role,
+      });
 
       await newUser.updateOne({ token }).exec();
-
-      res.cookie('accessToken', token, {
-        expires: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-      });
 
       return res.send({
         _id: newUser._id,

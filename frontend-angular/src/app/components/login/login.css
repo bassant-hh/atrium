@@ -1,68 +1,44 @@
-.main-canvas {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: linear-gradient(135deg, var(--surface) 0%, var(--secondary-container) 100%);
+/* src/app/components/login/login.css */
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
 }
 
-.form-card {
-    width: 100%;
-    max-width: 500px; 
-    background: var(--surface-container-lowest);
-    border-radius: 3rem; 
-    box-shadow: 0 20px 50px rgba(25, 28, 30, 0.08);
-    padding: 3.5rem;
+.form-title {
+  color: var(--primary);
+  font-size: 2.2rem;
+  margin: 0;
 }
 
-.input-wrapper label {
-    display: block;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--on-surface-variant);
-    margin-bottom: 0.8rem;
-    letter-spacing: 0.5px;
+.form-subtitle {
+  color: var(--on-surface-variant);
+  font-size: 0.875rem;
+  margin-top: 0.3rem;
 }
 
-.custom-input {
-    width: 100%;
-    background: var(--surface-container-low);
-    border: none;
-    border-radius: 1.2rem;
-    padding: 1.2rem;
-    font-size: 1rem;
-    transition: 0.3s;
+.form-actions {
+  margin-top: 2.5rem;
 }
 
-.custom-input:focus {
-    background: white;
-    outline: 2px solid rgba(12, 103, 128, 0.1);
+.form-footer {
+  text-align: center;
+  margin-top: 1.5rem;
 }
 
-.btn-primary {
-    width: 100%;
-    padding: 1.2rem;
-    background: linear-gradient(to right, var(--primary), #1282a2);
-    color: white;
-    border: none;
-    border-radius: 1.5rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.4s;
+.footer-text {
+  font-size: 0.8125rem;
+  color: var(--on-surface-variant);
+  margin: 0;
 }
 
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 25px rgba(12, 103, 128, 0.2);
+.footer-link {
+  color: var(--primary);
+  font-weight: 800;
+  text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
-.animate-in {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.footer-link:hover {
+  text-decoration: underline;
 }

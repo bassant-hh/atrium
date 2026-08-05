@@ -1,0 +1,40 @@
+<div class="pending-wrapper">
+  <div class="pending-card">
+    <div class="icon-wrap">
+      <svg class="clock-icon" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle
+          class="clock-circle"
+          cx="26"
+          cy="26"
+          r="24"
+          stroke="#eab308"
+          stroke-width="3"
+          fill="rgba(234, 179, 8, 0.1)"
+        />
+        <path
+          class="clock-hands"
+          d="M26 14v13l8 4"
+          stroke="#eab308"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+
+    <h1 class="title">Application received</h1>
+    <p class="subtitle">Waiting for admin approval</p>
+    <p class="body-text">
+      Your identity registration is currently under review by our administration team. You will be
+      able to access your dashboard as soon as your account is approved.
+    </p>
+
+    <div class="actions-row">
+      <button class="waiting-btn" disabled>
+        <span class="spinner"></span>
+        Waiting for approval...
+      </button>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </div>
+</div>

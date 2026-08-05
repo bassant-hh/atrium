@@ -1,10 +1,8 @@
 <main class="main-canvas">
   <div class="form-card animate-in">
-    <header style="text-align: center; margin-bottom: 2.5rem">
-      <h1 class="font-headline" style="color: var(--primary); font-size: 2.2rem; margin: 0">
-        Makook
-      </h1>
-      <p style="color: var(--on-surface-variant); font-size: 14px; margin-top: 5px">Rider Login</p>
+    <header class="form-header">
+      <h1 class="font-headline form-title">Makook</h1>
+      <p class="form-subtitle">Rider Login</p>
     </header>
 
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
@@ -18,14 +16,18 @@
           placeholder="Enter your username"
           type="text"
           autocomplete="username"
+          [attr.aria-invalid]="
+            loginForm.get('username')?.invalid && loginForm.get('username')?.touched
+          "
+          aria-describedby="username-error"
         />
         @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-          <span class="field-error">Username is required.</span>
+          <span id="username-error" class="field-error" role="alert">Username is required.</span>
         }
       </div>
 
       <!-- Password -->
-      <div class="input-wrapper" style="margin-top: 1.5rem">
+      <div class="input-wrapper">
         <label for="password">Password</label>
         <input
           id="password"
@@ -34,13 +36,19 @@
           placeholder="Enter your password"
           type="password"
           autocomplete="current-password"
+          [attr.aria-invalid]="
+            loginForm.get('password')?.invalid && loginForm.get('password')?.touched
+          "
+          aria-describedby="password-error"
         />
         @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          @if (loginForm.get('password')?.hasError('required')) {
-            <span class="field-error">Password is required.</span>
-          } @else if (loginForm.get('password')?.hasError('minlength')) {
-            <span class="field-error">Password must be at least 8 characters.</span>
-          }
+          <span id="password-error" class="field-error" role="alert">
+            @if (loginForm.get('password')?.hasError('required')) {
+              Password is required.
+            } @else if (loginForm.get('password')?.hasError('minlength')) {
+              Password must be at least 8 characters.
+            }
+          </span>
         }
       </div>
 
@@ -51,19 +59,20 @@
         </div>
       }
 
-      <div style="margin-top: 2.5rem">
+      <div class="form-actions">
         <button class="btn-primary" type="submit" [disabled]="loginForm.invalid || isLoading()">
-          {{ isLoading() ? 'Verifying...' : 'Login' }}
+          @if (isLoading()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Verifying...
+          } @else {
+            Login
+          }
         </button>
 
-        <div style="text-align: center; margin-top: 1.5rem">
-          <p style="font-size: 13px; color: var(--on-surface-variant)">
+        <div class="form-footer">
+          <p class="footer-text">
             Not a rider yet?
-            <a
-              routerLink="/register"
-              style="color: var(--primary); font-weight: 800; text-decoration: none"
-              >Apply Now</a
-            >
+            <a routerLink="/register" class="footer-link">Apply Now</a>
           </p>
         </div>
       </div>

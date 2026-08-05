@@ -9,7 +9,6 @@ import {
 import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { CommonModule } from '@angular/common';
 import { RegisterRequest } from '../../models/register-request';
 
 function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -20,7 +19,8 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 
 @Component({
   selector: 'app-register',
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
@@ -32,6 +32,7 @@ export class Register {
   currentStep = signal<number>(1);
   isLoading = signal<boolean>(false);
   isSubmitted = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   readonly universities = [
     { id: 'SVU', name: 'South Valley University' },
@@ -81,6 +82,21 @@ export class Register {
 
   nextStep(): void {
     if (!this.canGoNext()) {
+      switch (this.currentStep()) {
+        case 1:
+          ['firstName', 'lastName', 'university', 'phone'].forEach((field) =>
+            this.registerForm.get(field)?.markAsTouched(),
+          );
+          break;
+        case 2:
+          ['idFront', 'idBack'].forEach((field) => this.registerForm.get(field)?.markAsTouched());
+          break;
+        case 3:
+          ['email', 'username', 'password', 'confirmPassword', 'bikeType'].forEach((field) =>
+            this.registerForm.get(field)?.markAsTouched(),
+          );
+          break;
+      }
       return;
     }
 
@@ -101,47 +117,61 @@ export class Register {
       return;
     }
 
-    if (true) {
-      this.isLoading.set(true);
+    const frontFile = this.registerForm.value.idFront;
+    const backFile = this.registerForm.value.idBack;
 
-      const val = this.registerForm.value;
-      const frontFile = val.idFront as unknown as File;
-      const backFile = val.idBack as unknown as File;
-
-      this.authService
-        .uploadIds(frontFile, backFile)
-        .pipe(
-          switchMap((uploadRes) => {
-            const payload: RegisterRequest = {
-              firstName: val.firstName ?? '',
-              lastName: val.lastName ?? '',
-              email: val.email ?? '',
-              username: val.username ?? '',
-              password: val.password ?? '',
-              role: 'DELIVERY',
-              phone: val.phone ?? '',
-              university: val.university ?? '',
-              idFront: uploadRes.frontUrl,
-              idBack: uploadRes.backUrl,
-              status: 'PENDING',
-            };
-
-            return this.authService.register(payload);
-          }),
-        )
-        .subscribe({
-          next: (res) => {
-            this.isSubmitted.set(true);
-            this.isLoading.set(false);
-            this.authService.saveToken(res.token);
-            this.router.navigate(['/pending']);
-          },
-          error: (err) => {
-            this.isLoading.set(false);
-            console.error('Registration Error', err);
-          },
-        });
+    if (!(frontFile instanceof File) || !(backFile instanceof File)) {
+      return;
     }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const val = this.registerForm.value;
+
+    this.authService
+      .uploadIds(frontFile, backFile)
+      .pipe(
+        switchMap((uploadRes) => {
+          const payload: RegisterRequest = {
+            firstName: val.firstName ?? '',
+            lastName: val.lastName ?? '',
+            email: val.email ?? '',
+            username: val.username ?? '',
+            password: val.password ?? '',
+            role: 'DELIVERY',
+            phone: val.phone ?? '',
+            university: val.university ?? '',
+            idFront: uploadRes.frontUrl,
+            idBack: uploadRes.backUrl,
+            status: 'PENDING',
+          };
+
+          return this.authService.register(payload);
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.isSubmitted.set(true);
+          this.isLoading.set(false);
+          this.authService.saveToken(res.token);
+          this.router.navigate(['/pending']);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          const status: number = err?.status ?? 0;
+
+          if (status === 400) {
+            this.errorMessage.set('Registration failed.');
+          } else if (status === 409) {
+            this.errorMessage.set('Username or email already exists.');
+          } else if (status === 500) {
+            this.errorMessage.set('Server error.');
+          } else {
+            this.errorMessage.set('Please check your internet connection.');
+          }
+        },
+      });
   }
 
   onFrontSelected(event: Event): void {
@@ -151,7 +181,10 @@ export class Register {
       return;
     }
 
-    this.registerForm.patchValue({ idFront: input.files[0] });
+    const control = this.registerForm.get('idFront');
+    control?.patchValue(input.files[0]);
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
   }
 
   onBackSelected(event: Event): void {
@@ -161,7 +194,10 @@ export class Register {
       return;
     }
 
-    this.registerForm.patchValue({ idBack: input.files[0] });
+    const control = this.registerForm.get('idBack');
+    control?.patchValue(input.files[0]);
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
   }
 
   canGoNext(): boolean {

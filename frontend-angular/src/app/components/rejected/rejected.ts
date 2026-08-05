@@ -4,13 +4,13 @@ import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-pending',
+  selector: 'app-rejected',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './pending.html',
-  styleUrl: './pending.css',
+  templateUrl: './rejected.html',
+  styleUrl: './rejected.css',
 })
-export class Pending {
+export class Rejected {
   private authService = inject(AuthService);
   private router = inject(Router);
 

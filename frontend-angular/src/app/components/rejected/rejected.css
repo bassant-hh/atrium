@@ -1,4 +1,4 @@
-.pending-wrapper {
+.rejected-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -8,9 +8,9 @@
   font-family: 'Inter', system-ui, sans-serif;
 }
 
-.pending-card {
+.rejected-card {
   background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   backdrop-filter: blur(16px);
   border-radius: 1.5rem;
   padding: 3rem 2.5rem;
@@ -26,7 +26,7 @@
   margin-bottom: 1.5rem;
 }
 
-.clock-icon {
+.cross-icon {
   width: 72px;
   height: 72px;
 }
@@ -41,7 +41,7 @@
 .subtitle {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #eab308;
+  color: #f87171;
   margin: 0 0 1rem;
 }
 
@@ -58,49 +58,19 @@
   gap: 0.75rem;
 }
 
-.waiting-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: rgba(234, 179, 8, 0.15);
-  border: 1px solid rgba(234, 179, 8, 0.35);
-  color: #facc15;
+.logout-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
   font-size: 0.95rem;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  cursor: not-allowed;
-}
-
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(250, 204, 21, 0.3);
-  border-top-color: #facc15;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-.logout-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #94a3b8;
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: 0.65rem 1.5rem;
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
 }

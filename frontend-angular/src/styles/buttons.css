@@ -1,0 +1,35 @@
+/* src/styles/buttons.css */
+
+.btn-primary {
+  width: 100%;
+  padding: 1.2rem;
+  background: linear-gradient(to right, var(--primary), #1282a2);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-xl);
+  font-weight: 800;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    opacity var(--transition-normal);
+}
+
+.btn-primary:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(12, 103, 128, 0.2);
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--primary-container);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
