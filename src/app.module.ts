@@ -3,6 +3,8 @@ import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
 import { AdminModule } from './admin/admin.module';
+import { RiderModule } from './rider/rider.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 import { MongooseModule } from '@nestjs/mongoose';
 import { UploadFileModule } from './upload-file/upload-file.module';
@@ -18,6 +20,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     OrderModule,
     AdminModule,
+    RiderModule,
+    DashboardModule,
 
     MongooseModule.forRootAsync({
       inject: [ConfigService],

@@ -1,5 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { VerificationStatus } from '../rider/enums/verification-status.enum';
+import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -36,7 +38,10 @@ export class User {
   idBack: string;
 
   @Prop({ default: 'PENDING' })
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING';
+  status: VerificationStatus;
+
+  @Prop({ default: 'OFFLINE' })
+  dutyStatus: RiderDutyStatus;
 
   @Prop({ required: false })
   token?: string;
