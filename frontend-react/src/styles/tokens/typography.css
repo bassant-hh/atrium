@@ -1,0 +1,31 @@
+:root {
+  /* Font Family Stack */
+  --font-family-sans:
+    'Plus Jakarta Sans', 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  /* Typography Scales */
+  --font-display-xl: 52px;
+  --font-display-l: 40px;
+  --font-heading-xl: 38px;
+  --font-heading-l: 30px;
+  --font-heading-m: 22px;
+  --font-heading-s: 18px;
+  --font-body-l: 18px;
+  --font-body: 16px;
+  --font-body-small: 14px;
+  --font-caption: 12px;
+
+  /* Line Heights */
+  --line-height-tight: 1.15;
+  --line-height-heading: 1.25;
+  --line-height-body: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+}

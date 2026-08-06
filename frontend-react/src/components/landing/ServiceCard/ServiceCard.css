@@ -1,14 +1,11 @@
 .service-card {
-  background-color: #ffffff;
-  border: 2px solid #baeaff;
-  border-radius: 20px;
-  padding: 32px 24px;
+  background-color: var(--color-surface-elevated);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-32) var(--space-24);
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 77, 98, 0.04);
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-normal);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,42 +15,40 @@
 
 .service-card:hover {
   transform: translateY(-8px);
-  border-color: #004d62;
-  box-shadow: 0 12px 30px rgba(0, 77, 98, 0.12);
+  border-color: var(--color-primary-500);
+  box-shadow: var(--shadow-lg);
 }
 
 .service-card__icon-wrap {
   width: 72px;
   height: 72px;
-  background-color: #def4ff;
-  color: #004d62;
-  border-radius: 20px;
+  background-color: var(--color-surface);
+  color: var(--color-primary-500);
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  margin-bottom: 20px;
-  transition:
-    transform 0.25s ease,
-    background-color 0.25s ease;
+  margin-bottom: var(--space-20, 20px);
+  transition: var(--transition-normal);
 }
 
 .service-card:hover .service-card__icon-wrap {
   transform: scale(1.1);
-  background-color: #004d62;
-  color: #baeaff;
+  background-color: var(--color-primary-500);
+  color: var(--color-accent);
 }
 
 .service-card__title {
-  font-size: 20px;
-  font-weight: 800;
-  color: #004d62;
-  margin-bottom: 10px;
+  font-size: var(--font-heading-m);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-primary-500);
+  margin-bottom: var(--space-12);
 }
 
 .service-card__desc {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #666666;
+  font-size: var(--font-body-small);
+  line-height: var(--line-height-body);
+  color: var(--color-text-secondary);
   margin: 0;
 }

@@ -1,0 +1,48 @@
+:root {
+  /* Primary Palette (Based on #156B82) */
+  --color-primary-50: #f0f8fa;
+  --color-primary-100: #d5edf2;
+  --color-primary-200: #abdae5;
+  --color-primary-300: #74bece;
+  --color-primary-400: #439db1;
+  --color-primary-500: #156b82;
+  --color-primary-600: #11576b;
+  --color-primary-700: #0e4555;
+  --color-primary-800: #0b3643;
+  --color-primary-900: #082630;
+
+  /* Secondary Palette (Based on #3C8DA6) */
+  --color-secondary-50: #f2f9fb;
+  --color-secondary-100: #daf0f6;
+  --color-secondary-200: #b3e0ec;
+  --color-secondary-300: #84c9dd;
+  --color-secondary-400: #55aecc;
+  --color-secondary-500: #3c8da6;
+  --color-secondary-600: #307389;
+  --color-secondary-700: #275c6d;
+  --color-secondary-800: #1e4653;
+  --color-secondary-900: #143039;
+
+  /* Accent & Surface Tokens */
+  --color-accent: #a9e3f7;
+  --color-bg: #fcfeff;
+  --color-surface: #f4fbfd;
+  --color-surface-elevated: #ffffff;
+  --color-border: #d8eef5;
+
+  /* Typography Colors */
+  --color-text-primary: #263238;
+  --color-text-secondary: #607d8b;
+  --color-text-muted: #90a4ae;
+  --color-text-on-primary: #ffffff;
+
+  /* Semantic Feedback Status Colors */
+  --color-success: #2e7d32;
+  --color-success-bg: #e8f5e9;
+  --color-warning: #ed6c02;
+  --color-warning-bg: #fff3e0;
+  --color-danger: #d32f2f;
+  --color-danger-bg: #ffebee;
+  --color-info: #0288d1;
+  --color-info-bg: #e0f7fa;
+}

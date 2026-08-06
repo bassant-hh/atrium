@@ -8,7 +8,6 @@ import React, {
   useRef,
 } from 'react';
 import { getToken, saveToken, removeToken } from '../utils/auth';
-import { removeRole } from '../utils/role';
 import { getCustomerProfile } from '../services/auth.service';
 
 const AuthContext = createContext(null);
@@ -34,7 +33,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     removeToken();
-    removeRole();
     if (isMountedRef.current) {
       setToken(null);
       setUser(null);

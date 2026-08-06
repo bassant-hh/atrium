@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUserGraduate, FaMotorcycle, FaSignInAlt, FaUserPlus, FaArrowLeft } from 'react-icons/fa';
 import RoleCard from '../../components/RoleCard/RoleCard';
-import { ROUTES } from '../../constants/routes';
-import { goToRiderPortal } from '../../utils/navigation';
 import { saveRole } from '../../utils/role';
+import {
+  goCustomerLogin,
+  goCustomerRegister,
+  goRiderLogin,
+  goRiderRegister,
+} from '../../services/navigation/publicPortal.service';
 import './RoleSelection.css';
 
 const RoleSelection = () => {
@@ -18,15 +22,15 @@ const RoleSelection = () => {
 
     if (intent === 'register') {
       if (roleKey === 'customer') {
-        navigate(ROUTES.CUSTOMER_REGISTER);
+        goCustomerRegister(navigate);
       } else {
-        goToRiderPortal('/register');
+        goRiderRegister();
       }
     } else if (intent === 'login') {
       if (roleKey === 'customer') {
-        navigate(ROUTES.CUSTOMER_LOGIN);
+        goCustomerLogin(navigate);
       } else {
-        goToRiderPortal('/login');
+        goRiderLogin();
       }
     } else {
       setSelectedRole(roleKey);
@@ -36,15 +40,15 @@ const RoleSelection = () => {
   const handleActionSelect = (action) => {
     if (selectedRole === 'customer') {
       if (action === 'register') {
-        navigate(ROUTES.CUSTOMER_REGISTER);
+        goCustomerRegister(navigate);
       } else {
-        navigate(ROUTES.CUSTOMER_LOGIN);
+        goCustomerLogin(navigate);
       }
     } else if (selectedRole === 'rider') {
       if (action === 'register') {
-        goToRiderPortal('/register');
+        goRiderRegister();
       } else {
-        goToRiderPortal('/login');
+        goRiderLogin();
       }
     }
   };

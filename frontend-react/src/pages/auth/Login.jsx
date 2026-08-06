@@ -5,6 +5,30 @@ import { useAuth } from '../../context/AuthContext';
 import { saveRole } from '../../utils/role';
 import { ROUTES } from '../../constants/routes';
 
+const getSafeRedirectPath = (fromState) => {
+  if (typeof fromState !== 'string') return ROUTES.CUSTOMER_PROFILE;
+
+  // Prevent open redirect vulnerabilities (must start with single slash, not //)
+  if (!fromState.startsWith('/') || fromState.startsWith('//')) {
+    return ROUTES.CUSTOMER_PROFILE;
+  }
+
+  // Do not redirect back to authentication pages
+  const forbiddenAuthPaths = [
+    ROUTES.CUSTOMER_LOGIN,
+    ROUTES.CUSTOMER_REGISTER,
+    ROUTES.LOGIN,
+    ROUTES.REGISTER,
+    ROUTES.PORTAL,
+  ];
+
+  if (forbiddenAuthPaths.some((path) => fromState.startsWith(path))) {
+    return ROUTES.CUSTOMER_PROFILE;
+  }
+
+  return fromState;
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,8 +51,9 @@ const Login = () => {
       const res = await loginCustomer({ email, password });
       saveRole('customer');
       login(res.token, res.customer);
-      const from = location.state?.from || ROUTES.CUSTOMER_PROFILE;
-      navigate(from, { replace: true });
+
+      const targetPath = getSafeRedirectPath(location.state?.from);
+      navigate(targetPath, { replace: true });
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {

@@ -3,13 +3,13 @@ import { getToken } from './auth';
 import { ROUTES } from '../constants/routes';
 import { goToRiderPortal } from './navigation';
 
-export const handlePrimaryCTA = (navigate, isAuthenticated) => {
+export const handlePrimaryCTA = (navigate, authInfo) => {
   const role = getRole();
-  const token = getToken();
-  const isAuth = isAuthenticated || !!token;
+  const currentToken = authInfo?.token || getToken();
+  const isAuthenticated = Boolean(authInfo?.isAuthenticated && authInfo?.user && currentToken);
 
-  // Scenario C: Authenticated User with Stored Role
-  if (role && isAuth) {
+  // Scenario 3: Authenticated User with Valid Session
+  if (isAuthenticated && role) {
     if (role === 'customer') {
       navigate(ROUTES.CUSTOMER_PROFILE);
     } else if (role === 'rider') {
@@ -18,7 +18,7 @@ export const handlePrimaryCTA = (navigate, isAuthenticated) => {
     return;
   }
 
-  // Scenario B & D: Unauthenticated User with Stored Role
+  // Scenario 2: Unauthenticated Returning User with Stored Role Preference
   if (role === 'customer') {
     navigate(ROUTES.CUSTOMER_LOGIN);
     return;
@@ -28,26 +28,37 @@ export const handlePrimaryCTA = (navigate, isAuthenticated) => {
     return;
   }
 
-  // Scenario A: First Visit (No Role) -> Intent = Register
+  // Scenario 1: First Visit (No Role) -> Navigate to Portal with Register Intent
   navigate(ROUTES.PORTAL, { state: { intent: 'register' } });
 };
 
-export const handleSecondaryCTA = (navigate) => {
+export const handleSecondaryCTA = (navigate, authInfo, onShowSwitchDialog) => {
   const role = getRole();
+  const currentToken = authInfo?.token || getToken();
+  const isAuthenticated = Boolean(authInfo?.isAuthenticated && authInfo?.user && currentToken);
+
   if (!role) {
-    // Scenario A: First visit secondary button = Login -> Intent = Login
+    // Scenario 1: First Visit Secondary Button = Login
     navigate(ROUTES.PORTAL, { state: { intent: 'login' } });
+  } else if (isAuthenticated) {
+    // Scenario 3: Authenticated User Secondary Button = Switch account -> Open Confirmation Dialog
+    if (typeof onShowSwitchDialog === 'function') {
+      onShowSwitchDialog();
+    } else {
+      removeRole();
+      navigate(ROUTES.PORTAL, { replace: true, state: null });
+    }
   } else {
-    // Scenarios B, C, D: Secondary button = Change Account Type -> Neutral portal
+    // Scenario 2: Unauthenticated Returning User = Use another account -> Neutral Portal (Clear State)
     removeRole();
-    navigate(ROUTES.PORTAL);
+    navigate(ROUTES.PORTAL, { replace: true, state: null });
   }
 };
 
-export const getCTAButtonLabels = (isAuthenticated) => {
+export const getCTAButtonLabels = (authInfo) => {
   const role = getRole();
-  const token = getToken();
-  const isAuth = isAuthenticated || !!token;
+  const currentToken = authInfo?.token || getToken();
+  const isAuthenticated = Boolean(authInfo?.isAuthenticated && authInfo?.user && currentToken);
 
   if (!role) {
     return {
@@ -58,10 +69,10 @@ export const getCTAButtonLabels = (isAuthenticated) => {
     };
   }
 
-  if (isAuth) {
+  if (isAuthenticated) {
     return {
-      primary: 'Continue',
-      secondary: 'Change Account Type',
+      primary: 'Continue to Dashboard',
+      secondary: 'Switch account',
       hasRole: true,
       isAuthenticated: true,
     };
@@ -69,7 +80,7 @@ export const getCTAButtonLabels = (isAuthenticated) => {
 
   return {
     primary: 'Login',
-    secondary: 'Change Account Type',
+    secondary: 'Use another account',
     hasRole: true,
     isAuthenticated: false,
   };

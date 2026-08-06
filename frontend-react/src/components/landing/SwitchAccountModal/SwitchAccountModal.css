@@ -1,0 +1,76 @@
+.switch-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20, 20px);
+}
+
+.switch-modal-content {
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-32);
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.switch-modal-title {
+  margin: 0 0 var(--space-12) 0;
+  color: var(--color-primary-500);
+  font-size: var(--font-heading-m);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.switch-modal-desc {
+  margin: 0 0 var(--space-24) 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: var(--line-height-body);
+}
+
+.switch-modal-actions {
+  display: flex;
+  gap: var(--space-12);
+  justify-content: center;
+}
+
+.switch-modal-btn-cancel {
+  padding: 10px var(--space-24);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.switch-modal-btn-cancel:hover {
+  background: var(--color-surface);
+}
+
+.switch-modal-btn-continue {
+  padding: 10px var(--space-24);
+  background: var(--color-danger);
+  color: var(--color-text-on-primary);
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.switch-modal-btn-continue:hover {
+  background: #93000a;
+}

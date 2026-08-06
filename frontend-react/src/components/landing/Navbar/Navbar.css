@@ -4,8 +4,8 @@
   z-index: 1000;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid #baeaff;
-  padding: 16px 32px;
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-16) var(--space-32);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -14,16 +14,16 @@
 .landing-navbar__logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-12);
   text-decoration: none;
 }
 
 .landing-navbar__logo-icon {
   width: 40px;
   height: 40px;
-  background-color: #004d62;
-  color: #baeaff;
-  border-radius: 10px;
+  background-color: var(--color-primary-500);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,34 +31,31 @@
 }
 
 .landing-navbar__logo-text {
-  font-size: 22px;
-  font-weight: 800;
-  color: #004d62;
+  font-size: var(--font-heading-m);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-primary-500);
   letter-spacing: -0.5px;
 }
 
 .landing-navbar__login-btn {
-  padding: 10px 24px;
-  background-color: #004d62;
-  color: #ffffff;
+  padding: 10px var(--space-24);
+  background-color: var(--color-primary-500);
+  color: var(--color-text-on-primary);
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-body-small);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: var(--transition-normal);
 }
 
 .landing-navbar__login-btn:hover {
-  background-color: #0c6780;
+  background-color: var(--color-secondary-500);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 77, 98, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .landing-navbar__login-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(186, 234, 255, 0.8);
+  box-shadow: 0 0 0 3px var(--color-border);
 }
