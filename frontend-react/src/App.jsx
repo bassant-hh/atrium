@@ -1,8 +1,8 @@
-import React from "react";
-import MainLayout from "./layouts/MainLayout.jsx";
+import React from 'react';
+import AppRoutes from './routes/AppRoutes.jsx';
 
 const App = () => {
-  return <MainLayout />;
+  return <AppRoutes />;
 };
 
 export default App;

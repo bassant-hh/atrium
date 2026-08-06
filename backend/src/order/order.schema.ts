@@ -10,6 +10,7 @@ export type OrderDocument = HydratedDocument<Order>;
 // OrderSchema.index({ riderId: 1 });
 // OrderSchema.index({ declinedRiderIds: 1 });
 // OrderSchema.index({ riderId: 1, status: 1 });
+// OrderSchema.index({ clientId: 1 });
 // ============================================================================
 
 @Schema({ timestamps: true })
@@ -37,6 +38,18 @@ export class Order {
 
   @Prop({ required: true })
   earnings: string;
+
+  @Prop({ required: false })
+  title?: string;
+
+  @Prop({ required: false })
+  category?: string;
+
+  @Prop({ required: false })
+  notes?: string;
+
+  @Prop({ required: false })
+  amount?: number;
 
   @Prop({ required: false, default: '15 mins' })
   estimatedTime?: string;

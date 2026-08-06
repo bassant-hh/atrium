@@ -1,37 +1,78 @@
-import { useState } from "react";
-import "./newPage.css";
-import { NavLink } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createOrder } from '../../services/order.service';
+import './newPage.css';
 
 const CATEGORIES = [
-  { key: "food", label: "Food", icon: "🍕" },
-  { key: "printing", label: "Printing", icon: "🖨️" },
-  { key: "stationery", label: "Stationery", icon: "✏️" },
-  { key: "books", label: "Books", icon: "📚" },
+  { key: 'food', label: 'Food', icon: '🍕' },
+  { key: 'printing', label: 'Printing', icon: '🖨️' },
+  { key: 'stationery', label: 'Stationery', icon: '✏️' },
+  { key: 'books', label: 'Books', icon: '📚' },
 ];
 
 const PAYMENT_METHODS = [
-  { key: "cash", label: "Cash on Delivery", desc: "Pay when you receive" },
-  { key: "card", label: "Credit/Debit Card", desc: "Pay online now" },
-  { key: "wallet", label: "Digital Wallet", desc: "Apple Pay, Mada, STC Pay" },
+  { key: 'cash', label: 'Cash on Delivery', desc: 'Pay when you receive' },
+  { key: 'card', label: 'Credit/Debit Card', desc: 'Pay online now' },
+  { key: 'wallet', label: 'Digital Wallet', desc: 'Apple Pay, Mada, STC Pay' },
 ];
 
 const DELIVERY_FEE = 5;
 
 const NewOrder = () => {
-  const [category, setCategory] = useState("food");
-  const [itemName, setItemName] = useState("");
-  const [description, setDescription] = useState("");
-  const [pickupLocation, setPickupLocation] = useState("");
-  const [deliveryLocation, setDeliveryLocation] = useState("");
+  const navigate = useNavigate();
+  const [category, setCategory] = useState('food');
+  const [itemName, setItemName] = useState('');
+  const [description, setDescription] = useState('');
+  const [pickupLocation, setPickupLocation] = useState('');
+  const [deliveryLocation, setDeliveryLocation] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(25);
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const total = price * quantity + DELIVERY_FEE;
+
+  const handlePlaceOrder = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await createOrder({
+        pickup: pickupLocation || 'Campus Building A',
+        destination: deliveryLocation || 'Campus Building B',
+        category: category,
+        title: itemName || 'General Order',
+        amount: total,
+        notes: description,
+      });
+
+      navigate('/my-orders');
+    } catch (err) {
+      setError(err.message || 'Failed to place order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="new-order">
       <h1 className="new-order__title">New Order</h1>
+
+      {error && (
+        <div
+          style={{
+            color: '#ba1a1a',
+            backgroundColor: '#ffdad6',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       <div className="new-order__layout">
         <div className="new-order__left">
@@ -44,7 +85,7 @@ const NewOrder = () => {
                 <button
                   key={cat.key}
                   className={`no-category-btn ${
-                    category === cat.key ? "no-category-btn--active" : ""
+                    category === cat.key ? 'no-category-btn--active' : ''
                   }`}
                   onClick={() => setCategory(cat.key)}
                 >
@@ -84,7 +125,7 @@ const NewOrder = () => {
                 <label className="no-field__label">Pickup Location</label>
                 <div className="no-field__icon-input">
                   <span>
-                    <i class="fa-solid fa-location-dot"></i>
+                    <i className="fa-solid fa-location-dot"></i>
                   </span>
                   <input
                     placeholder="Building A, Room 101"
@@ -98,7 +139,7 @@ const NewOrder = () => {
                 <label className="no-field__label">Delivery Location</label>
                 <div className="no-field__icon-input">
                   <span>
-                    <i class="fa-solid fa-location-dot"></i>
+                    <i className="fa-solid fa-location-dot"></i>
                   </span>
                   <input
                     placeholder="Building C, Room 205"
@@ -123,10 +164,7 @@ const NewOrder = () => {
 
                 <span className="no-quantity__value">{quantity}</span>
 
-                <button
-                  className="no-quantity__btn"
-                  onClick={() => setQuantity((q) => q + 1)}
-                >
+                <button className="no-quantity__btn" onClick={() => setQuantity((q) => q + 1)}>
                   +
                 </button>
               </div>
@@ -156,7 +194,7 @@ const NewOrder = () => {
                 <label
                   key={pm.key}
                   className={`no-payment-item ${
-                    paymentMethod === pm.key ? "no-payment-item--active" : ""
+                    paymentMethod === pm.key ? 'no-payment-item--active' : ''
                   }`}
                 >
                   <input
@@ -201,15 +239,15 @@ const NewOrder = () => {
 
           <div className="no-summary__meta">
             <p>
-              <i class="fa-regular fa-clock"></i> Estimated Time: 15–30 mins
+              <i className="fa-regular fa-clock"></i> Estimated Time: 15–30 mins
             </p>
             <p>
-              <i class="fa-solid fa-location-dot"></i> Campus Delivery Only
+              <i className="fa-solid fa-location-dot"></i> Campus Delivery Only
             </p>
           </div>
-          <NavLink to="/my-orders">
-            <button className="no-summary__place-btn">Place Order</button>
-          </NavLink>
+          <button className="no-summary__place-btn" onClick={handlePlaceOrder} disabled={loading}>
+            {loading ? 'Placing Order...' : 'Place Order'}
+          </button>
 
           <p className="no-summary__terms">
             By placing this order, you agree to our Terms & Conditions
