@@ -16,9 +16,22 @@ import {
 import { DeclineOrderResponseDto } from './dto/decline-order-response.dto';
 import { PickupOrderResponseDto } from './dto/pickup-order-response.dto';
 import { DeliverOrderResponseDto } from './dto/deliver-order-response.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
+import {
+  CreateOrderResponseDto,
+  CustomerOrderDetailsDto,
+  CustomerOrderDto,
+} from './dto/customer-order-response.dto';
 import { User, UserDocument } from '../schemas/user.schema';
 import { VerificationStatus } from '../rider/enums/verification-status.enum';
 import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
+
+// ============================================================================
+// Temporary Default Constants for Phase 1
+// TODO Phase 2: Replace default estimates with dynamic Google Maps distance calculation engine.
+// ============================================================================
+const DEFAULT_DISTANCE = '0.8 km';
+const DEFAULT_ESTIMATED_TIME = '15 mins';
 
 type OrderFilterQuery = {
   status?: OrderStatus;
@@ -38,6 +51,17 @@ export class OrderService {
   // ==========================================================================
   // Private Helpers
   // ==========================================================================
+  private buildCustomerName(user: {
+    firstName?: string;
+    lastName?: string;
+  }): string {
+    return `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+  }
+
+  private formatEarnings(amount: number, currency: string = 'EGP'): string {
+    return `${currency} ${amount}`;
+  }
+
   private mapNearbyOrder(order: {
     _id: { toString(): string } | string;
     customerName: string;
@@ -69,8 +93,57 @@ export class OrderService {
       customerName: order.customerName,
       pickup: order.pickup,
       dropoff: order.destination,
-      estimatedTime: order.estimatedTime ?? '15 mins',
+      estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
       status: order.status,
+    };
+  }
+
+  private mapCustomerOrder(order: {
+    _id: { toString(): string } | string;
+    title?: string;
+    category?: string;
+    pickup: string;
+    destination: string;
+    status: string;
+    amount?: number;
+    earnings: string;
+    estimatedTime?: string;
+    createdAt?: Date;
+  }): CustomerOrderDto {
+    return {
+      id: order._id.toString(),
+      title: order.title ?? 'Order Request',
+      category: order.category ?? 'General',
+      pickup: order.pickup,
+      destination: order.destination,
+      status: order.status,
+      amount: order.amount ?? 0,
+      earnings: order.earnings,
+      estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
+      createdAt: order.createdAt,
+    };
+  }
+
+  private mapCustomerOrderDetails(order: {
+    _id: { toString(): string } | string;
+    title?: string;
+    category?: string;
+    pickup: string;
+    destination: string;
+    status: string;
+    amount?: number;
+    earnings: string;
+    estimatedTime?: string;
+    notes?: string;
+    distance?: string;
+    customerName?: string;
+    createdAt?: Date;
+  }): CustomerOrderDetailsDto {
+    return {
+      ...this.mapCustomerOrder(order),
+      notes: order.notes,
+      distance: order.distance ?? DEFAULT_DISTANCE,
+      customerName: order.customerName,
     };
   }
 
@@ -97,6 +170,78 @@ export class OrderService {
     }
 
     return rider as UserDocument;
+  }
+
+  // ==========================================================================
+  // Customer Order Operations (Phase 1)
+  // ==========================================================================
+  async createOrder(
+    dto: CreateOrderDto,
+    clientId: string,
+  ): Promise<CreateOrderResponseDto> {
+    const user = await this.userModel.findById(clientId).lean().exec();
+
+    if (!user) {
+      throw new NotFoundException('Customer user not found.');
+    }
+
+    const customerName = this.buildCustomerName(user);
+    const earnings = this.formatEarnings(dto.amount);
+
+    const createdOrder = await this.orderModel.create({
+      clientId: clientId,
+      customerName: customerName,
+      pickup: dto.pickup,
+      destination: dto.destination,
+      category: dto.category,
+      title: dto.title,
+      amount: dto.amount,
+      notes: dto.notes,
+      distance: DEFAULT_DISTANCE,
+      earnings: earnings,
+      estimatedTime: DEFAULT_ESTIMATED_TIME,
+      status: OrderStatus.AVAILABLE,
+      declinedRiderIds: [],
+    });
+
+    return {
+      success: true,
+      message: 'Order created successfully.',
+      order: this.mapCustomerOrderDetails(createdOrder),
+    };
+  }
+
+  async getCustomerOrders(customerId: string): Promise<CustomerOrderDto[]> {
+    const orders = await this.orderModel
+      .find({ clientId: customerId })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return orders.map((order) => this.mapCustomerOrder(order));
+  }
+
+  async getOrderById(
+    orderId: string,
+    userId: string,
+  ): Promise<CustomerOrderDetailsDto> {
+    const order = await this.orderModel.findById(orderId).lean().exec();
+
+    if (!order) {
+      throw new NotFoundException('Order not found.');
+    }
+
+    const isCustomer =
+      order.clientId && String(order.clientId) === String(userId);
+    const isRider = order.riderId && String(order.riderId) === String(userId);
+
+    if (!isCustomer && !isRider) {
+      throw new ForbiddenException(
+        'You do not have permission to view this order.',
+      );
+    }
+
+    return this.mapCustomerOrderDetails(order);
   }
 
   // ==========================================================================
@@ -150,7 +295,9 @@ export class OrderService {
 
     if (
       existingOrder.declinedRiderIds &&
-      existingOrder.declinedRiderIds.includes(riderId)
+      existingOrder.declinedRiderIds.some(
+        (id) => String(id) === String(riderId),
+      )
     ) {
       throw new ConflictException('You have already declined this order.');
     }
@@ -252,7 +399,7 @@ export class OrderService {
       throw new NotFoundException('Order not found.');
     }
 
-    if (order.riderId !== riderId) {
+    if (!order.riderId || String(order.riderId) !== String(riderId)) {
       throw new ForbiddenException('You are not assigned to this order.');
     }
 
@@ -301,7 +448,7 @@ export class OrderService {
       throw new NotFoundException('Order not found.');
     }
 
-    if (order.riderId !== riderId) {
+    if (!order.riderId || String(order.riderId) !== String(riderId)) {
       throw new ForbiddenException('You are not assigned to this order.');
     }
 

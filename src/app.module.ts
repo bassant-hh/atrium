@@ -5,6 +5,7 @@ import { OrderModule } from './order/order.module';
 import { AdminModule } from './admin/admin.module';
 import { RiderModule } from './rider/rider.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { CustomerModule } from './customer/customer.module';
 
 import { MongooseModule } from '@nestjs/mongoose';
 import { UploadFileModule } from './upload-file/upload-file.module';
@@ -22,6 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     AdminModule,
     RiderModule,
     DashboardModule,
+    CustomerModule,
 
     MongooseModule.forRootAsync({
       inject: [ConfigService],
