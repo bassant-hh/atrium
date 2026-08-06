@@ -1,5 +1,6 @@
 export const ROUTES = {
   ROOT: '/',
+  PORTAL: '/portal',
   CUSTOMER_LOGIN: '/customer/login',
   CUSTOMER_REGISTER: '/customer/register',
   CUSTOMER_PROFILE: '/customer/profile',

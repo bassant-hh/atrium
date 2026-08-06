@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
+import { saveRole } from '../../utils/role';
+import { ROUTES } from '../../constants/routes';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -56,8 +58,9 @@ const Register = () => {
         password,
       });
 
+      saveRole('customer');
       login(res.token, res.customer);
-      navigate('/customer/profile');
+      navigate(ROUTES.CUSTOMER_PROFILE, { replace: true });
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -265,7 +268,7 @@ const Register = () => {
       <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
         Already have an account?{' '}
         <Link
-          to="/customer/login"
+          to={ROUTES.CUSTOMER_LOGIN}
           style={{ color: '#3b889d', fontWeight: 'bold', textDecoration: 'none' }}
         >
           Login here

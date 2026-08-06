@@ -1,0 +1,118 @@
+.how-section {
+  padding: 100px 32px;
+  background-color: #def4ff;
+}
+
+.how-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.how-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 60px auto;
+}
+
+.how-header__tag {
+  color: #0c6780;
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.how-header__title {
+  font-size: 38px;
+  font-weight: 800;
+  color: #004d62;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.how-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  position: relative;
+}
+
+.how-step-card {
+  background: #ffffff;
+  border: 2px solid #baeaff;
+  border-radius: 20px;
+  padding: 32px 20px;
+  text-align: center;
+  position: relative;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.how-step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 77, 98, 0.08);
+}
+
+.how-step-number {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #004d62;
+  color: #baeaff;
+  font-weight: 800;
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 77, 98, 0.2);
+}
+
+.how-step-icon {
+  width: 60px;
+  height: 60px;
+  background-color: #def4ff;
+  color: #0c6780;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin: 12px auto 20px auto;
+}
+
+.how-step-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #004d62;
+  margin-bottom: 8px;
+}
+
+.how-step-desc {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 992px) {
+  .how-timeline {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 36px 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .how-timeline {
+    grid-template-columns: 1fr;
+  }
+  .how-section {
+    padding: 60px 20px;
+  }
+}

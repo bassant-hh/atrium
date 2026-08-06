@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { loginCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
+import { saveRole } from '../../utils/role';
+import { ROUTES } from '../../constants/routes';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,8 +25,10 @@ const Login = () => {
       setLoading(true);
       setError(null);
       const res = await loginCustomer({ email, password });
+      saveRole('customer');
       login(res.token, res.customer);
-      navigate('/customer/profile');
+      const from = location.state?.from || ROUTES.CUSTOMER_PROFILE;
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {
@@ -126,7 +131,7 @@ const Login = () => {
       <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
         Don't have an account?{' '}
         <Link
-          to="/customer/register"
+          to={ROUTES.CUSTOMER_REGISTER}
           style={{ color: '#3b889d', fontWeight: 'bold', textDecoration: 'none' }}
         >
           Register here

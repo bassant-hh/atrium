@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { getToken, saveToken, removeToken } from '../utils/auth';
+import { removeRole } from '../utils/role';
 import { getCustomerProfile } from '../services/auth.service';
 
 const AuthContext = createContext(null);
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     removeToken();
+    removeRole();
     if (isMountedRef.current) {
       setToken(null);
       setUser(null);
@@ -49,10 +51,14 @@ export const AuthProvider = ({ children }) => {
       return profile;
     } catch (error) {
       logError('Refresh user failed:', error);
-      logout();
+      removeToken();
+      if (isMountedRef.current) {
+        setToken(null);
+        setUser(null);
+      }
       return null;
     }
-  }, [logout]);
+  }, []);
 
   const login = useCallback(
     async (newToken, userData) => {
@@ -95,13 +101,17 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       logError('Session restoration failed:', error);
-      logout();
+      removeToken();
+      if (isMountedRef.current) {
+        setToken(null);
+        setUser(null);
+      }
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
       }
     }
-  }, [logout]);
+  }, []);
 
   useEffect(() => {
     restoreSession();
