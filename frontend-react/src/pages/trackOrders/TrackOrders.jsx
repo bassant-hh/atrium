@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderById } from '../../services/order.service';
+import {
+  startRealtimeTracking,
+  stopRealtimeTracking,
+} from '../../services/realtimeTracking.service';
 import { Spinner, Alert, EmptyState } from '../../components/ui';
 import TrackOrderMap from '../../components/map/TrackOrderMap';
 
@@ -34,6 +38,7 @@ const TrackOrders = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [riderCoords, setRiderCoords] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -47,8 +52,22 @@ const TrackOrders = () => {
         if (isMounted) {
           setOrder(data);
           setError(null);
-          // Stop polling automatically if order reached a terminal status
-          if (data?.status === 'DELIVERED' || data?.status === 'CANCELLED') {
+
+          const status = data?.status;
+
+          // Connect / Disconnect Realtime Rider Location Tracking based on lifecycle status
+          if (status === 'ACCEPTED' || status === 'PICKED_UP') {
+            startRealtimeTracking(
+              id,
+              (coords) => {
+                if (isMounted) setRiderCoords(coords);
+              },
+              (_trackingErr) => {
+                // Realtime tracking warnings are non-blocking
+              },
+            );
+          } else if (status === 'DELIVERED' || status === 'CANCELLED') {
+            stopRealtimeTracking();
             if (intervalId) clearInterval(intervalId);
           }
         }
@@ -65,7 +84,7 @@ const TrackOrders = () => {
 
     fetchOrderDetails(true);
 
-    // Setup 5000ms polling interval for active orders
+    // Setup 5000ms polling interval for active order status
     intervalId = setInterval(() => {
       fetchOrderDetails(false);
     }, 5000);
@@ -73,6 +92,7 @@ const TrackOrders = () => {
     return () => {
       isMounted = false;
       if (intervalId) clearInterval(intervalId);
+      stopRealtimeTracking();
     };
   }, [id]);
 
@@ -200,6 +220,7 @@ const TrackOrders = () => {
             pickupString={order.pickup}
             destinationString={order.destination}
             status={statusConfig.label}
+            riderCoords={riderCoords}
           />
 
           {/* Main Grid: Timeline + Details */}

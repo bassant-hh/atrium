@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../auth';
+import { RiderTrackingService } from '../rider-tracking.service';
 import { RiderDutyStatus, VerificationStatus } from '../../models/dashboard/rider.models';
 import {
   AcceptOrderResponse,
@@ -26,6 +27,7 @@ export class DashboardService {
   // ==========================================================================
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly riderTrackingService = inject(RiderTrackingService);
   private readonly router = inject(Router);
 
   // ==========================================================================
@@ -138,8 +140,10 @@ export class DashboardService {
         if (active) {
           this.activeDelivery.set(active);
           this.riderStatus.set('DELIVERING');
+          this.riderTrackingService.startTracking(active.orderId);
         } else {
           this.activeDelivery.set(null);
+          this.riderTrackingService.stopTracking();
         }
       },
       error: (_err) => {
@@ -180,7 +184,7 @@ export class DashboardService {
         // 1. Remove accepted order from nearbyOrders list reactively
         this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
 
-        // 2. Update activeDelivery signal reactively
+        // 2. Update activeDelivery signal reactively & start live GPS tracking
         if (res.activeDelivery) {
           this.activeDelivery.set({
             orderId: res.activeDelivery.orderId,
@@ -191,6 +195,7 @@ export class DashboardService {
             status: res.activeDelivery.status,
           });
           this.riderStatus.set('DELIVERING');
+          this.riderTrackingService.startTracking(res.activeDelivery.orderId);
         }
       },
       error: (err) => {
@@ -237,6 +242,7 @@ export class DashboardService {
             estimatedTime: res.activeDelivery.estimatedTime,
             status: res.activeDelivery.status,
           });
+          this.riderTrackingService.startTracking(res.activeDelivery.orderId);
         }
       },
       error: (err) => {
@@ -260,7 +266,8 @@ export class DashboardService {
         // 2. Set riderStatus signal to ONLINE
         this.riderStatus.set('ONLINE');
 
-        // 3. Clear activeDelivery signal
+        // 3. Stop GPS tracking & clear activeDelivery signal
+        this.riderTrackingService.stopTracking();
         this.activeDelivery.set(null);
       },
       error: (err) => {
@@ -272,14 +279,8 @@ export class DashboardService {
   }
 
   logout(): void {
+    this.riderTrackingService.stopTracking();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
-
-  // ==========================================================================
-  // 6. Future Extension Points (Phase 5+ Blueprints)
-  // ==========================================================================
-  // TODO Phase 5: Compute rating from customer reviews.
-  // TODO Phase 5: Compute online hours from rider activity logs.
-  // TODO: connectSocket()
 }
