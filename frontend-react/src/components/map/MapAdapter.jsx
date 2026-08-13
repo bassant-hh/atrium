@@ -10,7 +10,7 @@ const loadGoogleMapsScript = (apiKey) => {
   if (!googleMapsScriptPromise) {
     googleMapsScriptPromise = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,routes`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -32,11 +32,19 @@ const MapAdapter = ({
   center = { latitude: 26.1551, longitude: 32.716 },
   pickupCoords,
   destCoords,
-  riderCoords, // Prepared for future Live Rider Tracking phase!
+  riderCoords,
+  routeData,
   onPositionChange,
   height = '220px',
 }) => {
-  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const pickupMarkerRef = useRef(null);
+  const destMarkerRef = useRef(null);
+  const riderMarkerRef = useRef(null);
+  const pickerMarkerRef = useRef(null);
+  const polylinesRef = useRef([]);
+
   const [providerState, setProviderState] = useState('initializing'); // 'google' | 'fallback' | 'initializing'
   const [currentCoords, setCurrentCoords] = useState(center);
 
@@ -44,7 +52,19 @@ const MapAdapter = ({
     setCurrentCoords(center);
   }, [center.latitude, center.longitude]);
 
-  // Attempt Google Maps initialization if API key is present
+  // Clean up polylines from current map instance
+  const clearPolylines = () => {
+    if (polylinesRef.current && polylinesRef.current.length > 0) {
+      polylinesRef.current.forEach((pl) => {
+        if (pl && typeof pl.setMap === 'function') {
+          pl.setMap(null);
+        }
+      });
+      polylinesRef.current = [];
+    }
+  };
+
+  // 1. Initialize Google Maps instance once when SDK and container are ready
   useEffect(() => {
     let isMounted = true;
     const apiKey = APP_CONFIG.googleMapsApiKey;
@@ -56,72 +76,18 @@ const MapAdapter = ({
 
     loadGoogleMapsScript(apiKey)
       .then((maps) => {
-        if (!isMounted || !mapRef.current) return;
+        if (!isMounted || !mapContainerRef.current) return;
 
         setProviderState('google');
 
-        const mapInstance = new maps.Map(mapRef.current, {
-          center: { lat: center.latitude, lng: center.longitude },
-          zoom: 15,
-          disableDefaultUI: false,
-          zoomControl: true,
-        });
-
-        if (mode === 'picker') {
-          const marker = new maps.Marker({
-            position: { lat: center.latitude, lng: center.longitude },
-            map: mapInstance,
-            draggable: true,
-            title: 'Selected Location',
+        if (!mapInstanceRef.current) {
+          const mapInstance = new maps.Map(mapContainerRef.current, {
+            center: { lat: center.latitude, lng: center.longitude },
+            zoom: 15,
+            disableDefaultUI: false,
+            zoomControl: true,
           });
-
-          marker.addListener('dragend', (event) => {
-            const lat = Number(event.latLng.lat().toFixed(6));
-            const lng = Number(event.latLng.lng().toFixed(6));
-            const newPos = { latitude: lat, longitude: lng };
-            setCurrentCoords(newPos);
-            if (onPositionChange) onPositionChange(newPos);
-          });
-        } else if (mode === 'tracking') {
-          const bounds = new maps.LatLngBounds();
-
-          if (pickupCoords) {
-            const pPos = { lat: pickupCoords.latitude, lng: pickupCoords.longitude };
-            new maps.Marker({
-              position: pPos,
-              map: mapInstance,
-              title: 'Pickup Location',
-              label: '📍',
-            });
-            bounds.extend(pPos);
-          }
-
-          if (destCoords) {
-            const dPos = { lat: destCoords.latitude, lng: destCoords.longitude };
-            new maps.Marker({
-              position: dPos,
-              map: mapInstance,
-              title: 'Destination Location',
-              label: '🏁',
-            });
-            bounds.extend(dPos);
-          }
-
-          // Prepared for Future Live Tracking Phase!
-          if (riderCoords) {
-            const rPos = { lat: riderCoords.latitude, lng: riderCoords.longitude };
-            new maps.Marker({
-              position: rPos,
-              map: mapInstance,
-              title: 'Rider Location',
-              label: '🛵',
-            });
-            bounds.extend(rPos);
-          }
-
-          if (pickupCoords || destCoords || riderCoords) {
-            mapInstance.fitBounds(bounds, 50);
-          }
+          mapInstanceRef.current = mapInstance;
         }
       })
       .catch((err) => {
@@ -132,7 +98,165 @@ const MapAdapter = ({
     return () => {
       isMounted = false;
     };
-  }, [mode, center.latitude, center.longitude, pickupCoords, destCoords, riderCoords]);
+  }, [mode]);
+
+  // 2. Manage Picker Mode Marker & Drag Listeners
+  useEffect(() => {
+    if (providerState !== 'google' || mode !== 'picker' || !mapInstanceRef.current) return;
+    const maps = window.google.maps;
+    const mapInstance = mapInstanceRef.current;
+
+    const latLng = { lat: center.latitude, lng: center.longitude };
+
+    if (!pickerMarkerRef.current) {
+      const marker = new maps.Marker({
+        position: latLng,
+        map: mapInstance,
+        draggable: true,
+        title: 'Selected Location',
+      });
+
+      marker.addListener('dragend', (event) => {
+        const lat = Number(event.latLng.lat().toFixed(6));
+        const lng = Number(event.latLng.lng().toFixed(6));
+        const newPos = { latitude: lat, longitude: lng };
+        setCurrentCoords(newPos);
+        if (onPositionChange) onPositionChange(newPos);
+      });
+
+      pickerMarkerRef.current = marker;
+    } else {
+      pickerMarkerRef.current.setPosition(latLng);
+    }
+  }, [providerState, mode, center.latitude, center.longitude, onPositionChange]);
+
+  // 3. Manage Tracking Mode Markers (Pickup & Destination) and Initial Bounds
+  useEffect(() => {
+    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
+    const maps = window.google.maps;
+    const mapInstance = mapInstanceRef.current;
+    const bounds = new maps.LatLngBounds();
+    let hasPoint = false;
+
+    // Pickup Marker
+    if (pickupCoords && pickupCoords.latitude != null && pickupCoords.longitude != null) {
+      const pPos = { lat: pickupCoords.latitude, lng: pickupCoords.longitude };
+      if (!pickupMarkerRef.current) {
+        pickupMarkerRef.current = new maps.Marker({
+          position: pPos,
+          map: mapInstance,
+          title: 'Pickup Location',
+          label: '📍',
+        });
+      } else {
+        pickupMarkerRef.current.setPosition(pPos);
+      }
+      bounds.extend(pPos);
+      hasPoint = true;
+    }
+
+    // Destination Marker
+    if (destCoords && destCoords.latitude != null && destCoords.longitude != null) {
+      const dPos = { lat: destCoords.latitude, lng: destCoords.longitude };
+      if (!destMarkerRef.current) {
+        destMarkerRef.current = new maps.Marker({
+          position: dPos,
+          map: mapInstance,
+          title: 'Destination Location',
+          label: '🏁',
+        });
+      } else {
+        destMarkerRef.current.setPosition(dPos);
+      }
+      bounds.extend(dPos);
+      hasPoint = true;
+    }
+
+    if (hasPoint && !mapInstance._initialBoundsFitted) {
+      mapInstance.fitBounds(bounds, 50);
+      mapInstance._initialBoundsFitted = true;
+    }
+  }, [providerState, mode, pickupCoords, destCoords]);
+
+  // 4. Manage Realtime Rider Marker (Updates position dynamically without map teardown or fitBounds jumping)
+  useEffect(() => {
+    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
+    const maps = window.google.maps;
+    const mapInstance = mapInstanceRef.current;
+
+    if (riderCoords && riderCoords.latitude != null && riderCoords.longitude != null) {
+      const rPos = { lat: Number(riderCoords.latitude), lng: Number(riderCoords.longitude) };
+
+      if (!riderMarkerRef.current) {
+        riderMarkerRef.current = new maps.Marker({
+          position: rPos,
+          map: mapInstance,
+          title: 'Rider Location',
+          label: '🛵',
+          zIndex: 999,
+        });
+      } else {
+        riderMarkerRef.current.setPosition(rPos);
+      }
+    } else if (riderMarkerRef.current) {
+      riderMarkerRef.current.setMap(null);
+      riderMarkerRef.current = null;
+    }
+  }, [providerState, mode, riderCoords?.latitude, riderCoords?.longitude]);
+
+  // 5. Render Route Polyline using Google Maps Routes Library
+  useEffect(() => {
+    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
+    const maps = window.google.maps;
+    const mapInstance = mapInstanceRef.current;
+
+    clearPolylines();
+
+    if (!routeData) return;
+
+    // Check if routeObject provides createPolylines() (Google Maps Route instance)
+    const routeObj = routeData.routeObject;
+    if (routeObj && typeof routeObj.createPolylines === 'function') {
+      try {
+        const polylines = routeObj.createPolylines();
+        if (Array.isArray(polylines)) {
+          polylines.forEach((pl) => {
+            pl.setMap(mapInstance);
+          });
+          polylinesRef.current = polylines;
+          return;
+        }
+      } catch {
+        // Fallback to manual Polyline drawing if createPolylines fails
+      }
+    }
+
+    // Manual Polyline rendering from route path coordinates
+    const path = routeData.path;
+    if (Array.isArray(path) && path.length > 0) {
+      const polyline = new maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: '#156B82',
+        strokeOpacity: 0.8,
+        strokeWeight: 5,
+        map: mapInstance,
+      });
+      polylinesRef.current = [polyline];
+    }
+  }, [providerState, mode, routeData]);
+
+  // Clean up all map elements on unmount
+  useEffect(() => {
+    return () => {
+      clearPolylines();
+      if (pickupMarkerRef.current) pickupMarkerRef.current.setMap(null);
+      if (destMarkerRef.current) destMarkerRef.current.setMap(null);
+      if (riderMarkerRef.current) riderMarkerRef.current.setMap(null);
+      if (pickerMarkerRef.current) pickerMarkerRef.current.setMap(null);
+      mapInstanceRef.current = null;
+    };
+  }, []);
 
   const handlePan = (dLat, dLng) => {
     const updated = {
@@ -147,7 +271,7 @@ const MapAdapter = ({
   if (providerState === 'google') {
     return (
       <div
-        ref={mapRef}
+        ref={mapContainerRef}
         style={{
           width: '100%',
           height: height,
@@ -278,6 +402,30 @@ const MapAdapter = ({
               Pickup
             </div>
           </div>
+
+          {/* Rider position indicator if live tracking in fallback mode */}
+          {riderCoords && (
+            <div
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 6 }}
+            >
+              <div style={{ fontSize: '28px', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.3))' }}>
+                🛵
+              </div>
+              <div
+                style={{
+                  background: '#E65100',
+                  color: '#ffffff',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  marginTop: '2px',
+                }}
+              >
+                Rider
+              </div>
+            </div>
+          )}
 
           <div
             style={{

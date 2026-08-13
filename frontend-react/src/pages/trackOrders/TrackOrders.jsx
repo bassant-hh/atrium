@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderById } from '../../services/order.service';
 import {
   startRealtimeTracking,
   stopRealtimeTracking,
 } from '../../services/realtimeTracking.service';
+import { fetchRouteAndETA, shouldRecalculateRoute } from '../../services/routing.service';
 import { Spinner, Alert, EmptyState } from '../../components/ui';
 import TrackOrderMap from '../../components/map/TrackOrderMap';
 
@@ -35,10 +36,104 @@ const formatDate = (dateValue) => {
 const TrackOrders = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [riderCoords, setRiderCoords] = useState(null);
+
+  // Controlled Routing & ETA State (Domain Level - Isolated from provider classes)
+  const [routeData, setRouteData] = useState(null);
+  const [etaInfo, setEtaInfo] = useState({
+    durationText: null,
+    distanceText: null,
+    loading: false,
+    error: null,
+  });
+
+  // Routing Recalculation & Stale Async Request Guards
+  const currentOrderIdRef = useRef(id);
+  const lastRoutedOriginRef = useRef(null);
+  const lastRequestTimeRef = useRef(null);
+  const lastTargetKeyRef = useRef(null);
+
+  useEffect(() => {
+    currentOrderIdRef.current = id;
+  }, [id]);
+
+  // Execute Route & ETA calculation based on controlled refresh policy
+  const triggerRouteCalculation = useCallback(async (currentOrder, currentRiderPos) => {
+    if (!currentOrder || !currentRiderPos) return;
+
+    const status = currentOrder.status;
+    if (status !== 'ACCEPTED' && status !== 'PICKED_UP') {
+      setRouteData(null);
+      setEtaInfo({ durationText: null, distanceText: null, loading: false, error: null });
+      return;
+    }
+
+    // Determine target coordinates based on order lifecycle
+    let targetCoords = null;
+    if (status === 'ACCEPTED') {
+      targetCoords = currentOrder.pickupLocationDetails?.coordinates;
+    } else if (status === 'PICKED_UP') {
+      targetCoords = currentOrder.destinationLocationDetails?.coordinates;
+    }
+
+    if (!targetCoords || targetCoords.latitude == null || targetCoords.longitude == null) {
+      setRouteData(null);
+      setEtaInfo({ durationText: null, distanceText: null, loading: false, error: null });
+      return;
+    }
+
+    const targetKey = `${status}_${targetCoords.latitude}_${targetCoords.longitude}`;
+    const targetChanged = lastTargetKeyRef.current !== targetKey;
+
+    const needsRecalculation = shouldRecalculateRoute({
+      lastRoutedOrigin: lastRoutedOriginRef.current,
+      currentOrigin: currentRiderPos,
+      lastRequestTime: lastRequestTimeRef.current,
+      targetChanged,
+      status,
+    });
+
+    if (!needsRecalculation) return;
+
+    // Update control timestamps and target key
+    lastRequestTimeRef.current = Date.now();
+    lastRoutedOriginRef.current = currentRiderPos;
+    lastTargetKeyRef.current = targetKey;
+
+    setEtaInfo((prev) => ({ ...prev, loading: true, error: null }));
+
+    const requestedOrderId = currentOrderIdRef.current;
+    const result = await fetchRouteAndETA({
+      origin: currentRiderPos,
+      destination: targetCoords,
+    });
+
+    // Stale response guard: ensure order hasn't switched during async computation
+    if (currentOrderIdRef.current !== requestedOrderId) return;
+
+    if (result.success) {
+      setRouteData({
+        routeObject: result.routeObject,
+        path: result.path,
+      });
+      setEtaInfo({
+        durationText: result.durationText,
+        distanceText: result.distanceText,
+        loading: false,
+        error: null,
+      });
+    } else {
+      setEtaInfo((prev) => ({
+        ...prev,
+        loading: false,
+        error: result.error || 'ETA temporarily unavailable',
+      }));
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -49,6 +144,7 @@ const TrackOrders = () => {
       try {
         if (isInitial) setLoading(true);
         const data = await getOrderById(id);
+
         if (isMounted) {
           setOrder(data);
           setError(null);
@@ -60,15 +156,22 @@ const TrackOrders = () => {
             startRealtimeTracking(
               id,
               (coords) => {
-                if (isMounted) setRiderCoords(coords);
+                if (isMounted) {
+                  setRiderCoords(coords);
+                  triggerRouteCalculation(data, coords);
+                }
               },
               (_trackingErr) => {
                 // Realtime tracking warnings are non-blocking
               },
             );
-          } else if (status === 'DELIVERED' || status === 'CANCELLED') {
+          } else if (status === 'DELIVERED' || status === 'CANCELLED' || status === 'AVAILABLE') {
             stopRealtimeTracking();
-            if (intervalId) clearInterval(intervalId);
+            setRouteData(null);
+            setEtaInfo({ durationText: null, distanceText: null, loading: false, error: null });
+            if (intervalId && (status === 'DELIVERED' || status === 'CANCELLED')) {
+              clearInterval(intervalId);
+            }
           }
         }
       } catch (err) {
@@ -93,8 +196,11 @@ const TrackOrders = () => {
       isMounted = false;
       if (intervalId) clearInterval(intervalId);
       stopRealtimeTracking();
+      lastRoutedOriginRef.current = null;
+      lastRequestTimeRef.current = null;
+      lastTargetKeyRef.current = null;
     };
-  }, [id]);
+  }, [id, triggerRouteCalculation]);
 
   const currentStatus = order?.status || 'AVAILABLE';
   const statusConfig = statusDisplayMap[currentStatus] || {
@@ -219,8 +325,10 @@ const TrackOrders = () => {
             destinationDetails={order.destinationLocationDetails}
             pickupString={order.pickup}
             destinationString={order.destination}
-            status={statusConfig.label}
+            status={currentStatus}
             riderCoords={riderCoords}
+            routeData={routeData}
+            etaInfo={etaInfo}
           />
 
           {/* Main Grid: Timeline + Details */}
@@ -411,7 +519,7 @@ const TrackOrders = () => {
                   Estimated Time
                 </p>
                 <p style={{ margin: 0, fontSize: '15px', fontWeight: '600', color: '#263238' }}>
-                  {order.estimatedTime || '15 mins'}
+                  {etaInfo.durationText || order.estimatedTime || '15 mins'}
                 </p>
               </div>
 
