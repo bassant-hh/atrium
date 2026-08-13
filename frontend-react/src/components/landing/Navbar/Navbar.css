@@ -1,3 +1,4 @@
+/* Base Mobile-First Styles (xs: 0-575px) */
 .landing-navbar {
   position: sticky;
   top: 0;
@@ -5,40 +6,47 @@
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--color-border);
-  padding: var(--space-16) var(--space-32);
+  padding: var(--space-12) var(--space-16);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .landing-navbar__logo {
   display: flex;
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-8);
   text-decoration: none;
+  min-height: 44px;
 }
 
 .landing-navbar__logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background-color: var(--color-primary-500);
   color: var(--color-accent);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 .landing-navbar__logo-text {
-  font-size: var(--font-heading-m);
+  font-size: var(--font-heading-s);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-primary-500);
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
 .landing-navbar__login-btn {
-  padding: 10px var(--space-24);
+  min-height: 44px;
+  padding: 10px var(--space-16);
   background-color: var(--color-primary-500);
   color: var(--color-text-on-primary);
   border: none;
@@ -47,15 +55,41 @@
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .landing-navbar__login-btn:hover {
   background-color: var(--color-secondary-500);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
 .landing-navbar__login-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--color-border);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+/* Tablet & Up (md: >= 768px) */
+@media (min-width: 768px) {
+  .landing-navbar {
+    padding: var(--space-16) var(--space-32);
+  }
+
+  .landing-navbar__logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .landing-navbar__logo-text {
+    font-size: var(--font-heading-m);
+  }
+
+  .landing-navbar__login-btn {
+    padding: 10px var(--space-24);
+  }
 }

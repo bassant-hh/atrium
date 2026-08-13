@@ -1,9 +1,12 @@
+/* Base Mobile-First Styles (xs: 0-575px) */
 .how-section {
-  padding: var(--space-96) var(--space-32);
+  padding: var(--space-48) var(--space-16);
   background-color: var(--color-surface);
+  box-sizing: border-box;
 }
 
 .how-container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -11,7 +14,7 @@
 .how-header {
   text-align: center;
   max-width: 600px;
-  margin: 0 auto var(--space-64) auto;
+  margin: 0 auto var(--space-32) auto;
 }
 
 .how-header__tag {
@@ -20,7 +23,7 @@
   font-size: var(--font-body-small);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-8);
   display: block;
 }
 
@@ -28,14 +31,14 @@
   font-size: var(--font-heading-xl);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-primary-500);
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-12);
   letter-spacing: -0.5px;
 }
 
 .how-timeline {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
   position: relative;
 }
 
@@ -43,14 +46,16 @@
   background: var(--color-surface-elevated);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--space-32) var(--space-20, 20px);
+  padding: var(--space-24) var(--space-16);
   text-align: center;
   position: relative;
   transition: var(--transition-normal);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .how-step-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-md);
 }
 
@@ -73,16 +78,16 @@
 }
 
 .how-step-icon {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   background-color: var(--color-surface);
   color: var(--color-secondary-500);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  margin: var(--space-12) auto var(--space-20, 20px) auto;
+  font-size: 24px;
+  margin: var(--space-12) auto var(--space-16) auto;
 }
 
 .how-step-title {
@@ -99,18 +104,26 @@
   margin: 0;
 }
 
-@media (max-width: 992px) {
+/* Tablet Scale (md: >= 768px) */
+@media (min-width: 768px) {
   .how-timeline {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 36px var(--space-24);
+    gap: var(--space-32);
   }
 }
 
-@media (max-width: 576px) {
-  .how-timeline {
-    grid-template-columns: 1fr;
-  }
+/* Desktop Scale (lg: >= 992px) */
+@media (min-width: 992px) {
   .how-section {
-    padding: var(--space-64) var(--space-16);
+    padding: var(--space-96) var(--space-32);
+  }
+
+  .how-header {
+    margin-bottom: var(--space-64);
+  }
+
+  .how-timeline {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

@@ -1,3 +1,4 @@
+/* Base Mobile-First Styles (xs: 0-575px) */
 .switch-modal-overlay {
   position: fixed;
   top: 0;
@@ -10,17 +11,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-20, 20px);
+  padding: var(--space-16);
+  box-sizing: border-box;
 }
 
 .switch-modal-content {
   background: var(--color-surface-elevated);
   border-radius: var(--radius-xl);
-  padding: var(--space-32);
+  padding: var(--space-24) var(--space-20, 20px);
   max-width: 420px;
   width: 100%;
   box-shadow: var(--shadow-lg);
   text-align: center;
+  box-sizing: border-box;
 }
 
 .switch-modal-title {
@@ -33,26 +36,34 @@
 .switch-modal-desc {
   margin: 0 0 var(--space-24) 0;
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: var(--font-body);
   line-height: var(--line-height-body);
 }
 
 .switch-modal-actions {
   display: flex;
+  flex-direction: column;
   gap: var(--space-12);
   justify-content: center;
+  width: 100%;
 }
 
 .switch-modal-btn-cancel {
-  padding: 10px var(--space-24);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-12) var(--space-24);
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-body-small);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .switch-modal-btn-cancel:hover {
@@ -60,17 +71,40 @@
 }
 
 .switch-modal-btn-continue {
-  padding: 10px var(--space-24);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-12) var(--space-24);
   background: var(--color-danger);
   color: var(--color-text-on-primary);
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-body-small);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .switch-modal-btn-continue:hover {
   background: #93000a;
+}
+
+/* Tablet Scale (sm: >= 576px) */
+@media (min-width: 576px) {
+  .switch-modal-content {
+    padding: var(--space-32);
+  }
+
+  .switch-modal-actions {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .switch-modal-btn-cancel,
+  .switch-modal-btn-continue {
+    width: auto;
+  }
 }

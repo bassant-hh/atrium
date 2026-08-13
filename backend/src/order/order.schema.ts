@@ -4,15 +4,6 @@ import { OrderStatus } from './enums/order-status.enum';
 
 export type OrderDocument = HydratedDocument<Order>;
 
-// ============================================================================
-// Recommended Production Indexes for Database Scalability:
-// OrderSchema.index({ status: 1 });
-// OrderSchema.index({ riderId: 1 });
-// OrderSchema.index({ declinedRiderIds: 1 });
-// OrderSchema.index({ riderId: 1, status: 1 });
-// OrderSchema.index({ clientId: 1 });
-// ============================================================================
-
 @Schema({ timestamps: true })
 export class Order {
   @Prop({ required: false })
@@ -32,6 +23,22 @@ export class Order {
 
   @Prop({ required: true })
   destination: string;
+
+  @Prop({ required: false, type: Object })
+  pickupLocationDetails?: {
+    type: string;
+    address: Record<string, any>;
+    coordinates: { latitude: number; longitude: number };
+    formattedAddress: string;
+  };
+
+  @Prop({ required: false, type: Object })
+  destinationLocationDetails?: {
+    type: string;
+    address: Record<string, any>;
+    coordinates: { latitude: number; longitude: number };
+    formattedAddress: string;
+  };
 
   @Prop({ required: true })
   distance: string;
@@ -62,6 +69,19 @@ export class Order {
 
   @Prop({ required: false })
   deliveredAt?: Date;
+
+  @Prop({ required: false })
+  createdAt?: Date;
+
+  @Prop({ required: false })
+  updatedAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+// Active Production MongoDB Indexes
+OrderSchema.index({ status: 1 });
+OrderSchema.index({ riderId: 1 });
+OrderSchema.index({ declinedRiderIds: 1 });
+OrderSchema.index({ riderId: 1, status: 1 });
+OrderSchema.index({ clientId: 1 });

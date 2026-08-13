@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { getMyOrders } from '../../services/order.service';
 import './MyOrders.css';
 
-const statusStyles = {
-  Delivered: { color: '#2E9E6B', background: '#E6F7F0' },
-  'In Progress': { color: '#5B8DEF', background: '#E8EFFD' },
-  ACCEPTED: { color: '#5B8DEF', background: '#E8EFFD' },
-  PICKED_UP: { color: '#0C6780', background: '#BAEAFF' },
-  Pending: { color: '#C9A227', background: '#FEF9E3' },
-  AVAILABLE: { color: '#C9A227', background: '#FEF9E3' },
-  Cancelled: { color: '#E05252', background: '#FDECEC' },
+const statusDisplayMap = {
+  AVAILABLE: { label: 'Waiting for Rider', color: '#C9A227', background: '#FEF9E3' },
+  ACCEPTED: { label: 'Rider Assigned', color: '#5B8DEF', background: '#E8EFFD' },
+  PICKED_UP: { label: 'In Transit', color: '#0C6780', background: '#BAEAFF' },
+  DELIVERED: { label: 'Delivered', color: '#2E9E6B', background: '#E6F7F0' },
+  CANCELLED: { label: 'Cancelled', color: '#E05252', background: '#FDECEC' },
 };
 
 const StatusBadge = ({ status }) => {
-  const style = statusStyles[status] || {
+  const config = statusDisplayMap[status] || {
+    label: status || 'Unknown',
     color: '#666',
     background: '#eee',
   };
@@ -26,11 +25,11 @@ const StatusBadge = ({ status }) => {
         borderRadius: '20px',
         fontSize: '12px',
         fontWeight: '600',
-        backgroundColor: style.background,
-        color: style.color,
+        backgroundColor: config.background,
+        color: config.color,
       }}
     >
-      {status}
+      {config.label}
     </span>
   );
 };
@@ -54,9 +53,7 @@ const OrderCard = ({ order }) => {
       <div className="order-left">
         <h3>{order.title || 'Order Request'}</h3>
 
-        <p className="order-meta">
-          #{orderId} • {order.category || 'General'}
-        </p>
+        <p className="order-meta">{order.category || 'General'}</p>
 
         <div className="order-meta">
           <p>
@@ -74,7 +71,7 @@ const OrderCard = ({ order }) => {
       </div>
 
       <div className="order-right">
-        <h3 className="order-amount">{order.earnings || `${order.amount || 0} SAR`}</h3>
+        <h3 className="order-amount">{order.amount != null ? `${order.amount} SAR` : 'N/A'}</h3>
 
         <button className="track-btn" onClick={() => navigate(`/track-orders/${orderId}`)}>
           Track
@@ -120,8 +117,16 @@ const MyOrders = () => {
     };
   }, []);
 
-  const filteredOrders =
-    filter === 'All' ? orders : orders.filter((order) => order.status === filter);
+  const matchesFilter = (orderStatus, currentFilter) => {
+    if (currentFilter === 'All') return true;
+    if (currentFilter === 'Available') return orderStatus === 'AVAILABLE';
+    if (currentFilter === 'In Progress')
+      return orderStatus === 'ACCEPTED' || orderStatus === 'PICKED_UP';
+    if (currentFilter === 'Delivered') return orderStatus === 'DELIVERED';
+    return true;
+  };
+
+  const filteredOrders = orders.filter((order) => matchesFilter(order.status, filter));
 
   return (
     <div className="my-orders-page">
@@ -137,7 +142,7 @@ const MyOrders = () => {
       </div>
 
       <div className="orders-filters">
-        {['All', 'Pending', 'In Progress', 'Delivered'].map((item) => (
+        {['All', 'Available', 'In Progress', 'Delivered'].map((item) => (
           <button
             key={item}
             className={filter === item ? 'active' : ''}

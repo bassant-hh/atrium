@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { loginCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
 import { saveRole } from '../../utils/role';
 import { ROUTES } from '../../constants/routes';
+import './Login.css';
 
 const getSafeRedirectPath = (fromState) => {
   if (typeof fromState !== 'string') return ROUTES.CUSTOMER_PROFILE;
@@ -41,7 +42,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Please fill in all fields.');
+      setError('Please fill in all required fields.');
       return;
     }
 
@@ -62,106 +63,68 @@ const Login = () => {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: '420px',
-        margin: '40px auto',
-        padding: '32px',
-        background: '#fff',
-        borderRadius: '16px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-      }}
-    >
-      <h2 style={{ textAlign: 'center', marginBottom: '24px', color: '#333' }}>Customer Login</h2>
+    <div className="auth-page-container">
+      <div className="auth-card">
+        <h1 className="auth-card__title">Customer Login</h1>
 
-      {error && (
-        <div
-          style={{
-            color: '#ba1a1a',
-            backgroundColor: '#ffdad6',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '14px',
-          }}
-        >
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="auth-alert-error" role="alert" aria-live="polite" id="login-error-alert">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '16px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Email Address
-          </label>
-          <input
-            type="email"
-            placeholder="student@university.edu"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="auth-form-group">
+            <label htmlFor="customer-email" className="auth-form-label">
+              Email Address
+            </label>
+            <input
+              id="customer-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="student@university.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
+              aria-describedby={error ? 'login-error-alert' : undefined}
+              required
+            />
+          </div>
 
-        <div style={{ marginBottom: '24px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
+          <div className="auth-form-group">
+            <label htmlFor="customer-password" className="auth-form-label">
+              Password
+            </label>
+            <input
+              id="customer-password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
+              aria-describedby={error ? 'login-error-alert' : undefined}
+              required
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#3b889d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
+          <button type="submit" disabled={loading} className="auth-submit-btn">
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
 
-      <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
-        Don't have an account?{' '}
-        <Link
-          to={ROUTES.CUSTOMER_REGISTER}
-          style={{ color: '#3b889d', fontWeight: 'bold', textDecoration: 'none' }}
-        >
-          Register here
-        </Link>
-      </p>
+        <p className="auth-footer-text">
+          Don't have an account?{' '}
+          <Link to={ROUTES.CUSTOMER_REGISTER} className="auth-footer-link">
+            Register here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };

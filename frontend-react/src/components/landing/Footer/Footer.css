@@ -1,24 +1,27 @@
+/* Base Mobile-First Styles (xs: 0-575px) */
 .landing-footer {
   background-color: var(--color-primary-500);
   color: var(--color-text-on-primary);
-  padding: var(--space-48) var(--space-32);
+  padding: var(--space-32) var(--space-16);
   border-top: 1px solid var(--color-primary-600);
+  box-sizing: border-box;
 }
 
 .landing-footer__container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
+  text-align: center;
   gap: var(--space-20, 20px);
 }
 
 .landing-footer__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-8);
   font-size: var(--font-heading-s);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-accent);
@@ -32,23 +35,39 @@
 
 .landing-footer__links {
   display: flex;
-  gap: var(--space-24);
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-16);
 }
 
 .landing-footer__link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   color: var(--color-text-on-primary);
   text-decoration: none;
   font-size: var(--font-body-small);
   transition: var(--transition-fast);
+  padding: 0 var(--space-8);
 }
 
 .landing-footer__link:hover {
   color: var(--color-accent);
 }
 
-@media (max-width: 576px) {
+/* Tablet & Up Scale (md: >= 768px) */
+@media (min-width: 768px) {
+  .landing-footer {
+    padding: var(--space-48) var(--space-32);
+  }
+
   .landing-footer__container {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .landing-footer__links {
+    gap: var(--space-24);
   }
 }

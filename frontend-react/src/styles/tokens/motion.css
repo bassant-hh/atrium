@@ -9,3 +9,15 @@
   --transition-normal: all var(--duration-normal) var(--ease-standard);
   --transition-slow: all var(--duration-slow) var(--ease-standard);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+
+    --transition-fast: none;
+    --transition-normal: none;
+    --transition-slow: none;
+  }
+}

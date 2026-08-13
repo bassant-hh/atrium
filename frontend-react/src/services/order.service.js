@@ -1,7 +1,7 @@
 import { authFetch } from './api';
 
 export const createOrder = async (orderData) => {
-  return authFetch('orders', {
+  return authFetch('customer/orders', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -11,13 +11,13 @@ export const createOrder = async (orderData) => {
 };
 
 export const getMyOrders = async () => {
-  return authFetch('orders/my', {
+  return authFetch('customer/orders', {
     method: 'GET',
   });
 };
 
 export const getOrderById = async (id) => {
-  return authFetch(`orders/${id}`, {
+  return authFetch(`customer/orders/${id}`, {
     method: 'GET',
   });
 };

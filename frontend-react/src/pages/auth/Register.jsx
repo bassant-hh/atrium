@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
 import { saveRole } from '../../utils/role';
 import { ROUTES } from '../../constants/routes';
+import './Login.css';
+import './Register.css';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -69,211 +71,146 @@ const Register = () => {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: '480px',
-        margin: '40px auto',
-        padding: '32px',
-        background: '#fff',
-        borderRadius: '16px',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-      }}
-    >
-      <h2 style={{ textAlign: 'center', marginBottom: '24px', color: '#333' }}>
-        Customer Registration
-      </h2>
+    <div className="auth-page-container">
+      <div className="auth-card auth-card--register">
+        <h1 className="auth-card__title">Customer Registration</h1>
 
-      {error && (
-        <div
-          style={{
-            color: '#ba1a1a',
-            backgroundColor: '#ffdad6',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '14px',
-          }}
-        >
-          {error}
-        </div>
-      )}
+        {error && (
+          <div
+            className="auth-alert-error"
+            role="alert"
+            aria-live="polite"
+            id="register-error-alert"
+          >
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginBottom: '16px',
-          }}
-        >
-          <div>
-            <label
-              style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-            >
-              First Name
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="auth-grid-2col">
+            <div className="auth-form-group" style={{ marginBottom: 0 }}>
+              <label htmlFor="reg-firstname" className="auth-form-label">
+                First Name
+              </label>
+              <input
+                id="reg-firstname"
+                type="text"
+                name="firstName"
+                autoComplete="given-name"
+                placeholder="Ahmed"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="auth-form-input"
+                aria-invalid={error ? 'true' : 'false'}
+                required
+              />
+            </div>
+
+            <div className="auth-form-group" style={{ marginBottom: 0 }}>
+              <label htmlFor="reg-lastname" className="auth-form-label">
+                Last Name
+              </label>
+              <input
+                id="reg-lastname"
+                type="text"
+                name="lastName"
+                autoComplete="family-name"
+                placeholder="Ali"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="auth-form-input"
+                aria-invalid={error ? 'true' : 'false'}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="auth-form-group">
+            <label htmlFor="reg-email" className="auth-form-label">
+              Email Address
             </label>
             <input
-              type="text"
-              name="firstName"
-              placeholder="Ahmed"
-              value={formData.firstName}
+              id="reg-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="student@university.edu"
+              value={formData.email}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '8px',
-                border: '1px solid #ccc',
-                boxSizing: 'border-box',
-              }}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
+              aria-describedby={error ? 'register-error-alert' : undefined}
               required
             />
           </div>
 
-          <div>
-            <label
-              style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-            >
-              Last Name
+          <div className="auth-form-group">
+            <label htmlFor="reg-phone" className="auth-form-label">
+              Phone Number
             </label>
             <input
-              type="text"
-              name="lastName"
-              placeholder="Ali"
-              value={formData.lastName}
+              id="reg-phone"
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              placeholder="+201000000000"
+              value={formData.phone}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '8px',
-                border: '1px solid #ccc',
-                boxSizing: 'border-box',
-              }}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
               required
             />
           </div>
-        </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            placeholder="student@university.edu"
-            value={formData.email}
-            onChange={handleChange}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
+          <div className="auth-form-group">
+            <label htmlFor="reg-password" className="auth-form-label">
+              Password
+            </label>
+            <input
+              id="reg-password"
+              type="password"
+              name="password"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
+              required
+            />
+          </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            placeholder="+201000000000"
-            value={formData.phone}
-            onChange={handleChange}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
+          <div className="auth-form-group">
+            <label htmlFor="reg-confirm-password" className="auth-form-label">
+              Confirm Password
+            </label>
+            <input
+              id="reg-confirm-password"
+              type="password"
+              name="confirmPassword"
+              autoComplete="new-password"
+              placeholder="••••••••"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="auth-form-input"
+              aria-invalid={error ? 'true' : 'false'}
+              required
+            />
+          </div>
 
-        <div style={{ marginBottom: '16px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
+          <button type="submit" disabled={loading} className="auth-submit-btn">
+            {loading ? 'Registering...' : 'Register'}
+          </button>
+        </form>
 
-        <div style={{ marginBottom: '24px' }}>
-          <label
-            style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#555' }}
-          >
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="••••••••"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '1px solid #ccc',
-              boxSizing: 'border-box',
-            }}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#3b889d',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-
-      <p style={{ textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '14px' }}>
-        Already have an account?{' '}
-        <Link
-          to={ROUTES.CUSTOMER_LOGIN}
-          style={{ color: '#3b889d', fontWeight: 'bold', textDecoration: 'none' }}
-        >
-          Login here
-        </Link>
-      </p>
+        <p className="auth-footer-text">
+          Already have an account?{' '}
+          <Link to={ROUTES.CUSTOMER_LOGIN} className="auth-footer-link">
+            Login here
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
