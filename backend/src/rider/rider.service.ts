@@ -39,6 +39,13 @@ export class RiderService {
       throw new NotFoundException('Rider user not found.');
     }
 
+    // Business Rule: Cannot manually change duty status while currently DELIVERING an order
+    if (user.dutyStatus === RiderDutyStatus.DELIVERING) {
+      throw new ForbiddenException(
+        'Cannot manually change duty status while currently DELIVERING an order.',
+      );
+    }
+
     // Business Rule: Cannot switch to ONLINE or active duty if verification status is not APPROVED
     if (
       dto.status === RiderDutyStatus.ONLINE &&

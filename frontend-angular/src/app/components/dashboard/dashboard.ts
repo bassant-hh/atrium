@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
+import { RiderTrackingService } from '../../services/rider-tracking.service';
 import { VerificationOverlayComponent } from './components/verification-overlay/verification-overlay';
 import { RiderStatusCardComponent } from './components/rider-status-card/rider-status-card';
 import { DashboardStatsComponent } from './components/dashboard-stats/dashboard-stats';
@@ -24,8 +25,9 @@ import { NearbyOrder } from '../../models/dashboard/order.models';
 })
 export class Dashboard {
   private dashboardService = inject(DashboardService);
+  private riderTrackingService = inject(RiderTrackingService);
 
-  // ── State Signal References (Delegated to DashboardService) ──
+  // ── State Signal References (Delegated to DashboardService & RiderTrackingService) ──
   readonly verificationStatus = this.dashboardService.verificationStatus;
   readonly riderStatus = this.dashboardService.riderStatus;
   readonly earnings = this.dashboardService.earnings;
@@ -34,6 +36,10 @@ export class Dashboard {
   readonly rating = this.dashboardService.rating;
   readonly activeDelivery = this.dashboardService.activeDelivery;
   readonly nearbyOrders = this.dashboardService.nearbyOrders;
+  readonly submittingOrderId = this.dashboardService.submittingOrderId;
+  readonly apiError = this.dashboardService.apiError;
+  readonly loading = this.dashboardService.loading;
+  readonly riderCoords = this.riderTrackingService.currentCoords;
 
   // ── Action Delegations ──
   toggleStatus(): void {
@@ -42,6 +48,10 @@ export class Dashboard {
 
   logout(): void {
     this.dashboardService.logout();
+  }
+
+  dismissError(): void {
+    this.dashboardService.dismissError();
   }
 
   onAcceptOrder(order: NearbyOrder): void {

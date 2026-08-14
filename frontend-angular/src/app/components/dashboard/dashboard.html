@@ -14,6 +14,21 @@
     <!-- Duty Status Control Card -->
     <app-rider-status-card [status]="riderStatus()" (toggleStatus)="toggleStatus()" />
 
+    <!-- Error Alert Notification Banner -->
+    @if (apiError()) {
+      <div class="api-error-alert" role="alert">
+        <span>⚠️ {{ apiError() }}</span>
+        <button
+          class="btn-dismiss-alert"
+          type="button"
+          (click)="dismissError()"
+          aria-label="Dismiss error"
+        >
+          ✕
+        </button>
+      </div>
+    }
+
     <!-- Today's Performance Statistics -->
     <app-dashboard-stats
       [earnings]="earnings()"
@@ -29,6 +44,8 @@
         @if (activeDelivery()) {
           <app-active-delivery-card
             [activeDelivery]="activeDelivery()!"
+            [riderCoords]="riderCoords()"
+            [submitting]="loading()"
             (pickup)="onPickupOrder()"
             (deliver)="onDeliverOrder()"
           />
@@ -36,6 +53,7 @@
 
         <app-nearby-orders
           [orders]="nearbyOrders()"
+          [submittingId]="submittingOrderId()"
           (accept)="onAcceptOrder($event)"
           (decline)="onDeclineOrder($event)"
         />

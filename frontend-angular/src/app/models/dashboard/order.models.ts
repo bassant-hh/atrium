@@ -5,6 +5,8 @@ export interface ActiveDelivery {
   dropoff: string;
   estimatedTime: string;
   status?: string;
+  pickupCoordinates?: { latitude: number; longitude: number };
+  destinationCoordinates?: { latitude: number; longitude: number };
 }
 
 export interface NearbyOrder {

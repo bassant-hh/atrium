@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../auth';
 import { RiderTrackingService } from '../rider-tracking.service';
@@ -30,6 +31,8 @@ export class DashboardService {
   private readonly riderTrackingService = inject(RiderTrackingService);
   private readonly router = inject(Router);
 
+  private socket: Socket | null = null;
+
   // ==========================================================================
   // 2. Configuration & Endpoints
   // ==========================================================================
@@ -48,6 +51,7 @@ export class DashboardService {
   // 3. Signals & Application State
   // ==========================================================================
   readonly loading = signal<boolean>(false);
+  readonly submittingOrderId = signal<string | null>(null);
   readonly apiError = signal<string | null>(null);
 
   readonly verificationStatus = signal<VerificationStatus>('APPROVED');
@@ -66,10 +70,11 @@ export class DashboardService {
     this.loadNearbyOrders();
     this.loadDashboardStats();
     this.loadActiveDelivery();
+    this.initRealtimeOrderEvents();
   }
 
   // ==========================================================================
-  // 4. Private Helpers
+  // 4. Private Helpers & Realtime Listeners
   // ==========================================================================
   private updateStatusSignals(res: RiderStatusResponse): void {
     if (res.verificationStatus) {
@@ -78,6 +83,42 @@ export class DashboardService {
     if (res.riderStatus) {
       this.riderStatus.set(res.riderStatus);
     }
+  }
+
+  private initRealtimeOrderEvents(): void {
+    const token = this.authService.getToken();
+    if (!token) return;
+
+    const socketUrl = `${environment.apiUrl.replace(/\/$/, '')}/realtime`;
+    this.socket = io(socketUrl, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+    });
+
+    this.socket.on('connect', () => {
+      // Re-synchronize nearby orders from REST on reconnect
+      this.loadNearbyOrders();
+    });
+
+    this.socket.on('order:available', (newOrder: NearbyOrder) => {
+      if (!newOrder || !newOrder.id) return;
+      this.nearbyOrders.update((current) => {
+        if (current.some((item) => item.id === newOrder.id)) {
+          return current; // Prevent duplicates
+        }
+        return [newOrder, ...current];
+      });
+    });
+
+    this.socket.on('order:unavailable', (payload: { orderId: string }) => {
+      if (!payload?.orderId) return;
+      this.nearbyOrders.update((current) => current.filter((item) => item.id !== payload.orderId));
+    });
+  }
+
+  dismissError(): void {
+    this.apiError.set(null);
   }
 
   // ==========================================================================
@@ -154,6 +195,10 @@ export class DashboardService {
   }
 
   toggleStatus(): void {
+    if (this.riderStatus() === 'DELIVERING') {
+      return;
+    }
+
     const nextDutyStatus: RiderDutyStatus = this.riderStatus() === 'OFFLINE' ? 'ONLINE' : 'OFFLINE';
 
     this.loading.set(true);
@@ -167,18 +212,28 @@ export class DashboardService {
           this.apiError.set(null);
           this.updateStatusSignals(res);
         },
-        error: (_err) => {
+        error: (err) => {
           this.loading.set(false);
-          this.apiError.set('Unable to communicate with server.');
+          const message = err?.error?.message || 'Unable to update rider duty status.';
+          this.apiError.set(message);
         },
       });
   }
 
   acceptOrder(order: NearbyOrder): void {
-    this.loading.set(true);
+    if (this.submittingOrderId()) return;
+
+    if (this.riderStatus() === 'OFFLINE') {
+      this.apiError.set('Please toggle your status to ONLINE before accepting orders.');
+      return;
+    }
+
+    this.submittingOrderId.set(order.id);
+    this.apiError.set(null);
+
     this.http.patch<AcceptOrderResponse>(this.endpoints.acceptOrder(order.id), {}).subscribe({
       next: (res) => {
-        this.loading.set(false);
+        this.submittingOrderId.set(null);
         this.apiError.set(null);
 
         // 1. Remove accepted order from nearbyOrders list reactively
@@ -193,35 +248,47 @@ export class DashboardService {
             dropoff: res.activeDelivery.dropoff,
             estimatedTime: res.activeDelivery.estimatedTime,
             status: res.activeDelivery.status,
+            pickupCoordinates: res.activeDelivery.pickupCoordinates,
+            destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
           this.riderStatus.set('DELIVERING');
           this.riderTrackingService.startTracking(res.activeDelivery.orderId);
         }
       },
       error: (err) => {
-        this.loading.set(false);
-        const message =
-          err?.error?.message ||
-          'Unable to accept order. Please verify your duty status and try again.';
+        this.submittingOrderId.set(null);
+        const message = err?.error?.message || 'Unable to accept order. Please try again.';
         this.apiError.set(message);
+
+        if (err?.status === 409 || err?.status === 404) {
+          this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
+        }
       },
     });
   }
 
   declineOrder(order: NearbyOrder): void {
-    this.loading.set(true);
+    if (this.submittingOrderId()) return;
+
+    this.submittingOrderId.set(order.id);
+    this.apiError.set(null);
+
     this.http.patch<DeclineOrderResponse>(this.endpoints.declineOrder(order.id), {}).subscribe({
       next: (_res) => {
-        this.loading.set(false);
+        this.submittingOrderId.set(null);
         this.apiError.set(null);
 
         // Remove declined order from nearbyOrders signal list
         this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
       },
       error: (err) => {
-        this.loading.set(false);
+        this.submittingOrderId.set(null);
         const message = err?.error?.message || 'Unable to decline order. Please try again.';
         this.apiError.set(message);
+
+        if (err?.status === 409 || err?.status === 404) {
+          this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
+        }
       },
     });
   }
@@ -241,6 +308,8 @@ export class DashboardService {
             dropoff: res.activeDelivery.dropoff,
             estimatedTime: res.activeDelivery.estimatedTime,
             status: res.activeDelivery.status,
+            pickupCoordinates: res.activeDelivery.pickupCoordinates,
+            destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
           this.riderTrackingService.startTracking(res.activeDelivery.orderId);
         }
@@ -279,6 +348,10 @@ export class DashboardService {
   }
 
   logout(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
     this.riderTrackingService.stopTracking();
     this.authService.logout();
     this.router.navigate(['/login']);

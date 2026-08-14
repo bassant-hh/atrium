@@ -22,12 +22,21 @@
   <button
     class="status-toggle-btn"
     [class.btn-active]="status === 'ONLINE' || status === 'DELIVERING'"
+    [disabled]="status === 'DELIVERING'"
     (click)="onToggle()"
     aria-label="Toggle Online Duty Status"
   >
     <span class="material-symbols-outlined" aria-hidden="true">
-      {{ status === 'ONLINE' || status === 'DELIVERING' ? 'power_settings_new' : 'play_arrow' }}
+      {{
+        status === 'ONLINE'
+          ? 'power_settings_new'
+          : status === 'DELIVERING'
+            ? 'local_shipping'
+            : 'play_arrow'
+      }}
     </span>
-    <span>{{ status === 'ONLINE' || status === 'DELIVERING' ? 'Go Offline' : 'Go Online' }}</span>
+    <span>{{
+      status === 'ONLINE' ? 'Go Offline' : status === 'DELIVERING' ? 'Delivering' : 'Go Online'
+    }}</span>
   </button>
 </section>

@@ -17,6 +17,32 @@
   user-select: none;
 }
 
+.api-error-alert {
+  background: var(--surface-container-high, #fdecec);
+  color: var(--error, #e05252);
+  border: 1px solid var(--outline-variant, #f8b4b4);
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.btn-dismiss-alert {
+  background: transparent;
+  border: none;
+  color: currentColor;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+}
+
 .operations-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;

@@ -2,9 +2,13 @@
   <header class="card-header">
     <div class="header-tag">
       <span class="pulse-dot" aria-hidden="true"></span>
-      <span class="tag-title font-headline">Active Delivery</span>
+      <span class="tag-title font-headline">
+        {{
+          activeDelivery.status === 'PICKED_UP' ? 'Estimated delivery' : 'Rider arriving at pickup'
+        }}
+      </span>
     </div>
-    <span class="order-id-chip">{{ activeDelivery.orderId }}</span>
+    <span class="order-id-chip">#{{ activeDelivery.orderId }}</span>
   </header>
 
   <div class="delivery-details">
@@ -28,24 +32,52 @@
       </div>
     </div>
 
+    <!-- Embedded Standalone Rider Delivery Map -->
+    <div class="map-container-wrap">
+      <app-rider-map
+        [riderCoords]="riderCoords"
+        [pickupCoords]="activeDelivery.pickupCoordinates || null"
+        [destinationCoords]="activeDelivery.destinationCoordinates || null"
+        [status]="activeDelivery.status"
+        (routeCalculated)="onRouteCalculated($event)"
+      />
+    </div>
+
     <div class="meta-strip">
       <div class="meta-item">
         <span class="material-symbols-outlined" aria-hidden="true">person</span>
         <span>{{ activeDelivery.customerName }}</span>
       </div>
+
+      @if (distanceText()) {
+        <div class="meta-item">
+          <span class="material-symbols-outlined" aria-hidden="true">near_me</span>
+          <span>{{ distanceText() }}</span>
+        </div>
+      }
+
       <div class="meta-item">
         <span class="material-symbols-outlined" aria-hidden="true">timer</span>
-        <span>Est. {{ activeDelivery.estimatedTime }}</span>
+        <span>{{ durationText() ? durationText() : 'Est. ' + activeDelivery.estimatedTime }}</span>
       </div>
     </div>
+
+    @if (routeError()) {
+      <div class="route-warning-banner">⚠️ {{ routeError() }}</div>
+    }
   </div>
 
   <button
     class="btn-primary btn-delivery-action"
     type="button"
+    [disabled]="submitting"
     (click)="onAction()"
     aria-label="Active Delivery Action Button"
   >
-    {{ activeDelivery.status === 'PICKED_UP' ? 'Delivered' : 'Picked Up' }}
+    @if (submitting) {
+      Processing...
+    } @else {
+      {{ activeDelivery.status === 'PICKED_UP' ? 'Delivered' : 'Picked Up' }}
+    }
   </button>
 </section>

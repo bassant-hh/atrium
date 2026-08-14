@@ -1,31 +1,52 @@
+/**
+ * MapAdapter — Leaflet + OpenStreetMap implementation
+ * Replaces previous Google Maps-based map provider.
+ *
+ * Modes:
+ *   'picker'   — Interactive location selector with coordinate display
+ *   'tracking' — Live order tracking: pickup, destination, rider markers + OSRM route polyline
+ */
+
 import { useEffect, useRef, useState } from 'react';
+import L from 'leaflet';
 import { APP_CONFIG } from '../../config/app.config';
 
-let googleMapsScriptPromise = null;
+// Leaflet's default marker icon assets break with Vite; fix paths inline.
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
-const loadGoogleMapsScript = (apiKey) => {
-  if (window.google && window.google.maps) {
-    return Promise.resolve(window.google.maps);
-  }
-  if (!googleMapsScriptPromise) {
-    googleMapsScriptPromise = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,routes`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        if (window.google && window.google.maps) {
-          resolve(window.google.maps);
-        } else {
-          reject(new Error('Google Maps SDK failed to load.'));
-        }
-      };
-      script.onerror = (err) => reject(err);
-      document.head.appendChild(script);
-    });
-  }
-  return googleMapsScriptPromise;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const isValidCoord = (c) => {
+  if (!c) return false;
+  const lat = Number(c.latitude);
+  const lon = Number(c.longitude);
+  return isFinite(lat) && isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 };
+
+const toLatLng = (c) => [Number(c.latitude), Number(c.longitude)];
+
+const makeEmojiIcon = (emoji) =>
+  L.divIcon({
+    className: 'makook-emoji-marker',
+    html: `<div style="font-size:26px;line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.35));">${emoji}</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -36],
+  });
+
+const PICKUP_ICON = makeEmojiIcon('📍');
+const DEST_ICON = makeEmojiIcon('🏁');
+const RIDER_ICON = makeEmojiIcon('🛵');
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const MapAdapter = ({
   mode = 'picker',
@@ -35,446 +56,221 @@ const MapAdapter = ({
   riderCoords,
   routeData,
   onPositionChange,
-  height = '220px',
+  height = '240px',
 }) => {
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const pickupMarkerRef = useRef(null);
-  const destMarkerRef = useRef(null);
-  const riderMarkerRef = useRef(null);
-  const pickerMarkerRef = useRef(null);
-  const polylinesRef = useRef([]);
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const pickupMarker = useRef(null);
+  const destMarker = useRef(null);
+  const riderMarker = useRef(null);
+  const pickerMarker = useRef(null);
+  const routePolyline = useRef(null);
+  const boundsFittedRef = useRef(false);
 
-  const [providerState, setProviderState] = useState('initializing'); // 'google' | 'fallback' | 'initializing'
-  const [currentCoords, setCurrentCoords] = useState(center);
+  // For fallback picker mode coordinate display
+  const [pickerCoords, setPickerCoords] = useState(center);
 
+  // ── 1. Mount Leaflet map once ──────────────────────────────────────────────
   useEffect(() => {
-    setCurrentCoords(center);
-  }, [center.latitude, center.longitude]);
+    if (!containerRef.current || mapRef.current) return;
 
-  // Clean up polylines from current map instance
-  const clearPolylines = () => {
-    if (polylinesRef.current && polylinesRef.current.length > 0) {
-      polylinesRef.current.forEach((pl) => {
-        if (pl && typeof pl.setMap === 'function') {
-          pl.setMap(null);
-        }
-      });
-      polylinesRef.current = [];
-    }
-  };
+    const tileUrl = APP_CONFIG.osmTileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-  // 1. Initialize Google Maps instance once when SDK and container are ready
-  useEffect(() => {
-    let isMounted = true;
-    const apiKey = APP_CONFIG.googleMapsApiKey;
+    const map = L.map(containerRef.current, {
+      center: isValidCoord(center) ? toLatLng(center) : [26.1551, 32.716],
+      zoom: 15,
+      zoomControl: true,
+    });
 
-    if (!apiKey) {
-      setProviderState('fallback');
-      return;
-    }
+    L.tileLayer(tileUrl, {
+      maxZoom: 19,
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
 
-    loadGoogleMapsScript(apiKey)
-      .then((maps) => {
-        if (!isMounted || !mapContainerRef.current) return;
+    mapRef.current = map;
 
-        setProviderState('google');
-
-        if (!mapInstanceRef.current) {
-          const mapInstance = new maps.Map(mapContainerRef.current, {
-            center: { lat: center.latitude, lng: center.longitude },
-            zoom: 15,
-            disableDefaultUI: false,
-            zoomControl: true,
-          });
-          mapInstanceRef.current = mapInstance;
-        }
-      })
-      .catch((err) => {
-        console.warn('Google Maps SDK load error, switching to interactive fallback:', err);
-        if (isMounted) setProviderState('fallback');
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [mode]);
-
-  // 2. Manage Picker Mode Marker & Drag Listeners
-  useEffect(() => {
-    if (providerState !== 'google' || mode !== 'picker' || !mapInstanceRef.current) return;
-    const maps = window.google.maps;
-    const mapInstance = mapInstanceRef.current;
-
-    const latLng = { lat: center.latitude, lng: center.longitude };
-
-    if (!pickerMarkerRef.current) {
-      const marker = new maps.Marker({
-        position: latLng,
-        map: mapInstance,
+    // Picker mode: draggable center marker
+    if (mode === 'picker' && isValidCoord(center)) {
+      const m = L.marker(toLatLng(center), {
+        icon: PICKUP_ICON,
         draggable: true,
-        title: 'Selected Location',
+      }).addTo(map);
+
+      m.on('dragend', (e) => {
+        const latlng = e.target.getLatLng();
+        const pos = {
+          latitude: Number(latlng.lat.toFixed(6)),
+          longitude: Number(latlng.lng.toFixed(6)),
+        };
+        setPickerCoords(pos);
+        if (onPositionChange) onPositionChange(pos);
       });
 
-      marker.addListener('dragend', (event) => {
-        const lat = Number(event.latLng.lat().toFixed(6));
-        const lng = Number(event.latLng.lng().toFixed(6));
-        const newPos = { latitude: lat, longitude: lng };
-        setCurrentCoords(newPos);
-        if (onPositionChange) onPositionChange(newPos);
-      });
-
-      pickerMarkerRef.current = marker;
-    } else {
-      pickerMarkerRef.current.setPosition(latLng);
-    }
-  }, [providerState, mode, center.latitude, center.longitude, onPositionChange]);
-
-  // 3. Manage Tracking Mode Markers (Pickup & Destination) and Initial Bounds
-  useEffect(() => {
-    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
-    const maps = window.google.maps;
-    const mapInstance = mapInstanceRef.current;
-    const bounds = new maps.LatLngBounds();
-    let hasPoint = false;
-
-    // Pickup Marker
-    if (pickupCoords && pickupCoords.latitude != null && pickupCoords.longitude != null) {
-      const pPos = { lat: pickupCoords.latitude, lng: pickupCoords.longitude };
-      if (!pickupMarkerRef.current) {
-        pickupMarkerRef.current = new maps.Marker({
-          position: pPos,
-          map: mapInstance,
-          title: 'Pickup Location',
-          label: '📍',
-        });
-      } else {
-        pickupMarkerRef.current.setPosition(pPos);
-      }
-      bounds.extend(pPos);
-      hasPoint = true;
+      pickerMarker.current = m;
     }
 
-    // Destination Marker
-    if (destCoords && destCoords.latitude != null && destCoords.longitude != null) {
-      const dPos = { lat: destCoords.latitude, lng: destCoords.longitude };
-      if (!destMarkerRef.current) {
-        destMarkerRef.current = new maps.Marker({
-          position: dPos,
-          map: mapInstance,
-          title: 'Destination Location',
-          label: '🏁',
-        });
-      } else {
-        destMarkerRef.current.setPosition(dPos);
-      }
-      bounds.extend(dPos);
-      hasPoint = true;
-    }
+    // Force Leaflet to recalculate the container size after mount
+    setTimeout(() => {
+      if (mapRef.current) mapRef.current.invalidateSize();
+    }, 100);
 
-    if (hasPoint && !mapInstance._initialBoundsFitted) {
-      mapInstance.fitBounds(bounds, 50);
-      mapInstance._initialBoundsFitted = true;
-    }
-  }, [providerState, mode, pickupCoords, destCoords]);
-
-  // 4. Manage Realtime Rider Marker (Updates position dynamically without map teardown or fitBounds jumping)
-  useEffect(() => {
-    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
-    const maps = window.google.maps;
-    const mapInstance = mapInstanceRef.current;
-
-    if (riderCoords && riderCoords.latitude != null && riderCoords.longitude != null) {
-      const rPos = { lat: Number(riderCoords.latitude), lng: Number(riderCoords.longitude) };
-
-      if (!riderMarkerRef.current) {
-        riderMarkerRef.current = new maps.Marker({
-          position: rPos,
-          map: mapInstance,
-          title: 'Rider Location',
-          label: '🛵',
-          zIndex: 999,
-        });
-      } else {
-        riderMarkerRef.current.setPosition(rPos);
-      }
-    } else if (riderMarkerRef.current) {
-      riderMarkerRef.current.setMap(null);
-      riderMarkerRef.current = null;
-    }
-  }, [providerState, mode, riderCoords?.latitude, riderCoords?.longitude]);
-
-  // 5. Render Route Polyline using Google Maps Routes Library
-  useEffect(() => {
-    if (providerState !== 'google' || mode !== 'tracking' || !mapInstanceRef.current) return;
-    const maps = window.google.maps;
-    const mapInstance = mapInstanceRef.current;
-
-    clearPolylines();
-
-    if (!routeData) return;
-
-    // Check if routeObject provides createPolylines() (Google Maps Route instance)
-    const routeObj = routeData.routeObject;
-    if (routeObj && typeof routeObj.createPolylines === 'function') {
-      try {
-        const polylines = routeObj.createPolylines();
-        if (Array.isArray(polylines)) {
-          polylines.forEach((pl) => {
-            pl.setMap(mapInstance);
-          });
-          polylinesRef.current = polylines;
-          return;
-        }
-      } catch {
-        // Fallback to manual Polyline drawing if createPolylines fails
-      }
-    }
-
-    // Manual Polyline rendering from route path coordinates
-    const path = routeData.path;
-    if (Array.isArray(path) && path.length > 0) {
-      const polyline = new maps.Polyline({
-        path: path,
-        geodesic: true,
-        strokeColor: '#156B82',
-        strokeOpacity: 0.8,
-        strokeWeight: 5,
-        map: mapInstance,
-      });
-      polylinesRef.current = [polyline];
-    }
-  }, [providerState, mode, routeData]);
-
-  // Clean up all map elements on unmount
-  useEffect(() => {
     return () => {
-      clearPolylines();
-      if (pickupMarkerRef.current) pickupMarkerRef.current.setMap(null);
-      if (destMarkerRef.current) destMarkerRef.current.setMap(null);
-      if (riderMarkerRef.current) riderMarkerRef.current.setMap(null);
-      if (pickerMarkerRef.current) pickerMarkerRef.current.setMap(null);
-      mapInstanceRef.current = null;
+      // Cleanup on unmount
+      if (routePolyline.current) {
+        routePolyline.current.remove();
+        routePolyline.current = null;
+      }
+      if (pickupMarker.current) {
+        pickupMarker.current.remove();
+        pickupMarker.current = null;
+      }
+      if (destMarker.current) {
+        destMarker.current.remove();
+        destMarker.current = null;
+      }
+      if (riderMarker.current) {
+        riderMarker.current.remove();
+        riderMarker.current = null;
+      }
+      if (pickerMarker.current) {
+        pickerMarker.current.remove();
+        pickerMarker.current = null;
+      }
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      boundsFittedRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePan = (dLat, dLng) => {
-    const updated = {
-      latitude: Number((currentCoords.latitude + dLat).toFixed(6)),
-      longitude: Number((currentCoords.longitude + dLng).toFixed(6)),
-    };
-    setCurrentCoords(updated);
-    if (onPositionChange) onPositionChange(updated);
-  };
+  // ── 2. Tracking markers: Pickup + Destination ──────────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || mode !== 'tracking') return;
+    const map = mapRef.current;
+    const bounds = [];
 
-  // Render Google Maps Container if SDK loaded
-  if (providerState === 'google') {
-    return (
+    // Pickup marker
+    if (isValidCoord(pickupCoords)) {
+      const pos = toLatLng(pickupCoords);
+      if (!pickupMarker.current) {
+        pickupMarker.current = L.marker(pos, { icon: PICKUP_ICON }).addTo(map);
+      } else {
+        pickupMarker.current.setLatLng(pos);
+      }
+      bounds.push(pos);
+    } else if (pickupMarker.current) {
+      pickupMarker.current.remove();
+      pickupMarker.current = null;
+    }
+
+    // Destination marker
+    if (isValidCoord(destCoords)) {
+      const pos = toLatLng(destCoords);
+      if (!destMarker.current) {
+        destMarker.current = L.marker(pos, { icon: DEST_ICON }).addTo(map);
+      } else {
+        destMarker.current.setLatLng(pos);
+      }
+      bounds.push(pos);
+    } else if (destMarker.current) {
+      destMarker.current.remove();
+      destMarker.current = null;
+    }
+
+    // Fit map to pickup+destination on initial load only
+    if (bounds.length > 0 && !boundsFittedRef.current) {
+      try {
+        map.fitBounds(bounds, { padding: [40, 40] });
+      } catch {
+        // fitBounds can throw on single-point bounds; ignore
+      }
+      boundsFittedRef.current = true;
+    }
+  }, [mode, pickupCoords, destCoords]);
+
+  // ── 3. Rider marker (updates dynamically) ─────────────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || mode !== 'tracking') return;
+
+    if (isValidCoord(riderCoords)) {
+      const pos = toLatLng(riderCoords);
+      if (!riderMarker.current) {
+        riderMarker.current = L.marker(pos, { icon: RIDER_ICON, zIndexOffset: 1000 }).addTo(
+          mapRef.current,
+        );
+      } else {
+        riderMarker.current.setLatLng(pos);
+      }
+    } else if (riderMarker.current) {
+      riderMarker.current.remove();
+      riderMarker.current = null;
+    }
+  }, [mode, riderCoords?.latitude, riderCoords?.longitude]);
+
+  // ── 4. Route polyline from OSRM routeData ─────────────────────────────────
+  useEffect(() => {
+    if (!mapRef.current || mode !== 'tracking') return;
+
+    // Clear existing polyline
+    if (routePolyline.current) {
+      routePolyline.current.remove();
+      routePolyline.current = null;
+    }
+
+    // routeData.path is [[lat, lon], ...] already converted by routing.service.js
+    if (routeData?.path && Array.isArray(routeData.path) && routeData.path.length > 1) {
+      routePolyline.current = L.polyline(routeData.path, {
+        color: '#156B82',
+        weight: 5,
+        opacity: 0.82,
+        lineJoin: 'round',
+      }).addTo(mapRef.current);
+    }
+  }, [mode, routeData]);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  return (
+    <div style={{ position: 'relative', width: '100%' }}>
       <div
-        ref={mapContainerRef}
+        ref={containerRef}
         style={{
           width: '100%',
           height: height,
+          minHeight: height,
           borderRadius: '12px',
           overflow: 'hidden',
           border: '1px solid #D8EEF5',
+          position: 'relative',
+          zIndex: 1,
         }}
       />
-    );
-  }
 
-  // Render Interactive Fallback Map Engine (OpenStreetMap Tiles)
-  return (
-    <div
-      style={{
-        position: 'relative',
-        height: height,
-        width: '100%',
-        backgroundColor: '#e5e3df',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        border: '1px solid #c0d5df',
-        backgroundImage:
-          'linear-gradient(#d3e7ee 1px, transparent 1px), linear-gradient(90deg, #d3e7ee 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+      {/* Picker mode coordinate overlay */}
       {mode === 'picker' && (
-        <>
-          {/* Centered Fixed Pin */}
-          <div
-            style={{
-              position: 'absolute',
-              zIndex: 10,
-              fontSize: '32px',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -100%)',
-              pointerEvents: 'none',
-              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))',
-            }}
-          >
-            📍
-          </div>
-
-          {/* Coordinates Overlay */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '10px',
-              left: '10px',
-              background: 'rgba(255, 255, 255, 0.94)',
-              padding: '4px 10px',
-              borderRadius: '16px',
-              fontSize: '11px',
-              fontWeight: '600',
-              color: '#263238',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
-          >
-            Lat: {currentCoords.latitude.toFixed(4)}, Lng: {currentCoords.longitude.toFixed(4)}
-          </div>
-
-          {/* Pan Control Buttons */}
-          <div
-            style={{
-              position: 'absolute',
-              right: '10px',
-              top: '10px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 28px)',
-              gap: '4px',
-              background: 'rgba(255,255,255,0.92)',
-              padding: '4px',
-              borderRadius: '8px',
-            }}
-          >
-            <div />
-            <button type="button" onClick={() => handlePan(0.001, 0)} style={panBtnStyle}>
-              ▲
-            </button>
-            <div />
-            <button type="button" onClick={() => handlePan(0, -0.001)} style={panBtnStyle}>
-              ◄
-            </button>
-            <button type="button" onClick={() => handlePan(-0.001, 0)} style={panBtnStyle}>
-              ▼
-            </button>
-            <button type="button" onClick={() => handlePan(0, 0.001)} style={panBtnStyle}>
-              ►
-            </button>
-          </div>
-        </>
-      )}
-
-      {mode === 'tracking' && (
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            width: '100%',
-            padding: '20px',
-            boxSizing: 'border-box',
+            position: 'absolute',
+            bottom: '14px',
+            left: '14px',
+            zIndex: 1000,
+            background: 'rgba(255,255,255,0.94)',
+            padding: '4px 10px',
+            borderRadius: '16px',
+            fontSize: '11px',
+            fontWeight: '600',
+            color: '#263238',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            pointerEvents: 'none',
           }}
         >
-          {/* Pickup Marker */}
-          <div
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 5 }}
-          >
-            <div style={{ fontSize: '28px', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.3))' }}>
-              📍
-            </div>
-            <div
-              style={{
-                background: '#156B82',
-                color: '#ffffff',
-                padding: '4px 8px',
-                borderRadius: '12px',
-                fontSize: '11px',
-                fontWeight: '700',
-                marginTop: '4px',
-              }}
-            >
-              Pickup
-            </div>
-          </div>
-
-          {/* Rider position indicator if live tracking in fallback mode */}
-          {riderCoords && (
-            <div
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 6 }}
-            >
-              <div style={{ fontSize: '28px', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.3))' }}>
-                🛵
-              </div>
-              <div
-                style={{
-                  background: '#E65100',
-                  color: '#ffffff',
-                  padding: '2px 6px',
-                  borderRadius: '10px',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  marginTop: '2px',
-                }}
-              >
-                Rider
-              </div>
-            </div>
-          )}
-
-          <div
-            style={{
-              flex: 1,
-              height: '2px',
-              borderTop: '2px dashed #156B82',
-              margin: '0 12px',
-              opacity: 0.7,
-            }}
-          />
-
-          {/* Destination Marker */}
-          <div
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 5 }}
-          >
-            <div style={{ fontSize: '28px', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.3))' }}>
-              🏁
-            </div>
-            <div
-              style={{
-                background: '#2E9E6B',
-                color: '#ffffff',
-                padding: '4px 8px',
-                borderRadius: '12px',
-                fontSize: '11px',
-                fontWeight: '700',
-                marginTop: '4px',
-              }}
-            >
-              Destination
-            </div>
-          </div>
+          Lat: {pickerCoords.latitude.toFixed(4)}, Lng: {pickerCoords.longitude.toFixed(4)}
         </div>
       )}
     </div>
   );
-};
-
-const panBtnStyle = {
-  border: '1px solid #ccc',
-  background: '#fff',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '10px',
-  fontWeight: 'bold',
-  height: '28px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
 };
 
 export default MapAdapter;

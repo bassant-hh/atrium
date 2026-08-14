@@ -74,10 +74,15 @@ export class RealtimeGateway
         return;
       }
 
+      const formattedRole = String(role).toUpperCase();
       client.data.user = {
         userId: String(userId),
-        role: String(role).toUpperCase(),
+        role: formattedRole,
       } as AuthenticatedSocketData;
+
+      if (formattedRole === 'RIDER' || formattedRole === 'DELIVERY') {
+        client.join('riders');
+      }
     } catch {
       client.emit('order:tracking:error', {
         message: 'Invalid or expired authentication token.',
@@ -88,6 +93,23 @@ export class RealtimeGateway
 
   handleDisconnect(client: Socket) {
     // Socket disconnected cleanly
+  }
+
+  notifyOrderAvailable(orderPayload: {
+    id: string;
+    customerName: string;
+    pickup: string;
+    destination: string;
+    distance: string;
+    earnings: string;
+  }): void {
+    if (!this.server || !orderPayload?.id) return;
+    this.server.to('riders').emit('order:available', orderPayload);
+  }
+
+  notifyOrderUnavailable(orderId: string): void {
+    if (!this.server || !orderId) return;
+    this.server.to('riders').emit('order:unavailable', { orderId });
   }
 
   @SubscribeMessage('order:tracking:join')

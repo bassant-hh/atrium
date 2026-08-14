@@ -98,11 +98,36 @@
   color: var(--on-surface);
 }
 
+.map-container-wrap {
+  width: 100%;
+  min-height: 240px;
+  margin: 0.5rem 0;
+  display: block;
+  position: relative;
+}
+
+app-rider-map {
+  display: block;
+  width: 100%;
+  height: 240px;
+  min-height: 240px;
+}
+
+.route-warning-banner {
+  background: #fef9e3;
+  color: #c9a227;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+}
+
 .meta-strip {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   padding-top: 1rem;
   border-top: 1px dashed var(--outline-variant);
+  flex-wrap: wrap;
 }
 
 .meta-item {

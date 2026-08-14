@@ -12,6 +12,9 @@ export class RiderStatusCardComponent {
   @Output() toggleStatus = new EventEmitter<void>();
 
   onToggle(): void {
+    if (this.status === 'DELIVERING') {
+      return;
+    }
     this.toggleStatus.emit();
   }
 }

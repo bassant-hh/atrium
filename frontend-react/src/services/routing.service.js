@@ -1,8 +1,10 @@
 /**
- * Routing Service (Phase 10B)
- * Handles route calculation via Google Maps Routes Library (Route.computeRoutes)
+ * Routing Service (Phase 10B / Phase 12 OSM Migration)
+ * Handles route calculation via OSRM (router.project-osrm.org)
  * and controlled recalculation policy.
  */
+
+import { APP_CONFIG } from '../config/app.config';
 
 /**
  * Calculates distance in meters between two lat/lng coordinates using Haversine formula.
@@ -79,199 +81,98 @@ export const shouldRecalculateRoute = ({
 };
 
 /**
- * Format duration string from seconds or ISO duration string.
+ * Format duration string from seconds.
  */
-export const formatDurationText = (durationInput) => {
-  if (durationInput == null) return null;
-  let seconds = 0;
-
-  if (typeof durationInput === 'number') {
-    seconds = durationInput;
-  } else if (typeof durationInput === 'string') {
-    // Check if string ends with 's', e.g. "360s"
-    const cleaned = durationInput.replace('s', '').trim();
-    seconds = parseInt(cleaned, 10) || 0;
-  } else if (typeof durationInput === 'object' && durationInput.seconds) {
-    seconds = parseInt(durationInput.seconds, 10) || 0;
-  }
-
-  if (seconds <= 0) return null;
+export const formatDurationText = (seconds) => {
+  if (seconds == null || typeof seconds !== 'number' || seconds <= 0) return null;
   const minutes = Math.ceil(seconds / 60);
-
-  if (minutes <= 1) return '~1 min';
-  return `~${minutes} min`;
+  if (minutes < 2) return '~1 min';
+  if (minutes < 60) return `~${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 };
 
 /**
  * Format distance string from meters.
  */
-export const formatDistanceText = (metersInput) => {
-  if (metersInput == null) return null;
-  const meters = Number(metersInput);
-  if (isNaN(meters) || meters <= 0) return null;
-
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`;
-  }
-  const km = (meters / 1000).toFixed(1);
-  return `${km} km`;
+export const formatDistanceText = (meters) => {
+  if (meters == null) return null;
+  const m = Number(meters);
+  if (isNaN(m) || m <= 0) return null;
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(1)} km`;
 };
 
 /**
- * Decodes an Encoded Polyline algorithm string into array of {lat, lng} objects.
+ * Validates a coordinate object has finite numeric lat/lng in valid ranges.
  */
-export const decodePolylinePath = (encoded) => {
-  if (!encoded || typeof encoded !== 'string') return [];
-  const poly = [];
-  let index = 0,
-    len = encoded.length;
-  let lat = 0,
-    lng = 0;
-
-  while (index < len) {
-    let b,
-      shift = 0,
-      result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    let dlat = result & 1 ? ~(result >> 1) : result >> 1;
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    let dlng = result & 1 ? ~(result >> 1) : result >> 1;
-    lng += dlng;
-
-    poly.push({ lat: lat / 1e5, lng: lng / 1e5 });
-  }
-
-  return poly;
+const isValidCoord = (c) => {
+  if (!c) return false;
+  const lat = Number(c.latitude);
+  const lon = Number(c.longitude);
+  return isFinite(lat) && isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 };
 
 /**
- * Fetches route and ETA using Google Maps Routes Library (Route.computeRoutes).
+ * Fetches route and ETA using OSRM HTTP API.
+ * OSRM endpoint format: /route/v1/driving/{lon1},{lat1};{lon2},{lat2}
+ *
+ * Returns:
+ * {
+ *   success: boolean,
+ *   distanceMeters: number,
+ *   durationSeconds: number,
+ *   durationText: string,
+ *   distanceText: string,
+ *   geometry: { type: 'LineString', coordinates: [[lon, lat], ...] }  // raw OSRM
+ *   path: [[lat, lon], ...]  // Leaflet-ready (swapped)
+ * }
  */
 export const fetchRouteAndETA = async ({ origin, destination }) => {
-  if (
-    !origin ||
-    !destination ||
-    origin.latitude == null ||
-    origin.longitude == null ||
-    destination.latitude == null ||
-    destination.longitude == null
-  ) {
-    return { success: false, error: 'Missing coordinates for routing' };
+  if (!isValidCoord(origin) || !isValidCoord(destination)) {
+    return { success: false, error: 'Missing or invalid coordinates for routing' };
   }
 
-  if (!window.google || !window.google.maps) {
-    return { success: false, error: 'Google Maps SDK not loaded' };
-  }
+  const baseUrl = APP_CONFIG.osrmBaseUrl || 'https://router.project-osrm.org';
+
+  // OSRM expects longitude,latitude ordering
+  const url = `${baseUrl}/route/v1/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=geojson&steps=false`;
 
   try {
-    let RouteClass = window.google.maps.Route;
-    if (!RouteClass && window.google.maps.importLibrary) {
-      const routesLib = await window.google.maps.importLibrary('routes');
-      RouteClass = routesLib?.Route;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return { success: false, error: `OSRM request failed (HTTP ${response.status})` };
     }
 
-    // Prepare origin and destination locations
-    const originLocation = {
-      location: {
-        latLng: {
-          lat: Number(origin.latitude),
-          lng: Number(origin.longitude),
-        },
-      },
+    const data = await response.json();
+
+    if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+      return { success: false, error: 'No OSRM route found' };
+    }
+
+    const primaryRoute = data.routes[0];
+    const distanceMeters = primaryRoute.distance;
+    const durationSeconds = primaryRoute.duration;
+
+    const durationText = formatDurationText(durationSeconds);
+    const distanceText = formatDistanceText(distanceMeters);
+
+    // OSRM GeoJSON coords: [longitude, latitude] → Leaflet polyline: [latitude, longitude]
+    const rawCoords = primaryRoute.geometry?.coordinates ?? [];
+    const path = rawCoords.map(([lon, lat]) => [lat, lon]);
+
+    return {
+      success: true,
+      distanceMeters,
+      durationSeconds,
+      durationText,
+      distanceText,
+      geometry: primaryRoute.geometry,
+      path,
     };
-
-    const destinationLocation = {
-      location: {
-        latLng: {
-          lat: Number(destination.latitude),
-          lng: Number(destination.longitude),
-        },
-      },
-    };
-
-    // Use Route.computeRoutes if available in SDK
-    if (RouteClass && typeof RouteClass.computeRoutes === 'function') {
-      const request = {
-        origin: originLocation,
-        destination: destinationLocation,
-        travelMode: 'DRIVE',
-        fields: ['routes.duration', 'routes.distanceMeters', 'routes.polyline', 'routes.legs'],
-      };
-
-      const response = await RouteClass.computeRoutes(request);
-      const routes = response?.routes;
-
-      if (routes && routes.length > 0) {
-        const primaryRoute = routes[0];
-        const rawDuration = primaryRoute.duration || primaryRoute.legs?.[0]?.duration;
-        const rawDistance = primaryRoute.distanceMeters || primaryRoute.legs?.[0]?.distanceMeters;
-
-        const durationText = formatDurationText(rawDuration);
-        const distanceText = formatDistanceText(rawDistance);
-
-        // Extract polyline path coordinates
-        let path = [];
-        if (primaryRoute.polyline?.encodedPolyline) {
-          path = decodePolylinePath(primaryRoute.polyline.encodedPolyline);
-        } else if (primaryRoute.legs?.[0]?.polyline?.encodedPolyline) {
-          path = decodePolylinePath(primaryRoute.legs[0].polyline.encodedPolyline);
-        }
-
-        return {
-          success: true,
-          routeObject: primaryRoute, // Isolated provider reference for MapAdapter
-          durationText,
-          distanceText,
-          rawDuration,
-          rawDistance,
-          path,
-        };
-      }
-    }
-
-    // Fallback: Check if google.maps.routes namespace exists or alternative Route API
-    if (window.google.maps.routes && window.google.maps.routes.Route) {
-      const RouteNs = window.google.maps.routes.Route;
-      if (typeof RouteNs.computeRoutes === 'function') {
-        const response = await RouteNs.computeRoutes({
-          origin: originLocation,
-          destination: destinationLocation,
-          travelMode: 'DRIVE',
-        });
-        if (response?.routes?.[0]) {
-          const primaryRoute = response.routes[0];
-          const durationText = formatDurationText(primaryRoute.duration);
-          const distanceText = formatDistanceText(primaryRoute.distanceMeters);
-          let path = [];
-          if (primaryRoute.polyline?.encodedPolyline) {
-            path = decodePolylinePath(primaryRoute.polyline.encodedPolyline);
-          }
-          return {
-            success: true,
-            routeObject: primaryRoute,
-            durationText,
-            distanceText,
-            path,
-          };
-        }
-      }
-    }
-
-    return { success: false, error: 'No route found' };
   } catch (err) {
-    console.warn('Google Maps Routes API computation error:', err);
+    console.warn('[routing.service] OSRM request error:', err);
     return { success: false, error: 'ETA temporarily unavailable' };
   }
 };

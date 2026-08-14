@@ -3,7 +3,9 @@ const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'productio
 export const APP_CONFIG = {
   apiUrl: import.meta.env.VITE_API_URL,
   riderPortalUrl: import.meta.env.VITE_RIDER_PORTAL_URL,
-  googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+  osmTileUrl:
+    import.meta.env.VITE_OSM_TILE_URL || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  osrmBaseUrl: import.meta.env.VITE_OSRM_BASE_URL || 'https://router.project-osrm.org',
 };
 
 if (!APP_CONFIG.apiUrl) {
@@ -18,10 +20,4 @@ if (!APP_CONFIG.apiUrl) {
 
 if (!APP_CONFIG.riderPortalUrl) {
   console.warn('APP_CONFIG WARNING: VITE_RIDER_PORTAL_URL environment variable is missing.');
-}
-
-if (!APP_CONFIG.googleMapsApiKey) {
-  console.info(
-    'APP_CONFIG INFO: VITE_GOOGLE_MAPS_API_KEY is not set. MapAdapter will run with interactive fallback map engine.',
-  );
 }

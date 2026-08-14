@@ -27,14 +27,20 @@
           <button
             class="btn-accept"
             type="button"
+            [disabled]="submittingId === order.id"
             (click)="onAccept(order)"
             aria-label="Accept Order Request"
           >
-            Accept
+            @if (submittingId === order.id) {
+              Accepting...
+            } @else {
+              Accept Order
+            }
           </button>
           <button
             class="btn-decline"
             type="button"
+            [disabled]="submittingId === order.id"
             (click)="onDecline(order)"
             aria-label="Decline Order Request"
           >

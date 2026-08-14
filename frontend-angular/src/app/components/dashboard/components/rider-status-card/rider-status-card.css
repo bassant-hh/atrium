@@ -67,7 +67,7 @@
   transition: all var(--transition-fast);
 }
 
-.status-toggle-btn:hover {
+.status-toggle-btn:hover:not(:disabled) {
   background: rgba(59, 136, 157, 0.1);
   transform: translateY(-2px);
 }
@@ -77,8 +77,15 @@
   color: #ffffff;
 }
 
-.status-toggle-btn.btn-active:hover {
+.status-toggle-btn.btn-active:hover:not(:disabled) {
   background: var(--color-primary-hover);
+}
+
+.status-toggle-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 480px) {
