@@ -5,6 +5,8 @@ export class ActiveDeliveryDto {
   dropoff: string;
   estimatedTime: string;
   status?: string;
+  pickupCoordinates?: { latitude: number; longitude: number };
+  destinationCoordinates?: { latitude: number; longitude: number };
 }
 
 export class AcceptOrderResponseDto {

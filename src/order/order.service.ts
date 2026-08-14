@@ -25,6 +25,7 @@ import {
 import { User, UserDocument } from '../schemas/user.schema';
 import { VerificationStatus } from '../rider/enums/verification-status.enum';
 import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 // ============================================================================
 // Temporary Default Constants for Phase 1
@@ -46,6 +47,7 @@ export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   // ==========================================================================
@@ -87,6 +89,12 @@ export class OrderService {
     destination: string;
     estimatedTime?: string;
     status?: string;
+    pickupLocationDetails?: {
+      coordinates: { latitude: number; longitude: number };
+    };
+    destinationLocationDetails?: {
+      coordinates: { latitude: number; longitude: number };
+    };
   }): ActiveDeliveryDto {
     return {
       orderId: order._id.toString(),
@@ -95,6 +103,14 @@ export class OrderService {
       dropoff: order.destination,
       estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
       status: order.status,
+      pickupCoordinates: order.pickupLocationDetails?.coordinates ?? {
+        latitude: 26.1551,
+        longitude: 32.716,
+      },
+      destinationCoordinates: order.destinationLocationDetails?.coordinates ?? {
+        latitude: 26.158,
+        longitude: 32.721,
+      },
     };
   }
 
@@ -317,7 +333,7 @@ export class OrderService {
             acceptedAt: new Date(),
           },
         },
-        { new: true, lean: true },
+        { returnDocument: 'after', lean: true },
       )
       .exec();
 
@@ -332,13 +348,16 @@ export class OrderService {
       .findOneAndUpdate(
         { _id: riderId, dutyStatus: RiderDutyStatus.ONLINE },
         { $set: { dutyStatus: RiderDutyStatus.DELIVERING } },
-        { new: true, lean: true },
+        { returnDocument: 'after', lean: true },
       )
       .exec();
 
     if (!updatedRider) {
       throw new ConflictException('Rider is no longer ONLINE.');
     }
+
+    // 5. Broadcast realtime order removal event to all connected riders
+    this.realtimeGateway.notifyOrderUnavailable(orderId);
 
     return {
       success: true,
@@ -414,7 +433,7 @@ export class OrderService {
       .findOneAndUpdate(
         { _id: orderId, riderId: riderId, status: OrderStatus.ACCEPTED },
         { $set: { status: OrderStatus.PICKED_UP } },
-        { new: true, lean: true },
+        { returnDocument: 'after', lean: true },
       )
       .exec();
 
@@ -467,7 +486,7 @@ export class OrderService {
         .findOneAndUpdate(
           { _id: orderId, riderId: riderId, status: OrderStatus.PICKED_UP },
           { $set: { status: OrderStatus.DELIVERED, deliveredAt: new Date() } },
-          { new: true, lean: true, session },
+          { returnDocument: 'after', lean: true, session },
         )
         .exec();
 
@@ -481,7 +500,7 @@ export class OrderService {
         .findOneAndUpdate(
           { _id: riderId, dutyStatus: RiderDutyStatus.DELIVERING },
           { $set: { dutyStatus: RiderDutyStatus.ONLINE } },
-          { new: true, lean: true, session },
+          { returnDocument: 'after', lean: true, session },
         )
         .exec();
 
@@ -518,6 +537,8 @@ export class OrderService {
         destination: 1,
         estimatedTime: 1,
         status: 1,
+        pickupLocationDetails: 1,
+        destinationLocationDetails: 1,
       })
       .lean()
       .exec();

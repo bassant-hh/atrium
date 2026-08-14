@@ -15,6 +15,7 @@ import {
   DEFAULT_CUSTOMER_ORDER_ESTIMATED_TIME,
   DEFAULT_CUSTOMER_ORDER_EARNINGS,
 } from './constants/customer-order.constants';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class CustomerOrderService {
@@ -23,6 +24,7 @@ export class CustomerOrderService {
     private readonly customerModel: Model<CustomerDocument>,
     @InjectModel(Order.name)
     private readonly orderModel: Model<OrderDocument>,
+    private readonly realtimeGateway: RealtimeGateway,
   ) {}
 
   private mapToDto(order: OrderDocument): CustomerOrderDto {
@@ -77,6 +79,17 @@ export class CustomerOrderService {
     });
 
     const savedOrder = await createdOrder.save();
+
+    // Broadcast new AVAILABLE order to connected eligible riders via realtime gateway
+    this.realtimeGateway.notifyOrderAvailable({
+      id: savedOrder._id.toString(),
+      customerName: savedOrder.customerName,
+      pickup: savedOrder.pickup,
+      destination: savedOrder.destination,
+      distance: savedOrder.distance,
+      earnings: savedOrder.earnings,
+    });
+
     return this.mapToDto(savedOrder);
   }
 

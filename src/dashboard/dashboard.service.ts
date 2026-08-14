@@ -32,15 +32,17 @@ export class DashboardService {
               $toInt: {
                 $ifNull: [
                   {
-                    $arrayElemAt: [
-                      {
-                        $regexFindAll: {
-                          input: '$earnings',
-                          regex: '[0-9]+',
+                    $let: {
+                      vars: {
+                        matchObj: {
+                          $regexFind: {
+                            input: '$earnings',
+                            regex: '[0-9]+',
+                          },
                         },
                       },
-                      0,
-                    ],
+                      in: '$$matchObj.match',
+                    },
                   },
                   '0',
                 ],

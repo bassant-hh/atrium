@@ -7,6 +7,7 @@ import { CustomerService } from './customer.service';
 import { CustomerOrderController } from './customer-order.controller';
 import { CustomerOrderService } from './customer-order.service';
 import { CustomerJwtGuard } from './guards/customer-jwt.guard';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CustomerJwtGuard } from './guards/customer-jwt.guard';
       { name: Customer.name, schema: CustomerSchema },
       { name: Order.name, schema: OrderSchema },
     ]),
+    RealtimeModule,
   ],
   controllers: [CustomerController, CustomerOrderController],
   providers: [CustomerService, CustomerOrderService, CustomerJwtGuard],
