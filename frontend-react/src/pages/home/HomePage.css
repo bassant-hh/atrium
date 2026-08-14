@@ -1,0 +1,15 @@
+.home-page-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 14px 32px 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .home-page-container {
+    padding: 24px 20px 40px 20px;
+  }
+}

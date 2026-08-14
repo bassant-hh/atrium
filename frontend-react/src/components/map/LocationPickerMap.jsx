@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import MapAdapter from './MapAdapter';
+import { useCustomerLocation } from '../../hooks/useCustomerLocation';
 
 const DEFAULT_CENTER = {
   latitude: 26.1551,
@@ -13,9 +14,9 @@ const LocationPickerMap = ({
   onAddressGeocoded,
 }) => {
   const [coords, setCoords] = useState(initialCoords || DEFAULT_CENTER);
-  const [gpsStatus, setGpsStatus] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
   const [geocodedAddress, setGeocodedAddress] = useState('');
+
+  const { loading: isLocating, statusMessage: gpsStatus, requestLocation } = useCustomerLocation();
 
   const performReverseGeocode = async (newCoords) => {
     try {
@@ -45,35 +46,11 @@ const LocationPickerMap = ({
     performReverseGeocode(newCoords);
   };
 
-  const handleGetCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setGpsStatus('Geolocation is not supported by your browser.');
-      return;
+  const handleGetCurrentLocation = async () => {
+    const result = await requestLocation({ timeout: 10000, enableHighAccuracy: true });
+    if (result && result.success && result.coords) {
+      handlePositionChange(result.coords);
     }
-
-    setIsLocating(true);
-    setGpsStatus('Requesting GPS location...');
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const newCoords = {
-          latitude: Number(position.coords.latitude.toFixed(6)),
-          longitude: Number(position.coords.longitude.toFixed(6)),
-        };
-        handlePositionChange(newCoords);
-        setIsLocating(false);
-        setGpsStatus('Location captured via GPS ✓');
-      },
-      (error) => {
-        setIsLocating(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          setGpsStatus('GPS permission denied. Please adjust location manually on the map.');
-        } else {
-          setGpsStatus('Unable to retrieve GPS location. Please choose manually.');
-        }
-      },
-      { timeout: 10000, enableHighAccuracy: true },
-    );
   };
 
   return (

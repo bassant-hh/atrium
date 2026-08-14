@@ -1,175 +1,89 @@
-import React from 'react';
-import { FaBox, FaClock, FaLocationArrow, FaStar } from 'react-icons/fa';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { getMyOrders } from '../../services/order.service';
+import HomeGreeting from '../../components/home/HomeGreeting/HomeGreeting';
+import HomeQuickActions from '../../components/home/HomeQuickActions/HomeQuickActions';
+import ActiveOrder from '../../components/home/ActiveOrder/ActiveOrder';
+import RecentOrders from '../../components/home/RecentOrders/RecentOrders';
+import NearbyRiders from '../../components/home/NearbyRiders/NearbyRiders';
+import './HomePage.css';
 
-import { BACKEND_URL } from '../../../options';
-
-import StatusCard from '../../components/card/Card';
-import CategoryCard from '../../components/categoryCard/Category';
-import DriverCard from '../../components/DriverCard/DriverCard';
-import RecentOrders from '../../components/RecentOrders/RecentOrders';
-import WelcomeHome from '../../components/welcomeHome/WelcomeHome';
-import { useNavigate } from 'react-router-dom';
-
-console.log(BACKEND_URL);
-
-// constant right now until the backend send the endpoints
-const PRIMARY_COLOR = '#3b889d';
-
-const categories = [
-  {
-    id: 'food',
-    icon: '🍕',
-    iconBg: '#BAEAFF',
-    title: 'Food & Drinks',
-    orderCount: 45,
-    badgeColor: '#0C6780',
-    badgeBg: '#BAEAFF',
-  },
-  {
-    id: 'printing',
-    icon: '🖨️',
-    iconBg: '#BAEAFF',
-    title: 'Printing',
-    orderCount: 120,
-    badgeColor: '#0C6780',
-    badgeBg: '#BAEAFF',
-  },
-  {
-    id: 'stationary',
-    icon: '✏️',
-    iconBg: '#BAEAFF',
-    title: 'Stationary',
-    orderCount: 88,
-    badgeColor: '#0C6780',
-    badgeBg: '#BAEAFF',
-  },
-  {
-    id: 'books',
-    icon: '📚',
-    iconBg: '#BAEAFF',
-    title: 'Books',
-    orderCount: 32,
-    badgeColor: '#0C6780',
-    badgeBg: '#BAEAFF',
-  },
-];
-
-const drivers = [
-  {
-    id: 'mohammed',
-    name: 'Mohammed A.',
-    distance: '0.5 km away',
-    rating: 4.9,
-    isOnline: true,
-    avatarColor: '#BAEAFF',
-    avatarTextColor: '#004D62',
-  },
-  {
-    id: 'fatima',
-    name: 'Fatima S.',
-    distance: '0.8 km away',
-    rating: 4.8,
-    isOnline: true,
-  },
-  {
-    id: 'khalid',
-    name: 'Khalid M.',
-    distance: '1.2 km away',
-    rating: 4.7,
-    isOnline: false,
-  },
-];
-
-const sampleOrders = [
-  {
-    id: 'M1234',
-    item: 'Chicken Shawarma',
-    status: 'Delivered',
-    time: '2h ago',
-    amount: 25,
-  },
-  {
-    id: 'M1235',
-    item: 'Print Documents',
-    status: 'In Progress',
-    time: '30m ago',
-    amount: 5,
-  },
-  {
-    id: 'M1236',
-    item: 'Notebook & Pens',
-    status: 'Pending',
-    time: '1h ago',
-    amount: 15,
-  },
-  {
-    id: 'M1237',
-    item: 'Water Bottles x6',
-    status: 'Cancelled',
-    time: '3h ago',
-    amount: 18,
-  },
-];
-
-const gridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  gap: '16px',
-};
+const ACTIVE_STATUSES = ['AVAILABLE', 'ACCEPTED', 'PICKED_UP'];
 
 const HomePage = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleCategoryClick = () => {
-    navigate('/new-order');
-  };
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getMyOrders();
+      const orderList = Array.isArray(data) ? data : data?.data || [];
+      setOrders(orderList);
+    } catch (err) {
+      setError(err.message || 'Unable to load orders.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        const data = await getMyOrders();
+        if (isMounted) {
+          const orderList = Array.isArray(data) ? data : data?.data || [];
+          setOrders(orderList);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Unable to load orders.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Derive active order (AVAILABLE, ACCEPTED, PICKED_UP)
+  const activeOrder = orders.find((o) => ACTIVE_STATUSES.includes(o.status));
+
+  // Exclude active order from recent orders list if active order exists
+  const recentOrders = activeOrder
+    ? orders.filter((o) => (o.id || o._id) !== (activeOrder.id || activeOrder._id))
+    : orders;
+
   return (
-    <div className="container py-4">
-      <WelcomeHome />
+    <main className="home-page-container" role="main" aria-label="Customer Home">
+      {/* Section 1 — Greeting */}
+      <HomeGreeting user={user} />
 
-      {/* Status Cards */}
-      <div className="d-flex flex-wrap gap-3 mb-5">
-        <StatusCard title="Total Orders" count={24} icon={FaBox} color={PRIMARY_COLOR} />
-        <StatusCard title="In Progress" count={2} icon={FaClock} color={PRIMARY_COLOR} />
-        <StatusCard title="Completed" count={22} icon={FaStar} color={PRIMARY_COLOR} />
-        <StatusCard
-          title="Total Spent"
-          count={`${24}$`}
-          icon={FaLocationArrow}
-          color={PRIMARY_COLOR}
-        />
-      </div>
+      {/* Section 2 & 3 — Primary Action & Quick Shortcuts */}
+      <HomeQuickActions />
 
-      {/* Main Grid */}
-      <div className="row g-4 mt-4">
-        <div className="col-lg-8 d-flex flex-column gap-5">
-          {/* Categories */}
-          <div>
-            <h3 className="mb-4">Categories</h3>
+      {/* Section 4 — Active Order (Renders ONLY when an active order exists) */}
+      {activeOrder && <ActiveOrder order={activeOrder} />}
 
-            <div style={gridStyle}>
-              {categories.map((cat) => (
-                <CategoryCard key={cat.id} {...cat} onClick={() => handleCategoryClick()} />
-              ))}
-            </div>
-          </div>
+      {/* Section 5 — Recent Orders */}
+      <RecentOrders orders={recentOrders} loading={loading} error={error} onRetry={fetchOrders} />
 
-          {/* Recent Orders */}
-          <RecentOrders title="Recent Orders" orders={sampleOrders} currency="SAR" />
-        </div>
-
-        {/* Drivers */}
-        <div className="col-lg-4">
-          <h3 className="mb-4">Nearby Drivers</h3>
-
-          <div className="d-flex flex-column gap-3">
-            {drivers.map((driver) => (
-              <DriverCard key={driver.id} {...driver} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Section 6 — Nearby Riders (LAST Section) */}
+      <NearbyRiders />
+    </main>
   );
 };
 

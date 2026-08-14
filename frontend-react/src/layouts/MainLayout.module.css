@@ -30,13 +30,13 @@
 }
 
 .logoText {
-  color: #519AB5;
+  color: #519ab5;
   font-weight: 700;
   font-size: 18px;
 }
 
 .logoIcon {
-  color: #519AB5;
+  color: #519ab5;
   font-size: 20px;
 }
 
@@ -84,7 +84,7 @@
   right: -2px;
   width: 8px;
   height: 8px;
-  background-color: #519AB5;
+  background-color: #519ab5;
   border-radius: 50%;
 }
 
@@ -136,13 +136,13 @@
 }
 
 .navLink:hover {
-  background-color: #519AB5;
+  background-color: #519ab5;
   color: #374151;
 }
 
 .navLinkActive {
-  background-color: #BAEAFF;
-  color: #519AB5;
+  background-color: #baeaff;
+  color: #519ab5;
 }
 
 .userProfile {
@@ -183,4 +183,21 @@
   flex-grow: 1;
   overflow-y: auto;
   padding: 32px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  .main {
+    margin-left: 0;
+    padding: 16px 12px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+  .navbar {
+    padding: 0 16px;
+  }
+  .navbarLogo {
+    width: auto;
+  }
 }

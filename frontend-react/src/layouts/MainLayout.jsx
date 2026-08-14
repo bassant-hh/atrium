@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Form, InputGroup, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { ROUTES } from '../constants/routes.js';
+import HeaderDestinationSearch from '../components/navigation/HeaderDestinationSearch/HeaderDestinationSearch.jsx';
+import MobileBottomNavigation from '../components/navigation/MobileBottomNavigation/MobileBottomNavigation.jsx';
 import styles from './MainLayout.module.css';
 
 const MainLayout = () => {
@@ -10,7 +12,7 @@ const MainLayout = () => {
 
   return (
     <div className={styles.appWrapper}>
-      {/* Header */}
+      {/* Top Navbar Header */}
       <header className={styles.navbar}>
         <div className={styles.navbarLogo}>
           <span className={styles.logoIcon}>
@@ -19,15 +21,11 @@ const MainLayout = () => {
           <span className={styles.logoText}>Makook</span>
         </div>
 
+        {/* Destination Search (Header Position) */}
         <div className={styles.searchWrapper}>
-          <InputGroup>
-            <InputGroup.Text>
-              <i className="fa-solid fa-magnifying-glass"></i>
-            </InputGroup.Text>
-
-            <Form.Control placeholder="Search..." aria-label="Search" />
-          </InputGroup>
+          <HeaderDestinationSearch />
         </div>
+
         <NavLink to={ROUTES.NOTIFICATIONS}>
           <Button variant="light" className="rounded-circle p-2" aria-label="Notifications">
             <i className="fa-regular fa-bell"></i>
@@ -36,7 +34,7 @@ const MainLayout = () => {
       </header>
 
       <div className={styles.body}>
-        {/* Sidebar */}
+        {/* Desktop Sidebar (hidden on mobile via media query) */}
         <aside className={styles.sidebar}>
           <nav className={styles.sidebarNav}>
             <NavLink to={ROUTES.HOME} className={navLinkClass}>
@@ -57,11 +55,14 @@ const MainLayout = () => {
           </nav>
         </aside>
 
-        {/* Main */}
+        {/* Main Page Content */}
         <main className={styles.main}>
           <Outlet />
         </main>
       </div>
+
+      {/* Persistent Mobile Bottom Navigation Bar (visible on mobile only) */}
+      <MobileBottomNavigation />
     </div>
   );
 };

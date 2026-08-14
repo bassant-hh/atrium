@@ -6,6 +6,8 @@ import { CustomerController } from './customer.controller';
 import { CustomerService } from './customer.service';
 import { CustomerOrderController } from './customer-order.controller';
 import { CustomerOrderService } from './customer-order.service';
+import { CustomerDestinationController } from './customer-destination.controller';
+import { CustomerDestinationService } from './customer-destination.service';
 import { CustomerJwtGuard } from './guards/customer-jwt.guard';
 import { RealtimeModule } from '../realtime/realtime.module';
 
@@ -17,8 +19,22 @@ import { RealtimeModule } from '../realtime/realtime.module';
     ]),
     RealtimeModule,
   ],
-  controllers: [CustomerController, CustomerOrderController],
-  providers: [CustomerService, CustomerOrderService, CustomerJwtGuard],
-  exports: [CustomerService, CustomerOrderService, CustomerJwtGuard],
+  controllers: [
+    CustomerController,
+    CustomerOrderController,
+    CustomerDestinationController,
+  ],
+  providers: [
+    CustomerService,
+    CustomerOrderService,
+    CustomerDestinationService,
+    CustomerJwtGuard,
+  ],
+  exports: [
+    CustomerService,
+    CustomerOrderService,
+    CustomerDestinationService,
+    CustomerJwtGuard,
+  ],
 })
 export class CustomerModule {}

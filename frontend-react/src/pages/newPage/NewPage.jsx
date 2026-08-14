@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { createOrder } from '../../services/order.service';
 import LocationPickerMap from '../../components/map/LocationPickerMap';
 import './newPage.css';
@@ -88,6 +88,7 @@ const formatLocationString = (type, fields) => {
 
 const NewOrder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Order Details
   const [category, setCategory] = useState('food');
@@ -113,19 +114,24 @@ const NewOrder = () => {
   const [pickupCoords, setPickupCoords] = useState({ latitude: 26.1551, longitude: 32.716 });
 
   // Destination Location State
-  const [destType, setDestType] = useState('home');
-  const [destFields, setDestFields] = useState({
-    university: 'South Valley University',
-    faculty: '',
-    deliveryPoint: '',
-    street: 'University Street',
-    building: '12',
-    floor: '3',
-    apartment: '5',
-    officeName: '',
-    landmark: 'Beside Pharmacy',
-  });
-  const [destCoords, setDestCoords] = useState({ latitude: 26.158, longitude: 32.72 });
+  const initialDest = location.state?.selectedDestination;
+  const [isPreselected, setIsPreselected] = useState(() => !!initialDest);
+  const [preselectedInfo] = useState(() => initialDest || null);
+  const [destType, setDestType] = useState(() => initialDest?.type || 'home');
+  const [destFields, setDestFields] = useState(() => ({
+    university: initialDest?.fields?.university || 'South Valley University',
+    faculty: initialDest?.fields?.faculty || '',
+    deliveryPoint: initialDest?.fields?.deliveryPoint || '',
+    street: initialDest?.fields?.street || 'University Street',
+    building: initialDest?.fields?.building || '12',
+    floor: initialDest?.fields?.floor || '3',
+    apartment: initialDest?.fields?.apartment || '5',
+    officeName: initialDest?.fields?.officeName || '',
+    landmark: initialDest?.fields?.landmark || 'Beside Pharmacy',
+  }));
+  const [destCoords, setDestCoords] = useState(
+    () => initialDest?.coords || { latitude: 26.158, longitude: 32.72 },
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -511,6 +517,66 @@ const NewOrder = () => {
               <h2 className="no-card__title">4. Destination Location & Pin Selection</h2>
               <span style={{ fontSize: '12px', color: '#607D8B' }}>Step B</span>
             </div>
+
+            {/* Pre-selected Destination Banner from Header Search */}
+            {isPreselected && preselectedInfo && (
+              <div
+                style={{
+                  background: '#F0F8FA',
+                  border: '1px solid #74BECE',
+                  borderRadius: '12px',
+                  padding: '12px 16px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: '#156B82',
+                      fontWeight: '800',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    📍 PRE-SELECTED DESTINATION FROM SEARCH
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '800',
+                      color: '#263238',
+                      marginTop: '2px',
+                    }}
+                  >
+                    {preselectedInfo.name || preselectedInfo.displayTitle}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#607D8B' }}>
+                    {preselectedInfo.address || preselectedInfo.displaySub}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPreselected(false)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #156B82',
+                    background: '#ffffff',
+                    color: '#156B82',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  Change
+                </button>
+              </div>
+            )}
 
             {/* Quick Pick Presets */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

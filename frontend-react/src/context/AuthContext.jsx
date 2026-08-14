@@ -18,6 +18,19 @@ const logError = (...args) => {
   }
 };
 
+const normalizeUser = (userData) => {
+  if (!userData) return null;
+  const raw = userData.customer || userData.user || userData;
+  return {
+    id: raw.id || raw._id || '',
+    firstName: raw.firstName || '',
+    lastName: raw.lastName || '',
+    email: raw.email || '',
+    phone: raw.phone || '',
+    ...raw,
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => getToken());
   const [user, setUser] = useState(null);
@@ -43,10 +56,11 @@ export const AuthProvider = ({ children }) => {
     if (!getToken()) return null;
     try {
       const profile = await getCustomerProfile();
+      const normalized = normalizeUser(profile);
       if (isMountedRef.current) {
-        setUser(profile);
+        setUser(normalized);
       }
-      return profile;
+      return normalized;
     } catch (error) {
       logError('Refresh user failed:', error);
       removeToken();
@@ -69,7 +83,7 @@ export const AuthProvider = ({ children }) => {
 
       if (userData) {
         if (isMountedRef.current) {
-          setUser(userData);
+          setUser(normalizeUser(userData));
         }
       } else if (newToken) {
         await refreshUser();
@@ -94,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       if (isMountedRef.current) setLoading(true);
       const profile = await getCustomerProfile();
       if (isMountedRef.current) {
-        setUser(profile);
+        setUser(normalizeUser(profile));
         setToken(existingToken);
       }
     } catch (error) {
