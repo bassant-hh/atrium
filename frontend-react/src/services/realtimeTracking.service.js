@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { BACKEND_URL } from '../../options';
 import { APP_CONFIG } from '../config/app.config';
 
 let socket = null;
@@ -26,9 +27,8 @@ export const startRealtimeTracking = (orderId, onLocationUpdate, onError) => {
   errorCallback = onError;
 
   const token = getCustomerToken();
-  const baseUrl = APP_CONFIG.apiUrl
-    ? APP_CONFIG.apiUrl.replace(/\/$/, '')
-    : 'http://localhost:3000';
+  const rawApiUrl = BACKEND_URL || APP_CONFIG.apiUrl || '';
+  const baseUrl = rawApiUrl.replace(/\/$/, '');
   const socketUrl = `${baseUrl}/realtime`;
 
   socket = io(socketUrl, {
