@@ -26,6 +26,8 @@ import { User, UserDocument } from '../schemas/user.schema';
 import { VerificationStatus } from '../rider/enums/verification-status.enum';
 import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from '../notification/enums/notification-type.enum';
 
 // ============================================================================
 // Temporary Default Constants for Phase 1
@@ -48,6 +50,7 @@ export class OrderService {
     @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly realtimeGateway: RealtimeGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   // ==========================================================================
@@ -359,6 +362,17 @@ export class OrderService {
     // 5. Broadcast realtime order removal event to all connected riders
     this.realtimeGateway.notifyOrderUnavailable(orderId);
 
+    // 6. Trigger ORDER_ACCEPTED notification for customer
+    if (updatedOrder.clientId) {
+      await this.notificationService.createNotification({
+        customerId: updatedOrder.clientId,
+        orderId: updatedOrder._id.toString(),
+        type: NotificationType.ORDER_ACCEPTED,
+        title: 'Rider Assigned',
+        message: 'A rider has accepted your order and is heading to pickup.',
+      });
+    }
+
     return {
       success: true,
       message: 'Order accepted successfully.',
@@ -443,6 +457,17 @@ export class OrderService {
       );
     }
 
+    // 4. Trigger ORDER_PICKED_UP notification for customer
+    if (updatedOrder.clientId) {
+      await this.notificationService.createNotification({
+        customerId: updatedOrder.clientId,
+        orderId: updatedOrder._id.toString(),
+        type: NotificationType.ORDER_PICKED_UP,
+        title: 'Order In Transit',
+        message: 'Your order has been picked up and is on its way to you.',
+      });
+    }
+
     return {
       success: true,
       message: 'Order picked up successfully.',
@@ -478,17 +503,18 @@ export class OrderService {
     }
 
     // 3. Atomic MongoDB Session Transaction for 100% Data Consistency
+    let updatedOrder: OrderDocument | null = null;
     const session = await this.orderModel.db.startSession();
     try {
       session.startTransaction();
 
-      const updatedOrder = await this.orderModel
+      updatedOrder = (await this.orderModel
         .findOneAndUpdate(
           { _id: orderId, riderId: riderId, status: OrderStatus.PICKED_UP },
           { $set: { status: OrderStatus.DELIVERED, deliveredAt: new Date() } },
           { returnDocument: 'after', lean: true, session },
         )
-        .exec();
+        .exec()) as OrderDocument | null;
 
       if (!updatedOrder) {
         throw new ConflictException(
@@ -514,6 +540,17 @@ export class OrderService {
       throw error;
     } finally {
       session.endSession();
+    }
+
+    // 4. Trigger ORDER_DELIVERED notification only AFTER transaction successfully commits
+    if (updatedOrder && updatedOrder.clientId) {
+      await this.notificationService.createNotification({
+        customerId: updatedOrder.clientId,
+        orderId: updatedOrder._id.toString(),
+        type: NotificationType.ORDER_DELIVERED,
+        title: 'Order Delivered',
+        message: 'Your order has been delivered successfully.',
+      });
     }
 
     return {

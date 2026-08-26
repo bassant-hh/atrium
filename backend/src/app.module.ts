@@ -7,6 +7,7 @@ import { RiderModule } from './rider/rider.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CustomerModule } from './customer/customer.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { NotificationModule } from './notification/notification.module';
 
 import { MongooseModule } from '@nestjs/mongoose';
 import { UploadFileModule } from './upload-file/upload-file.module';
@@ -26,6 +27,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     DashboardModule,
     CustomerModule,
     RealtimeModule,
+    NotificationModule,
 
     MongooseModule.forRootAsync({
       inject: [ConfigService],

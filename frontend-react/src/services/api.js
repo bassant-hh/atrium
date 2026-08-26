@@ -104,6 +104,15 @@ export const apiPut = (endpoint, body, options = {}) => {
   });
 };
 
+export const apiPatch = (endpoint, body, options = {}) => {
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+  return authFetch(endpoint, {
+    ...options,
+    method: 'PATCH',
+    body: isFormData ? body : body ? JSON.stringify(body) : undefined,
+  });
+};
+
 export const apiDelete = (endpoint, options = {}) => {
   return authFetch(endpoint, { ...options, method: 'DELETE' });
 };
