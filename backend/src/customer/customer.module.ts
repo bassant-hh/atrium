@@ -8,6 +8,7 @@ import { CustomerOrderController } from './customer-order.controller';
 import { CustomerOrderService } from './customer-order.service';
 import { CustomerDestinationController } from './customer-destination.controller';
 import { CustomerDestinationService } from './customer-destination.service';
+import { LocationIqProvider } from './providers/locationiq.provider';
 import { CustomerJwtGuard } from './guards/customer-jwt.guard';
 import { RealtimeModule } from '../realtime/realtime.module';
 
@@ -28,12 +29,14 @@ import { RealtimeModule } from '../realtime/realtime.module';
     CustomerService,
     CustomerOrderService,
     CustomerDestinationService,
+    LocationIqProvider,
     CustomerJwtGuard,
   ],
   exports: [
     CustomerService,
     CustomerOrderService,
     CustomerDestinationService,
+    LocationIqProvider,
     CustomerJwtGuard,
   ],
 })

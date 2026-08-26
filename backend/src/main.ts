@@ -7,10 +7,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
+
   app.enableCors({
     origin: [
-      'http://localhost:5173', // React Customer
-      'http://localhost:4200', // Angular Rider
+      'http://localhost:5173',
+      'http://localhost:4200',
+      'https://atrium-frontend-vite.vercel.app',
+      'https://atrium-frontend-vite-8bkzbftx3-bassant-hhs-projects.vercel.app',
+      /^https:\/\/atrium-frontend-vite-[a-z0-9-]+-[a-z0-9-]+\.vercel\.app$/,
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
