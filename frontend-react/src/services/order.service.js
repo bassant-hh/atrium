@@ -21,3 +21,19 @@ export const getOrderById = async (id) => {
     method: 'GET',
   });
 };
+
+export const cancelOrder = async (id) => {
+  return authFetch(`customer/orders/${id}/cancel`, {
+    method: 'PATCH',
+  });
+};
+
+export const verifyPayment = async (orderId, transactionId) => {
+  return authFetch(`payment/verify/${orderId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ transactionId }),
+  });
+};

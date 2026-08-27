@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { NotificationService } from './notification.service';
 import {
@@ -26,5 +34,12 @@ export class NotificationController {
     @Req() req: Request & { customer: CustomerJwtPayload },
   ): Promise<NotificationDto> {
     return this.notificationService.markAsRead(id, req.customer._id);
+  }
+
+  @Delete()
+  async clearAll(
+    @Req() req: Request & { customer: CustomerJwtPayload },
+  ): Promise<{ deletedCount: number }> {
+    return this.notificationService.clearAll(req.customer._id);
   }
 }

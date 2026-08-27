@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrderById } from '../../services/order.service';
+import { getOrderById, cancelOrder } from '../../services/order.service';
 import {
   startRealtimeTracking,
   stopRealtimeTracking,
@@ -39,6 +39,7 @@ const TrackOrders = () => {
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [error, setError] = useState(null);
   const [riderCoords, setRiderCoords] = useState(null);
 
@@ -202,6 +203,25 @@ const TrackOrders = () => {
     };
   }, [id, triggerRouteCalculation]);
 
+  const handleCancelOrder = async () => {
+    if (!order || order.status !== 'AVAILABLE' || isCancelling) return;
+    const confirmed = window.confirm(
+      'Are you sure you want to cancel this order before a rider accepts it?',
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsCancelling(true);
+      setError(null);
+      const updated = await cancelOrder(order.id || order._id);
+      setOrder(updated);
+    } catch (err) {
+      setError(err.message || 'Failed to cancel order.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const currentStatus = order?.status || 'AVAILABLE';
   const statusConfig = statusDisplayMap[currentStatus] || {
     label: currentStatus,
@@ -294,21 +314,43 @@ const TrackOrders = () => {
               </h2>
               <p style={{ margin: '4px 0 0 0', color: '#607D8B', fontSize: '14px' }}>
                 {order.category || 'General'} •{' '}
-                {order.amount != null ? `${order.amount} SAR` : 'N/A'}
+                {order.amount != null ? `${order.amount} EGP` : 'N/A'}
               </p>
             </div>
-            <span
-              style={{
-                padding: '6px 14px',
-                borderRadius: '20px',
-                fontWeight: '700',
-                fontSize: '13px',
-                backgroundColor: statusConfig.background,
-                color: statusConfig.color,
-              }}
-            >
-              {statusConfig.label}
-            </span>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {currentStatus === 'AVAILABLE' && (
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={isCancelling}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    border: '1px solid #F5C6C6',
+                    backgroundColor: '#FDECEC',
+                    color: '#E05252',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                </button>
+              )}
+
+              <span
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  backgroundColor: statusConfig.background,
+                  color: statusConfig.color,
+                }}
+              >
+                {statusConfig.label}
+              </span>
+            </div>
           </div>
 
           {/* Cancellation Alert */}
@@ -525,10 +567,33 @@ const TrackOrders = () => {
 
               <div>
                 <p style={{ margin: '0 0 2px 0', fontSize: '13px', color: '#607D8B' }}>
-                  Total Amount Paid
+                  Total Amount ({order.paymentMethod || 'CASH'})
                 </p>
                 <p style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#156B82' }}>
-                  {order.amount != null ? `${order.amount} SAR` : 'N/A'}
+                  {order.amount != null ? `${order.amount} EGP` : 'N/A'}{' '}
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      marginLeft: '6px',
+                      backgroundColor:
+                        order.paymentStatus === 'PAID'
+                          ? '#E6F7F0'
+                          : order.paymentStatus === 'FAILED'
+                            ? '#FDECEC'
+                            : '#FEF9E3',
+                      color:
+                        order.paymentStatus === 'PAID'
+                          ? '#2E9E6B'
+                          : order.paymentStatus === 'FAILED'
+                            ? '#E05252'
+                            : '#C9A227',
+                    }}
+                  >
+                    Payment: {order.paymentStatus || 'PENDING'}
+                  </span>
                 </p>
               </div>
 
@@ -540,6 +605,29 @@ const TrackOrders = () => {
                   <p style={{ margin: 0, fontSize: '14px', color: '#263238' }}>{order.notes}</p>
                 </div>
               )}
+
+              <button
+                onClick={() => navigate(`/order-confirmation/${id}`)}
+                style={{
+                  width: '100%',
+                  marginTop: '8px',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1px solid #156B82',
+                  backgroundColor: '#F4FBFD',
+                  color: '#156B82',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                📄 View Order Invoice
+              </button>
             </div>
           </div>
         </div>

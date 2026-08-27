@@ -1,12 +1,20 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
 import { ROUTES } from '../constants/routes.js';
+import { useNotification } from '../context/NotificationContext.jsx';
 import HeaderDestinationSearch from '../components/navigation/HeaderDestinationSearch/HeaderDestinationSearch.jsx';
 import MobileBottomNavigation from '../components/navigation/MobileBottomNavigation/MobileBottomNavigation.jsx';
 import styles from './MainLayout.module.css';
 
+const formatBadgeCount = (count) => {
+  if (!count || count <= 0) return null;
+  if (count > 99) return '99+';
+  return String(count);
+};
+
 const MainLayout = () => {
+  const { unreadCount } = useNotification();
+
   const navLinkClass = ({ isActive }) =>
     `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`;
 
@@ -26,10 +34,18 @@ const MainLayout = () => {
           <HeaderDestinationSearch />
         </div>
 
-        <NavLink to={ROUTES.NOTIFICATIONS}>
-          <Button variant="light" className="rounded-circle p-2" aria-label="Notifications">
-            <i className="fa-regular fa-bell"></i>
-          </Button>
+        {/* Notification Bell Button with Numeric Badge */}
+        <NavLink
+          to={ROUTES.NOTIFICATIONS}
+          className={({ isActive }) =>
+            `btn btn-light rounded-circle p-2 ${styles.bellWrapper} ${isActive ? styles.navLinkActive : ''}`
+          }
+          aria-label="Notifications"
+        >
+          <i className="fa-regular fa-bell"></i>
+          {unreadCount > 0 && (
+            <span className={styles.bellBadge}>{formatBadgeCount(unreadCount)}</span>
+          )}
         </NavLink>
       </header>
 

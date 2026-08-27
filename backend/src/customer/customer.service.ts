@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -12,6 +13,7 @@ import jwt from 'jsonwebtoken';
 import { Customer, CustomerDocument } from './customer.schema';
 import { RegisterCustomerDto } from './dto/register-customer.dto';
 import { LoginCustomerDto } from './dto/login-customer.dto';
+import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
 import {
   CustomerLoginResponseDto,
   CustomerProfileResponseDto,
@@ -128,6 +130,68 @@ export class CustomerService {
 
     if (!customer) {
       throw new NotFoundException('Customer profile not found.');
+    }
+
+    return {
+      ...this.mapCustomerUser(customer),
+      createdAt: customer.createdAt,
+      updatedAt: customer.updatedAt,
+    };
+  }
+
+  async updateProfile(
+    customerId: string,
+    dto: UpdateCustomerProfileDto,
+  ): Promise<CustomerProfileResponseDto> {
+    const customer = await this.customerModel.findById(customerId).exec();
+    if (!customer) {
+      throw new NotFoundException('Customer profile not found.');
+    }
+
+    const updates: Partial<{
+      firstName: string;
+      lastName: string;
+      phone: string;
+    }> = {};
+
+    if (dto.firstName !== undefined) {
+      const trimmed = dto.firstName.trim();
+      if (!trimmed) {
+        throw new BadRequestException('First name cannot be empty.');
+      }
+      updates.firstName = trimmed;
+    }
+
+    if (dto.lastName !== undefined) {
+      const trimmed = dto.lastName.trim();
+      if (!trimmed) {
+        throw new BadRequestException('Last name cannot be empty.');
+      }
+      updates.lastName = trimmed;
+    }
+
+    if (dto.phone !== undefined) {
+      const trimmed = dto.phone.trim();
+      if (!trimmed) {
+        throw new BadRequestException('Phone number cannot be empty.');
+      }
+      if (trimmed !== customer.phone) {
+        const phoneExists = await this.customerModel
+          .findOne({ phone: trimmed, _id: { $ne: customerId } })
+          .lean()
+          .exec();
+        if (phoneExists) {
+          throw new ConflictException(
+            'Phone number is already in use by another account.',
+          );
+        }
+        updates.phone = trimmed;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      Object.assign(customer, updates);
+      await customer.save();
     }
 
     return {

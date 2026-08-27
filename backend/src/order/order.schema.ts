@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { OrderStatus } from './enums/order-status.enum';
+import { PaymentMethod } from './enums/payment-method.enum';
+import { PaymentStatus } from './enums/payment-status.enum';
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -56,7 +58,34 @@ export class Order {
   notes?: string;
 
   @Prop({ required: false })
+  price?: number;
+
+  @Prop({ required: false })
+  quantity?: number;
+
+  @Prop({ required: false })
+  itemSubtotal?: number;
+
+  @Prop({ required: false, default: 5 })
+  deliveryFee?: number;
+
+  @Prop({ required: false })
   amount?: number;
+
+  @Prop({ type: String, default: PaymentMethod.CASH, enum: PaymentMethod })
+  paymentMethod?: PaymentMethod;
+
+  @Prop({ type: String, default: PaymentStatus.PENDING, enum: PaymentStatus })
+  paymentStatus?: PaymentStatus;
+
+  @Prop({ required: false })
+  paymentProvider?: string;
+
+  @Prop({ required: false })
+  paymentTransactionId?: string;
+
+  @Prop({ required: false })
+  paymentReference?: string;
 
   @Prop({ required: false, default: '15 mins' })
   estimatedTime?: string;
@@ -85,3 +114,4 @@ OrderSchema.index({ riderId: 1 });
 OrderSchema.index({ declinedRiderIds: 1 });
 OrderSchema.index({ riderId: 1, status: 1 });
 OrderSchema.index({ clientId: 1 });
+OrderSchema.index({ paymentStatus: 1 });

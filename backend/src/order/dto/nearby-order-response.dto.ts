@@ -5,4 +5,7 @@ export class NearbyOrderResponseDto {
   destination: string;
   distance: string;
   earnings: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  amount?: number;
 }

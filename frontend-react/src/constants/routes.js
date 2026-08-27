@@ -12,4 +12,6 @@ export const ROUTES = {
   TRACK_ORDERS: '/track-orders/:id',
   NOTIFICATIONS: '/notifications',
   NEW_ORDER: '/new-order',
+  PAYMENT_RESULT: '/payment-result',
+  ORDER_CONFIRMATION: '/order-confirmation/:orderId',
 };

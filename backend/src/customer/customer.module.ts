@@ -11,6 +11,7 @@ import { CustomerDestinationService } from './customer-destination.service';
 import { LocationIqProvider } from './providers/locationiq.provider';
 import { CustomerJwtGuard } from './guards/customer-jwt.guard';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RealtimeModule } from '../realtime/realtime.module';
       { name: Order.name, schema: OrderSchema },
     ]),
     RealtimeModule,
+    PaymentModule,
   ],
   controllers: [
     CustomerController,

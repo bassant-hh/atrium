@@ -4,7 +4,9 @@
       <span class="pulse-dot" aria-hidden="true"></span>
       <span class="tag-title font-headline">
         {{
-          activeDelivery.status === 'PICKED_UP' ? 'Estimated delivery' : 'Rider arriving at pickup'
+          activeDelivery.status === 'PICKED_UP'
+            ? 'In Transit to Customer'
+            : 'Arriving at Pickup Point'
         }}
       </span>
     </div>
@@ -62,6 +64,24 @@
       </div>
     </div>
 
+    <!-- Payment Operational Banner -->
+    <div
+      class="payment-action-banner"
+      [class.banner-cash]="activeDelivery.paymentMethod === 'CASH'"
+      [class.banner-online]="activeDelivery.paymentMethod !== 'CASH'"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">
+        {{ activeDelivery.paymentMethod === 'CASH' ? 'payments' : 'credit_card' }}
+      </span>
+      <span>
+        {{
+          activeDelivery.paymentMethod === 'CASH'
+            ? 'Collect ' + (activeDelivery.amount || 205) + ' EGP Cash on Delivery'
+            : 'Prepaid Online (' + (activeDelivery.amount || 205) + ' EGP Paid)'
+        }}
+      </span>
+    </div>
+
     @if (routeError()) {
       <div class="route-warning-banner">⚠️ {{ routeError() }}</div>
     }
@@ -77,7 +97,7 @@
     @if (submitting) {
       Processing...
     } @else {
-      {{ activeDelivery.status === 'PICKED_UP' ? 'Delivered' : 'Picked Up' }}
+      {{ activeDelivery.status === 'PICKED_UP' ? 'Confirm Delivery' : 'Confirm Pickup' }}
     }
   </button>
 </section>

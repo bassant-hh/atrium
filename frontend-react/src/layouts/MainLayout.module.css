@@ -88,6 +88,23 @@
   border-radius: 50%;
 }
 
+.bellBadge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background-color: #e05252;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 10px;
+  line-height: 1.2;
+  min-width: 16px;
+  text-align: center;
+  pointer-events: none;
+  border: 1.5px solid #ffffff;
+}
+
 .body {
   display: flex;
   flex-grow: 1;

@@ -5,6 +5,9 @@ export interface ActiveDelivery {
   dropoff: string;
   estimatedTime: string;
   status?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  amount?: number;
   pickupCoordinates?: { latitude: number; longitude: number };
   destinationCoordinates?: { latitude: number; longitude: number };
 }
@@ -16,6 +19,9 @@ export interface NearbyOrder {
   destination: string;
   distance: string;
   earnings: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  amount?: number;
 }
 
 export interface AcceptOrderResponse {

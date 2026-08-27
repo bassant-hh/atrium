@@ -113,4 +113,14 @@ export class NotificationService {
       createdAt: updated.createdAt,
     };
   }
+
+  async clearAll(customerId: string): Promise<{ deletedCount: number }> {
+    const result = await this.notificationModel
+      .deleteMany({ customerId })
+      .exec();
+
+    return {
+      deletedCount: result.deletedCount || 0,
+    };
+  }
 }

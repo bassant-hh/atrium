@@ -11,6 +11,40 @@
     role="main"
     aria-label="Rider Dashboard Control Center"
   >
+    <!-- Rider Dashboard Header & Identity Greeting Section -->
+    <header class="dashboard-header-card shadow-card" aria-label="Rider Operations Greeting">
+      <div class="header-identity-left">
+        <div class="rider-avatar-circle" aria-hidden="true">
+          {{ riderInitials }}
+        </div>
+        <div class="header-greeting-text">
+          <h1 class="greeting-headline font-headline">
+            Welcome back, {{ firstName() || 'Rider' }} 👋
+          </h1>
+          <p class="greeting-subtitle">{{ currentDateFormatted }} • Campus Delivery Rider</p>
+        </div>
+      </div>
+
+      <div class="header-status-right">
+        <div
+          class="header-duty-badge"
+          [class.duty-online]="riderStatus() === 'ONLINE' || riderStatus() === 'DELIVERING'"
+          [class.duty-offline]="riderStatus() === 'OFFLINE'"
+          aria-live="polite"
+        >
+          <span class="badge-dot" aria-hidden="true"></span>
+          <span class="badge-text">{{ riderStatus() }}</span>
+        </div>
+
+        @if (verificationStatus() === 'APPROVED') {
+          <div class="header-verified-chip" aria-label="Verified Rider Status">
+            <span class="material-symbols-outlined check-icon" aria-hidden="true">verified</span>
+            <span>Verified Rider</span>
+          </div>
+        }
+      </div>
+    </header>
+
     <!-- Duty Status Control Card -->
     <app-rider-status-card [status]="riderStatus()" (toggleStatus)="toggleStatus()" />
 

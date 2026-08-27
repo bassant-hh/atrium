@@ -1,8 +1,8 @@
 const isProduction = import.meta.env.PROD || import.meta.env.MODE === 'production';
 
 export const APP_CONFIG = {
-  apiUrl: import.meta.env.VITE_API_URL,
-  riderPortalUrl: import.meta.env.VITE_RIDER_PORTAL_URL,
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  riderPortalUrl: import.meta.env.VITE_RIDER_PORTAL_URL || 'http://localhost:4200',
   osmTileUrl:
     import.meta.env.VITE_OSM_TILE_URL || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   osrmBaseUrl: import.meta.env.VITE_OSRM_BASE_URL || 'https://router.project-osrm.org',

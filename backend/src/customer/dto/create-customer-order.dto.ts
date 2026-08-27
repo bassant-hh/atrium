@@ -1,10 +1,12 @@
 import {
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
+import { PaymentMethod } from '../../order/enums/payment-method.enum';
 
 export class CreateCustomerOrderDto {
   @IsNotEmpty()
@@ -46,5 +48,19 @@ export class CreateCustomerOrderDto {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  quantity?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   amount?: number;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod;
 }

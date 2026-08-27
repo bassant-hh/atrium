@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   getCustomerNotifications,
   markNotificationAsRead,
+  clearAllNotifications,
 } from '../../services/notification.service';
+import { useNotification } from '../../context/NotificationContext';
 import './notification.css';
 
 const formatTimeAgo = (dateString) => {
@@ -35,24 +37,29 @@ const getNotificationIconConfig = (type) => {
 };
 
 const Notifications = () => {
+  const { setUnreadCount } = useNotification();
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [localUnread, setLocalUnread] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isClearing, setIsClearing] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchNotifications = useCallback(async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await getCustomerNotifications();
-      setNotifications(data?.notifications || []);
-      setUnreadCount(data?.unreadCount || 0);
+      const list = data?.notifications || [];
+      const count = data?.unreadCount || 0;
+      setNotifications(list);
+      setLocalUnread(count);
+      setUnreadCount(count);
     } catch (err) {
       setError(err.message || 'Failed to load notifications');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setUnreadCount]);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,8 +70,11 @@ const Notifications = () => {
         setError(null);
         const data = await getCustomerNotifications();
         if (isMounted) {
-          setNotifications(data?.notifications || []);
-          setUnreadCount(data?.unreadCount || 0);
+          const list = data?.notifications || [];
+          const count = data?.unreadCount || 0;
+          setNotifications(list);
+          setLocalUnread(count);
+          setUnreadCount(count);
         }
       } catch (err) {
         if (isMounted) {
@@ -82,7 +92,7 @@ const Notifications = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [setUnreadCount]);
 
   const markRead = async (id) => {
     const target = notifications.find((n) => n.id === id);
@@ -92,7 +102,11 @@ const Notifications = () => {
       setNotifications((prev) =>
         prev.map((item) => (item.id === id ? { ...item, isRead: true } : item)),
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      setLocalUnread((prev) => {
+        const next = Math.max(0, prev - 1);
+        setUnreadCount(next);
+        return next;
+      });
 
       await markNotificationAsRead(id);
     } catch (err) {
@@ -105,6 +119,7 @@ const Notifications = () => {
     if (unreadItems.length === 0) return;
 
     setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
+    setLocalUnread(0);
     setUnreadCount(0);
 
     try {
@@ -114,17 +129,55 @@ const Notifications = () => {
     }
   };
 
+  const handleClearAll = async () => {
+    if (notifications.length === 0 || isClearing) return;
+
+    try {
+      setIsClearing(true);
+      setError(null);
+      await clearAllNotifications();
+
+      setNotifications([]);
+      setLocalUnread(0);
+      setUnreadCount(0);
+    } catch (err) {
+      setError(err.message || 'Failed to clear notifications');
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   return (
     <div className="notif-page">
       <div className="notif-header">
         <div>
           <h1>Notifications</h1>
           <p>
-            You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+            You have {localUnread} unread notification{localUnread !== 1 ? 's' : ''}
           </p>
         </div>
 
-        {unreadCount > 0 && <button onClick={markAllRead}>Mark all as read</button>}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {localUnread > 0 && (
+            <button onClick={markAllRead} disabled={isClearing || loading}>
+              Mark all as read
+            </button>
+          )}
+
+          {notifications.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              disabled={isClearing || loading}
+              style={{
+                backgroundColor: '#FDECEC',
+                color: '#E05252',
+                border: '1px solid #F5C6C6',
+              }}
+            >
+              {isClearing ? 'Clearing...' : 'Clear all'}
+            </button>
+          )}
+        </div>
       </div>
 
       {loading && (

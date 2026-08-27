@@ -9,6 +9,8 @@ import TrackOrders from '../pages/trackOrders/TrackOrders.jsx';
 import Notification from '../pages/notification/Notification.jsx';
 import Profile from '../pages/profile/Profile.jsx';
 import NewPage from '../pages/newPage/NewPage.jsx';
+import PaymentResult from '../pages/paymentResult/PaymentResult.jsx';
+import OrderConfirmation from '../pages/orderConfirmation/OrderConfirmation.jsx';
 
 export const dashboardRoutes = (
   <>
@@ -60,6 +62,22 @@ export const dashboardRoutes = (
       element={
         <ProtectedRoute>
           <NewPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path={ROUTES.PAYMENT_RESULT}
+      element={
+        <ProtectedRoute>
+          <PaymentResult />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path={ROUTES.ORDER_CONFIRMATION}
+      element={
+        <ProtectedRoute>
+          <OrderConfirmation />
         </ProtectedRoute>
       }
     />

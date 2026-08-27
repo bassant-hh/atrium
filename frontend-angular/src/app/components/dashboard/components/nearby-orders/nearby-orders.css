@@ -31,6 +31,39 @@
   gap: 1.25rem;
 }
 
+.empty-jobs-card {
+  background: var(--surface-container-lowest);
+  border: 1px dashed var(--outline-variant);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-jobs-icon {
+  font-size: 2.8rem;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+  opacity: 0.8;
+}
+
+.empty-jobs-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--on-surface);
+}
+
+.empty-jobs-desc {
+  font-size: 0.875rem;
+  color: var(--on-surface-variant);
+  margin: 0;
+  max-width: 320px;
+}
+
 .request-card {
   background: var(--surface-container-lowest);
   border: 1px solid var(--outline-variant);
@@ -88,6 +121,30 @@
   margin: 0.3rem 0;
 }
 
+.payment-summary-pill {
+  margin-top: 0.6rem;
+}
+
+.pay-tag {
+  display: inline-block;
+  font-size: 0.775rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.pay-cash {
+  background: #fef9e3;
+  color: #c9a227;
+  border: 1px solid #f4e8b3;
+}
+
+.pay-online {
+  background: #e6f7f0;
+  color: #2e9e6b;
+  border: 1px solid #b7ebd5;
+}
+
 .request-actions {
   display: flex;
   gap: 0.85rem;
@@ -108,8 +165,13 @@
   transition: background var(--transition-fast);
 }
 
-.btn-accept:hover {
+.btn-accept:hover:not(:disabled) {
   background: var(--color-primary-hover);
+}
+
+.btn-accept:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-decline {
@@ -126,9 +188,14 @@
   transition: background var(--transition-fast);
 }
 
-.btn-decline:hover {
+.btn-decline:hover:not(:disabled) {
   background: var(--surface-container-low);
   color: var(--error);
+}
+
+.btn-decline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 480px) {

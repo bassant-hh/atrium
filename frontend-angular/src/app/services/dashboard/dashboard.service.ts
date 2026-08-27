@@ -37,6 +37,7 @@ export class DashboardService {
   // 2. Configuration & Endpoints
   // ==========================================================================
   private readonly endpoints = {
+    userProfile: `${environment.apiUrl}/user/profile`,
     riderStatus: `${environment.apiUrl}/rider/status`,
     nearbyOrders: `${environment.apiUrl}/orders/nearby`,
     acceptOrder: (id: string) => `${environment.apiUrl}/orders/${id}/accept`,
@@ -54,6 +55,9 @@ export class DashboardService {
   readonly submittingOrderId = signal<string | null>(null);
   readonly apiError = signal<string | null>(null);
 
+  readonly firstName = signal<string>('');
+  readonly lastName = signal<string>('');
+
   readonly verificationStatus = signal<VerificationStatus>('APPROVED');
   readonly riderStatus = signal<RiderDutyStatus>('OFFLINE');
 
@@ -66,11 +70,26 @@ export class DashboardService {
   readonly nearbyOrders = signal<NearbyOrder[]>([]);
 
   constructor() {
+    this.fetchUserProfile();
     this.fetchRiderStatus();
     this.loadNearbyOrders();
     this.loadDashboardStats();
     this.loadActiveDelivery();
     this.initRealtimeOrderEvents();
+  }
+
+  fetchUserProfile(): void {
+    this.http.get<{ firstName?: string; lastName?: string }>(this.endpoints.userProfile).subscribe({
+      next: (profile) => {
+        if (profile) {
+          if (profile.firstName) this.firstName.set(profile.firstName);
+          if (profile.lastName) this.lastName.set(profile.lastName);
+        }
+      },
+      error: (_err) => {
+        // Non-blocking profile load error
+      },
+    });
   }
 
   // ==========================================================================

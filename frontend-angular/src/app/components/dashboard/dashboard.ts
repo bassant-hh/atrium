@@ -28,6 +28,8 @@ export class Dashboard {
   private riderTrackingService = inject(RiderTrackingService);
 
   // ── State Signal References (Delegated to DashboardService & RiderTrackingService) ──
+  readonly firstName = this.dashboardService.firstName;
+  readonly lastName = this.dashboardService.lastName;
   readonly verificationStatus = this.dashboardService.verificationStatus;
   readonly riderStatus = this.dashboardService.riderStatus;
   readonly earnings = this.dashboardService.earnings;
@@ -40,6 +42,23 @@ export class Dashboard {
   readonly apiError = this.dashboardService.apiError;
   readonly loading = this.dashboardService.loading;
   readonly riderCoords = this.riderTrackingService.currentCoords;
+
+  get riderInitials(): string {
+    const f = this.firstName();
+    const l = this.lastName();
+    if (!f && !l) return 'MR';
+    const firstInitial = f ? f.charAt(0).toUpperCase() : '';
+    const lastInitial = l ? l.charAt(0).toUpperCase() : '';
+    return `${firstInitial}${lastInitial}` || 'MR';
+  }
+
+  get currentDateFormatted(): string {
+    return new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
 
   // ── Action Delegations ──
   toggleStatus(): void {

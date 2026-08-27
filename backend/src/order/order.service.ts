@@ -74,6 +74,9 @@ export class OrderService {
     destination: string;
     distance: string;
     earnings: string;
+    paymentMethod?: string;
+    paymentStatus?: string;
+    amount?: number;
   }): NearbyOrderResponseDto {
     return {
       id: order._id.toString(),
@@ -82,6 +85,9 @@ export class OrderService {
       destination: order.destination,
       distance: order.distance,
       earnings: order.earnings,
+      paymentMethod: order.paymentMethod ?? 'CASH',
+      paymentStatus: order.paymentStatus ?? 'PENDING',
+      amount: order.amount ?? 0,
     };
   }
 
@@ -92,6 +98,9 @@ export class OrderService {
     destination: string;
     estimatedTime?: string;
     status?: string;
+    paymentMethod?: string;
+    paymentStatus?: string;
+    amount?: number;
     pickupLocationDetails?: {
       coordinates: { latitude: number; longitude: number };
     };
@@ -106,6 +115,9 @@ export class OrderService {
       dropoff: order.destination,
       estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
       status: order.status,
+      paymentMethod: order.paymentMethod ?? 'CASH',
+      paymentStatus: order.paymentStatus ?? 'PENDING',
+      amount: order.amount ?? 0,
       pickupCoordinates: order.pickupLocationDetails?.coordinates ?? {
         latitude: 26.1551,
         longitude: 32.716,
@@ -282,6 +294,9 @@ export class OrderService {
         destination: 1,
         distance: 1,
         earnings: 1,
+        paymentMethod: 1,
+        paymentStatus: 1,
+        amount: 1,
       })
       .lean()
       .exec();
@@ -574,6 +589,9 @@ export class OrderService {
         destination: 1,
         estimatedTime: 1,
         status: 1,
+        paymentMethod: 1,
+        paymentStatus: 1,
+        amount: 1,
         pickupLocationDetails: 1,
         destinationLocationDetails: 1,
       })

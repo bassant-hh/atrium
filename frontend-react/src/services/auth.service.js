@@ -1,5 +1,5 @@
 import { saveToken, removeToken } from '../utils/auth';
-import { apiGet, apiPost } from './api';
+import { apiGet, apiPost, apiPatch } from './api';
 
 export const registerCustomer = async (customerData) => {
   const payload = {
@@ -31,6 +31,10 @@ export const loginCustomer = async (credentials) => {
 
 export const getCustomerProfile = async () => {
   return apiGet('customer/profile');
+};
+
+export const updateCustomerProfile = async (profileData) => {
+  return apiPatch('customer/profile', profileData);
 };
 
 export const logoutCustomer = () => {

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -40,5 +41,13 @@ export class CustomerOrderController {
     @Req() req: Request & { customer: CustomerJwtPayload },
   ): Promise<CustomerOrderDto> {
     return this.customerOrderService.getOrderById(id, req.customer._id);
+  }
+
+  @Patch(':id/cancel')
+  async cancelOrder(
+    @Param('id') id: string,
+    @Req() req: Request & { customer: CustomerJwtPayload },
+  ): Promise<CustomerOrderDto> {
+    return this.customerOrderService.cancelOrder(id, req.customer._id);
   }
 }

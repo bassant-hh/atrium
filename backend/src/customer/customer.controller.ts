@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { CustomerService } from './customer.service';
 import { RegisterCustomerDto } from './dto/register-customer.dto';
 import { LoginCustomerDto } from './dto/login-customer.dto';
+import { UpdateCustomerProfileDto } from './dto/update-customer-profile.dto';
 import {
   CustomerLoginResponseDto,
   CustomerProfileResponseDto,
@@ -35,5 +44,14 @@ export class CustomerController {
     @Req() req: Request & { customer: CustomerJwtPayload },
   ): Promise<CustomerProfileResponseDto> {
     return this.customerService.profile(req.customer._id);
+  }
+
+  @Patch('profile')
+  @UseGuards(CustomerJwtGuard)
+  async updateProfile(
+    @Body() dto: UpdateCustomerProfileDto,
+    @Req() req: Request & { customer: CustomerJwtPayload },
+  ): Promise<CustomerProfileResponseDto> {
+    return this.customerService.updateProfile(req.customer._id, dto);
   }
 }

@@ -5,49 +5,70 @@
   </header>
 
   <div class="orders-list">
-    @for (order of orders; track order.id) {
-      <article class="request-card shadow-card" aria-label="Order Request">
-        <div class="request-top">
-          <div>
-            <h3 class="customer-name font-headline">{{ order.customerName }}</h3>
-            <span class="order-chip">#{{ order.id }}</span>
+    @if (orders.length === 0) {
+      <div class="empty-jobs-card shadow-card">
+        <span class="material-symbols-outlined empty-jobs-icon">moped</span>
+        <h3 class="empty-jobs-title font-headline">No delivery requests right now</h3>
+        <p class="empty-jobs-desc">
+          Stay online and we'll notify you as soon as a new order is placed.
+        </p>
+      </div>
+    } @else {
+      @for (order of orders; track order.id) {
+        <article class="request-card shadow-card" aria-label="Order Request">
+          <div class="request-top">
+            <div>
+              <h3 class="customer-name font-headline">{{ order.customerName }}</h3>
+              <span class="order-chip">#{{ order.id }}</span>
+            </div>
+            <div class="request-financials">
+              <span class="earnings-pill font-headline">{{ order.earnings }}</span>
+              <span class="distance-text">{{ order.distance }}</span>
+            </div>
           </div>
-          <div class="request-financials">
-            <span class="earnings-pill font-headline">{{ order.earnings }}</span>
-            <span class="distance-text">{{ order.distance }}</span>
+
+          <div class="route-summary">
+            <p class="route-point"><strong>Pickup:</strong> {{ order.pickup }}</p>
+            <p class="route-point"><strong>Dropoff:</strong> {{ order.destination }}</p>
+            <div class="payment-summary-pill">
+              @if (order.paymentMethod === 'CASH') {
+                <span class="pay-tag pay-cash"
+                  >💵 Cash on Delivery ({{ order.amount || 0 }} EGP)</span
+                >
+              } @else {
+                <span class="pay-tag pay-online"
+                  >💳 Prepaid Online ({{ order.amount || 0 }} EGP)</span
+                >
+              }
+            </div>
           </div>
-        </div>
 
-        <div class="route-summary">
-          <p class="route-point"><strong>Pickup:</strong> {{ order.pickup }}</p>
-          <p class="route-point"><strong>Dropoff:</strong> {{ order.destination }}</p>
-        </div>
-
-        <div class="request-actions">
-          <button
-            class="btn-accept"
-            type="button"
-            [disabled]="submittingId === order.id"
-            (click)="onAccept(order)"
-            aria-label="Accept Order Request"
-          >
-            @if (submittingId === order.id) {
-              Accepting...
-            } @else {
-              Accept Order
-            }
-          </button>
-          <button
-            class="btn-decline"
-            type="button"
-            [disabled]="submittingId === order.id"
-            (click)="onDecline(order)"
-            aria-label="Decline Order Request"
-          >
-            Decline
-          </button>
-        </div>
-      </article>
+          <div class="request-actions">
+            <button
+              class="btn-accept"
+              type="button"
+              [disabled]="submittingId === order.id"
+              (click)="onAccept(order)"
+              aria-label="Accept Order Request"
+            >
+              @if (submittingId === order.id) {
+                Accepting...
+              } @else {
+                Accept Order
+              }
+            </button>
+            <button
+              class="btn-decline"
+              type="button"
+              [disabled]="submittingId === order.id"
+              (click)="onDecline(order)"
+              aria-label="Decline Order Request"
+            >
+              Decline
+            </button>
+          </div>
+        </article>
+      }
     }
   </div>
 </section>
