@@ -39,6 +39,7 @@ export class DashboardService {
   private readonly endpoints = {
     userProfile: `${environment.apiUrl}/user/profile`,
     riderStatus: `${environment.apiUrl}/rider/status`,
+    heartbeat: `${environment.apiUrl}/rider/heartbeat`,
     nearbyOrders: `${environment.apiUrl}/orders/nearby`,
     acceptOrder: (id: string) => `${environment.apiUrl}/orders/${id}/accept`,
     declineOrder: (id: string) => `${environment.apiUrl}/orders/${id}/decline`,
@@ -52,6 +53,7 @@ export class DashboardService {
   // 3. Signals & Application State
   // ==========================================================================
   readonly loading = signal<boolean>(false);
+  readonly statsLoading = signal<boolean>(true);
   readonly submittingOrderId = signal<string | null>(null);
   readonly apiError = signal<string | null>(null);
 
@@ -64,10 +66,12 @@ export class DashboardService {
   readonly earnings = signal<string>('EGP 0');
   readonly completed = signal<number>(0);
   readonly onlineHours = signal<string>('0 hrs');
-  readonly rating = signal<string>('0.0★');
 
   readonly activeDelivery = signal<ActiveDelivery | null>(null);
   readonly nearbyOrders = signal<NearbyOrder[]>([]);
+
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private statsRefreshTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.fetchUserProfile();
@@ -76,6 +80,53 @@ export class DashboardService {
     this.loadDashboardStats();
     this.loadActiveDelivery();
     this.initRealtimeOrderEvents();
+  }
+
+  private stopTimers(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+    if (this.statsRefreshTimer) {
+      clearInterval(this.statsRefreshTimer);
+      this.statsRefreshTimer = null;
+    }
+  }
+
+  private startDutyTimers(): void {
+    this.stopTimers();
+
+    if (typeof window === 'undefined') return;
+
+    // 1. Heartbeat every 30 seconds
+    this.heartbeatTimer = setInterval(() => {
+      const status = this.riderStatus();
+      if (status === 'ONLINE' || status === 'DELIVERING') {
+        this.http.post(this.endpoints.heartbeat, {}).subscribe({
+          next: () => {},
+          error: () => {},
+        });
+      } else {
+        this.stopTimers();
+      }
+    }, 30000);
+
+    // 2. Stats refresh every 60 seconds
+    this.statsRefreshTimer = setInterval(() => {
+      const status = this.riderStatus();
+      if (status === 'ONLINE' || status === 'DELIVERING') {
+        this.http.get<DashboardStatsResponse>(this.endpoints.dashboardStats).subscribe({
+          next: (stats) => {
+            this.earnings.set(`EGP ${stats.earnings}`);
+            this.completed.set(stats.completed);
+            this.onlineHours.set(`${stats.onlineHours} hrs`);
+          },
+          error: () => {},
+        });
+      } else {
+        this.stopTimers();
+      }
+    }, 60000);
   }
 
   fetchUserProfile(): void {
@@ -101,6 +152,11 @@ export class DashboardService {
     }
     if (res.riderStatus) {
       this.riderStatus.set(res.riderStatus);
+      if (res.riderStatus === 'ONLINE' || res.riderStatus === 'DELIVERING') {
+        this.startDutyTimers();
+      } else {
+        this.stopTimers();
+      }
     }
   }
 
@@ -174,18 +230,17 @@ export class DashboardService {
   }
 
   loadDashboardStats(): void {
-    this.loading.set(true);
+    this.statsLoading.set(true);
     this.http.get<DashboardStatsResponse>(this.endpoints.dashboardStats).subscribe({
       next: (stats) => {
-        this.loading.set(false);
+        this.statsLoading.set(false);
         this.apiError.set(null);
         this.earnings.set(`EGP ${stats.earnings}`);
         this.completed.set(stats.completed);
-        this.rating.set(`${stats.rating}★`);
         this.onlineHours.set(`${stats.onlineHours} hrs`);
       },
       error: (_err) => {
-        this.loading.set(false);
+        this.statsLoading.set(false);
         this.apiError.set('Unable to communicate with server.');
       },
     });
@@ -267,6 +322,10 @@ export class DashboardService {
             dropoff: res.activeDelivery.dropoff,
             estimatedTime: res.activeDelivery.estimatedTime,
             status: res.activeDelivery.status,
+            paymentMethod: res.activeDelivery.paymentMethod,
+            paymentStatus: res.activeDelivery.paymentStatus,
+            amount: res.activeDelivery.amount,
+            notes: res.activeDelivery.notes,
             pickupCoordinates: res.activeDelivery.pickupCoordinates,
             destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
@@ -327,6 +386,10 @@ export class DashboardService {
             dropoff: res.activeDelivery.dropoff,
             estimatedTime: res.activeDelivery.estimatedTime,
             status: res.activeDelivery.status,
+            paymentMethod: res.activeDelivery.paymentMethod,
+            paymentStatus: res.activeDelivery.paymentStatus,
+            amount: res.activeDelivery.amount,
+            notes: res.activeDelivery.notes,
             pickupCoordinates: res.activeDelivery.pickupCoordinates,
             destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
@@ -367,6 +430,7 @@ export class DashboardService {
   }
 
   logout(): void {
+    this.stopTimers();
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;

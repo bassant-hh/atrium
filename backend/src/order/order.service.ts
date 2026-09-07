@@ -28,13 +28,7 @@ import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/enums/notification-type.enum';
-
-// ============================================================================
-// Temporary Default Constants for Phase 1
-// TODO Phase 2: Replace default estimates with dynamic Google Maps distance calculation engine.
-// ============================================================================
-const DEFAULT_DISTANCE = '0.8 km';
-const DEFAULT_ESTIMATED_TIME = '15 mins';
+import { calculateDistanceAndDuration } from './utils/route-calculator.util';
 
 type OrderFilterQuery = {
   status?: OrderStatus;
@@ -67,65 +61,144 @@ export class OrderService {
     return `${currency} ${amount}`;
   }
 
-  private mapNearbyOrder(order: {
+  private async mapNearbyOrder(order: {
     _id: { toString(): string } | string;
     customerName: string;
     pickup: string;
     destination: string;
-    distance: string;
+    distance?: string;
     earnings: string;
     paymentMethod?: string;
     paymentStatus?: string;
     amount?: number;
-  }): NearbyOrderResponseDto {
+    title?: string;
+    category?: string;
+    estimatedTime?: string;
+    pickupLocationDetails?: {
+      coordinates?: { latitude?: number; longitude?: number };
+    };
+    destinationLocationDetails?: {
+      coordinates?: { latitude?: number; longitude?: number };
+    };
+  }): Promise<NearbyOrderResponseDto> {
+    const pickupCoords =
+      typeof order.pickupLocationDetails?.coordinates?.latitude === 'number' &&
+      typeof order.pickupLocationDetails?.coordinates?.longitude === 'number' &&
+      Number.isFinite(order.pickupLocationDetails.coordinates.latitude) &&
+      Number.isFinite(order.pickupLocationDetails.coordinates.longitude)
+        ? {
+            latitude: order.pickupLocationDetails.coordinates.latitude,
+            longitude: order.pickupLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    const destinationCoords =
+      typeof order.destinationLocationDetails?.coordinates?.latitude ===
+        'number' &&
+      typeof order.destinationLocationDetails?.coordinates?.longitude ===
+        'number' &&
+      Number.isFinite(order.destinationLocationDetails.coordinates.latitude) &&
+      Number.isFinite(order.destinationLocationDetails.coordinates.longitude)
+        ? {
+            latitude: order.destinationLocationDetails.coordinates.latitude,
+            longitude: order.destinationLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    let routeDistance: string | undefined = undefined;
+    let routeEstimatedTime: string | undefined = undefined;
+
+    if (pickupCoords && destinationCoords) {
+      const calculated = await calculateDistanceAndDuration(
+        pickupCoords,
+        destinationCoords,
+      );
+      routeDistance = calculated.distance;
+      routeEstimatedTime = calculated.estimatedTime;
+    }
+
     return {
       id: order._id.toString(),
       customerName: order.customerName,
       pickup: order.pickup,
       destination: order.destination,
-      distance: order.distance,
+      distance: routeDistance,
       earnings: order.earnings,
       paymentMethod: order.paymentMethod ?? 'CASH',
       paymentStatus: order.paymentStatus ?? 'PENDING',
       amount: order.amount ?? 0,
+      title: order.title,
+      category: order.category,
+      estimatedTime: routeEstimatedTime,
     };
   }
 
-  private mapActiveDelivery(order: {
+  private async mapActiveDelivery(order: {
     _id: { toString(): string } | string;
     customerName: string;
     pickup: string;
     destination: string;
+    distance?: string;
     estimatedTime?: string;
     status?: string;
     paymentMethod?: string;
     paymentStatus?: string;
     amount?: number;
+    notes?: string;
     pickupLocationDetails?: {
-      coordinates: { latitude: number; longitude: number };
+      coordinates?: { latitude?: number; longitude?: number };
     };
     destinationLocationDetails?: {
-      coordinates: { latitude: number; longitude: number };
+      coordinates?: { latitude?: number; longitude?: number };
     };
-  }): ActiveDeliveryDto {
+  }): Promise<ActiveDeliveryDto> {
+    const pickupCoords =
+      typeof order.pickupLocationDetails?.coordinates?.latitude === 'number' &&
+      typeof order.pickupLocationDetails?.coordinates?.longitude === 'number' &&
+      Number.isFinite(order.pickupLocationDetails.coordinates.latitude) &&
+      Number.isFinite(order.pickupLocationDetails.coordinates.longitude)
+        ? {
+            latitude: order.pickupLocationDetails.coordinates.latitude,
+            longitude: order.pickupLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    const destinationCoords =
+      typeof order.destinationLocationDetails?.coordinates?.latitude ===
+        'number' &&
+      typeof order.destinationLocationDetails?.coordinates?.longitude ===
+        'number' &&
+      Number.isFinite(order.destinationLocationDetails.coordinates.latitude) &&
+      Number.isFinite(order.destinationLocationDetails.coordinates.longitude)
+        ? {
+            latitude: order.destinationLocationDetails.coordinates.latitude,
+            longitude: order.destinationLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    let routeEstimatedTime: string | undefined = undefined;
+
+    if (pickupCoords && destinationCoords) {
+      const calculated = await calculateDistanceAndDuration(
+        pickupCoords,
+        destinationCoords,
+      );
+      routeEstimatedTime = calculated.estimatedTime;
+    }
+
     return {
       orderId: order._id.toString(),
       customerName: order.customerName,
       pickup: order.pickup,
       dropoff: order.destination,
-      estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
+      estimatedTime: routeEstimatedTime,
       status: order.status,
       paymentMethod: order.paymentMethod ?? 'CASH',
       paymentStatus: order.paymentStatus ?? 'PENDING',
       amount: order.amount ?? 0,
-      pickupCoordinates: order.pickupLocationDetails?.coordinates ?? {
-        latitude: 26.1551,
-        longitude: 32.716,
-      },
-      destinationCoordinates: order.destinationLocationDetails?.coordinates ?? {
-        latitude: 26.158,
-        longitude: 32.721,
-      },
+      notes: order.notes,
+      pickupCoordinates: pickupCoords,
+      destinationCoordinates: destinationCoords,
     };
   }
 
@@ -150,7 +223,7 @@ export class OrderService {
       status: order.status,
       amount: order.amount ?? 0,
       earnings: order.earnings,
-      estimatedTime: order.estimatedTime ?? DEFAULT_ESTIMATED_TIME,
+      estimatedTime: order.estimatedTime,
       createdAt: order.createdAt,
     };
   }
@@ -173,7 +246,7 @@ export class OrderService {
     return {
       ...this.mapCustomerOrder(order),
       notes: order.notes,
-      distance: order.distance ?? DEFAULT_DISTANCE,
+      distance: order.distance,
       customerName: order.customerName,
     };
   }
@@ -219,18 +292,49 @@ export class OrderService {
     const customerName = this.buildCustomerName(user);
     const earnings = this.formatEarnings(dto.amount);
 
+    const pickupCoords =
+      typeof dto.pickupLocationDetails?.coordinates?.latitude === 'number' &&
+      typeof dto.pickupLocationDetails?.coordinates?.longitude === 'number' &&
+      Number.isFinite(dto.pickupLocationDetails.coordinates.latitude) &&
+      Number.isFinite(dto.pickupLocationDetails.coordinates.longitude)
+        ? {
+            latitude: dto.pickupLocationDetails.coordinates.latitude,
+            longitude: dto.pickupLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    const destinationCoords =
+      typeof dto.destinationLocationDetails?.coordinates?.latitude ===
+        'number' &&
+      typeof dto.destinationLocationDetails?.coordinates?.longitude ===
+        'number' &&
+      Number.isFinite(dto.destinationLocationDetails.coordinates.latitude) &&
+      Number.isFinite(dto.destinationLocationDetails.coordinates.longitude)
+        ? {
+            latitude: dto.destinationLocationDetails.coordinates.latitude,
+            longitude: dto.destinationLocationDetails.coordinates.longitude,
+          }
+        : undefined;
+
+    const calculatedRoute = await calculateDistanceAndDuration(
+      pickupCoords,
+      destinationCoords,
+    );
+
     const createdOrder = await this.orderModel.create({
       clientId: clientId,
       customerName: customerName,
       pickup: dto.pickup,
       destination: dto.destination,
+      pickupLocationDetails: dto.pickupLocationDetails,
+      destinationLocationDetails: dto.destinationLocationDetails,
       category: dto.category,
       title: dto.title,
       amount: dto.amount,
       notes: dto.notes,
-      distance: DEFAULT_DISTANCE,
+      distance: calculatedRoute.distance,
+      estimatedTime: calculatedRoute.estimatedTime,
       earnings: earnings,
-      estimatedTime: DEFAULT_ESTIMATED_TIME,
       status: OrderStatus.AVAILABLE,
       declinedRiderIds: [],
     });
@@ -297,11 +401,16 @@ export class OrderService {
         paymentMethod: 1,
         paymentStatus: 1,
         amount: 1,
+        title: 1,
+        category: 1,
+        estimatedTime: 1,
+        pickupLocationDetails: 1,
+        destinationLocationDetails: 1,
       })
       .lean()
       .exec();
 
-    return orders.map((order) => this.mapNearbyOrder(order));
+    return Promise.all(orders.map((order) => this.mapNearbyOrder(order)));
   }
 
   // ==========================================================================
@@ -391,7 +500,7 @@ export class OrderService {
     return {
       success: true,
       message: 'Order accepted successfully.',
-      activeDelivery: this.mapActiveDelivery(updatedOrder),
+      activeDelivery: await this.mapActiveDelivery(updatedOrder),
     };
   }
 
@@ -486,7 +595,7 @@ export class OrderService {
     return {
       success: true,
       message: 'Order picked up successfully.',
-      activeDelivery: this.mapActiveDelivery(updatedOrder),
+      activeDelivery: await this.mapActiveDelivery(updatedOrder),
     };
   }
 
@@ -592,6 +701,7 @@ export class OrderService {
         paymentMethod: 1,
         paymentStatus: 1,
         amount: 1,
+        notes: 1,
         pickupLocationDetails: 1,
         destinationLocationDetails: 1,
       })
@@ -602,6 +712,6 @@ export class OrderService {
       return null;
     }
 
-    return this.mapActiveDelivery(activeOrder);
+    return await this.mapActiveDelivery(activeOrder);
   }
 }

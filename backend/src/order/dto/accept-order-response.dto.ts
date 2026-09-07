@@ -3,11 +3,12 @@ export class ActiveDeliveryDto {
   customerName: string;
   pickup: string;
   dropoff: string;
-  estimatedTime: string;
+  estimatedTime?: string;
   status?: string;
   paymentMethod?: string;
   paymentStatus?: string;
   amount?: number;
+  notes?: string;
   pickupCoordinates?: { latitude: number; longitude: number };
   destinationCoordinates?: { latitude: number; longitude: number };
 }

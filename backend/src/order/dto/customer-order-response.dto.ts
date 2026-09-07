@@ -7,7 +7,7 @@ export class CustomerOrderDto {
   status: string;
   amount: number;
   earnings: string;
-  estimatedTime: string;
+  estimatedTime?: string;
   createdAt?: Date;
 }
 

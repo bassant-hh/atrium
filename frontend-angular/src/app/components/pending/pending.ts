@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-pending',
@@ -11,11 +10,9 @@ import { CommonModule } from '@angular/common';
   styleUrl: './pending.css',
 })
 export class Pending {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private dashboardService = inject(DashboardService);
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.dashboardService.logout();
   }
 }

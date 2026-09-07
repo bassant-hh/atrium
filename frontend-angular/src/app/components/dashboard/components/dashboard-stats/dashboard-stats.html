@@ -1,11 +1,15 @@
-<section class="stats-grid" aria-label="Today's Performance Statistics">
+<section class="stats-grid" aria-label="Rider Performance Statistics">
   <article class="stat-card shadow-card">
     <div class="stat-icon-wrap icon-teal" aria-hidden="true">
       <span class="material-symbols-outlined">payments</span>
     </div>
     <div class="stat-body">
-      <span class="stat-value font-headline">{{ earnings }}</span>
-      <span class="stat-label">Today's Earnings</span>
+      @if (loading) {
+        <div class="skeleton-line skeleton-value"></div>
+      } @else {
+        <span class="stat-value font-headline">{{ earnings }}</span>
+      }
+      <span class="stat-label">Total Earnings</span>
     </div>
   </article>
 
@@ -14,8 +18,12 @@
       <span class="material-symbols-outlined">package_2</span>
     </div>
     <div class="stat-body">
-      <span class="stat-value font-headline">{{ completed }}</span>
-      <span class="stat-label">Completed Deliveries</span>
+      @if (loading) {
+        <div class="skeleton-line skeleton-value"></div>
+      } @else {
+        <span class="stat-value font-headline">{{ completed }}</span>
+      }
+      <span class="stat-label">Total Completed</span>
     </div>
   </article>
 
@@ -24,18 +32,12 @@
       <span class="material-symbols-outlined">schedule</span>
     </div>
     <div class="stat-body">
-      <span class="stat-value font-headline">{{ onlineHours }}</span>
-      <span class="stat-label">Online Hours</span>
-    </div>
-  </article>
-
-  <article class="stat-card shadow-card">
-    <div class="stat-icon-wrap icon-gold" aria-hidden="true">
-      <span class="material-symbols-outlined">star</span>
-    </div>
-    <div class="stat-body">
-      <span class="stat-value font-headline">{{ rating }}</span>
-      <span class="stat-label">Rating</span>
+      @if (loading) {
+        <div class="skeleton-line skeleton-value"></div>
+      } @else {
+        <span class="stat-value font-headline">{{ onlineHours }}</span>
+      }
+      <span class="stat-label">Today's Online Hours</span>
     </div>
   </article>
 </section>

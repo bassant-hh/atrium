@@ -15,13 +15,12 @@ import { PaymentStatus } from '../order/enums/payment-status.enum';
 import { CreateCustomerOrderDto } from './dto/create-customer-order.dto';
 import { CustomerOrderDto } from './dto/customer-order-response.dto';
 import {
-  DEFAULT_CUSTOMER_ORDER_DISTANCE,
-  DEFAULT_CUSTOMER_ORDER_ESTIMATED_TIME,
   DEFAULT_CUSTOMER_ORDER_EARNINGS,
   DEFAULT_DELIVERY_FEE,
 } from './constants/customer-order.constants';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { PaymentService } from '../payment/payment.service';
+import { calculateDistanceAndDuration } from '../order/utils/route-calculator.util';
 
 @Injectable()
 export class CustomerOrderService {
@@ -135,6 +134,11 @@ export class CustomerOrderService {
     const customerName = `${customer.firstName} ${customer.lastName}`.trim();
     const selectedMethod = dto.paymentMethod || PaymentMethod.CASH;
 
+    const calculatedRoute = await calculateDistanceAndDuration(
+      dto.pickupLocationDetails?.coordinates,
+      dto.destinationLocationDetails?.coordinates,
+    );
+
     const createdOrder = new this.orderModel({
       clientId: customerId,
       customerName: customerName || 'Campus Customer',
@@ -154,8 +158,8 @@ export class CustomerOrderService {
       paymentStatus: PaymentStatus.PENDING,
       paymentProvider:
         selectedMethod === PaymentMethod.CASH ? 'CASH' : 'PAYMOB',
-      distance: DEFAULT_CUSTOMER_ORDER_DISTANCE,
-      estimatedTime: DEFAULT_CUSTOMER_ORDER_ESTIMATED_TIME,
+      distance: calculatedRoute.distance,
+      estimatedTime: calculatedRoute.estimatedTime,
       earnings: DEFAULT_CUSTOMER_ORDER_EARNINGS,
       status: OrderStatus.AVAILABLE,
       declinedRiderIds: [],

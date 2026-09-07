@@ -58,11 +58,26 @@
         </div>
       }
 
-      <div class="meta-item">
-        <span class="material-symbols-outlined" aria-hidden="true">timer</span>
-        <span>{{ durationText() ? durationText() : 'Est. ' + activeDelivery.estimatedTime }}</span>
-      </div>
+      @if (durationText() || activeDelivery.estimatedTime) {
+        <div class="meta-item">
+          <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+          <span>{{
+            durationText() ? durationText() : 'Est. ' + activeDelivery.estimatedTime
+          }}</span>
+        </div>
+      }
     </div>
+
+    <!-- Customer Notes / Delivery Instructions -->
+    @if (activeDelivery.notes) {
+      <div class="delivery-instructions-box">
+        <div class="instructions-header">
+          <span class="material-symbols-outlined" aria-hidden="true">description</span>
+          <span>Delivery Instructions</span>
+        </div>
+        <p class="instructions-text">"{{ activeDelivery.notes }}"</p>
+      </div>
+    }
 
     <!-- Payment Operational Banner -->
     <div
@@ -73,13 +88,24 @@
       <span class="material-symbols-outlined" aria-hidden="true">
         {{ activeDelivery.paymentMethod === 'CASH' ? 'payments' : 'credit_card' }}
       </span>
-      <span>
-        {{
-          activeDelivery.paymentMethod === 'CASH'
-            ? 'Collect ' + (activeDelivery.amount || 205) + ' EGP Cash on Delivery'
-            : 'Prepaid Online (' + (activeDelivery.amount || 205) + ' EGP Paid)'
-        }}
-      </span>
+      <div class="payment-banner-details">
+        <span class="payment-banner-title">
+          {{
+            activeDelivery.paymentMethod === 'CASH'
+              ? '💵 Cash on Delivery (' + (activeDelivery.amount || 0) + ' EGP)'
+              : '💳 Prepaid Online (' + (activeDelivery.amount || 0) + ' EGP Paid)'
+          }}
+        </span>
+        <span class="payment-banner-subtext">
+          {{
+            activeDelivery.paymentMethod === 'CASH'
+              ? activeDelivery.status === 'PICKED_UP'
+                ? 'Collect the displayed amount from the customer before completing delivery.'
+                : 'Collect the displayed amount from the customer.'
+              : 'Payment already completed — Do not collect cash.'
+          }}
+        </span>
+      </div>
     </div>
 
     @if (routeError()) {
@@ -87,17 +113,27 @@
     }
   </div>
 
-  <button
-    class="btn-primary btn-delivery-action"
-    type="button"
-    [disabled]="submitting"
-    (click)="onAction()"
-    aria-label="Active Delivery Action Button"
-  >
-    @if (submitting) {
-      Processing...
-    } @else {
-      {{ activeDelivery.status === 'PICKED_UP' ? 'Confirm Delivery' : 'Confirm Pickup' }}
-    }
-  </button>
+  <div class="action-wrap">
+    <p class="action-helper-text">
+      {{
+        activeDelivery.status === 'PICKED_UP'
+          ? 'Confirm after you have handed the order to the customer.'
+          : 'Confirm after you have received the order from the pickup location.'
+      }}
+    </p>
+
+    <button
+      class="btn-primary btn-delivery-action"
+      type="button"
+      [disabled]="submitting"
+      (click)="onAction()"
+      aria-label="Active Delivery Action Button"
+    >
+      @if (submitting) {
+        Processing...
+      } @else {
+        {{ activeDelivery.status === 'PICKED_UP' ? 'Confirm Delivery' : 'Confirm Pickup' }}
+      }
+    </button>
+  </div>
 </section>

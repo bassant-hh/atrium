@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -10,11 +10,9 @@ import { AuthService } from '../../services/auth';
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private dashboardService = inject(DashboardService);
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.dashboardService.logout();
   }
 }

@@ -49,6 +49,14 @@
   color: var(--on-surface);
 }
 
+.status-helper-note {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.775rem;
+  color: var(--on-surface-variant, #607d8b);
+  font-weight: 400;
+  opacity: 0.85;
+}
+
 .status-toggle-btn {
   display: inline-flex;
   align-items: center;

@@ -8,17 +8,17 @@ export class CustomerOrderDto {
   destination: string;
   pickupLocationDetails?: {
     type: string;
-    address: Record<string, any>;
+    address: Record<string, unknown>;
     coordinates: { latitude: number; longitude: number };
     formattedAddress: string;
   };
   destinationLocationDetails?: {
     type: string;
-    address: Record<string, any>;
+    address: Record<string, unknown>;
     coordinates: { latitude: number; longitude: number };
     formattedAddress: string;
   };
-  distance: string;
+  distance?: string;
   earnings: string;
   title?: string;
   category?: string;

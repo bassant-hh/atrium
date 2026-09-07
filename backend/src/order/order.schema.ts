@@ -29,7 +29,7 @@ export class Order {
   @Prop({ required: false, type: Object })
   pickupLocationDetails?: {
     type: string;
-    address: Record<string, any>;
+    address: Record<string, unknown>;
     coordinates: { latitude: number; longitude: number };
     formattedAddress: string;
   };
@@ -37,13 +37,13 @@ export class Order {
   @Prop({ required: false, type: Object })
   destinationLocationDetails?: {
     type: string;
-    address: Record<string, any>;
+    address: Record<string, unknown>;
     coordinates: { latitude: number; longitude: number };
     formattedAddress: string;
   };
 
-  @Prop({ required: true })
-  distance: string;
+  @Prop({ required: false })
+  distance?: string;
 
   @Prop({ required: true })
   earnings: string;
@@ -87,7 +87,7 @@ export class Order {
   @Prop({ required: false })
   paymentReference?: string;
 
-  @Prop({ required: false, default: '15 mins' })
+  @Prop({ required: false })
   estimatedTime?: string;
 
   @Prop({ type: String, default: OrderStatus.AVAILABLE, enum: OrderStatus })

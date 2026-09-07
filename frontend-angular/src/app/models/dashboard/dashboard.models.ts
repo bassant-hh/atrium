@@ -10,7 +10,6 @@ export interface RiderStatusResponse {
 export interface DashboardStatsResponse {
   earnings: number;
   completed: number;
-  rating: number;
   onlineHours: number;
 }
 

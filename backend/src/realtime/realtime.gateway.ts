@@ -100,7 +100,7 @@ export class RealtimeGateway
     customerName: string;
     pickup: string;
     destination: string;
-    distance: string;
+    distance?: string;
     earnings: string;
   }): void {
     if (!this.server || !orderPayload?.id) return;

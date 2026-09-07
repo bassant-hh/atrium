@@ -117,6 +117,24 @@
   color: var(--on-surface-variant);
 }
 
+.order-category-tag {
+  display: inline-block;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--surface-container-high);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.est-time-text {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+}
+
 .route-point {
   margin: 0.3rem 0;
 }
@@ -125,24 +143,42 @@
   margin-top: 0.6rem;
 }
 
-.pay-tag {
-  display: inline-block;
-  font-size: 0.775rem;
+.pay-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+}
+
+.pay-banner-title {
+  font-size: 0.825rem;
   font-weight: 700;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-full);
+}
+
+.pay-banner-subtext {
+  font-size: 0.75rem;
+  opacity: 0.9;
 }
 
 .pay-cash {
   background: #fef9e3;
-  color: #c9a227;
-  border: 1px solid #f4e8b3;
+  color: #856404;
+  border: 1px solid #ffeeba;
 }
 
 .pay-online {
   background: #e6f7f0;
-  color: #2e9e6b;
-  border: 1px solid #b7ebd5;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.accept-helper-text {
+  font-size: 0.775rem;
+  color: var(--on-surface-variant);
+  margin: 0 0 0.85rem;
+  line-height: 1.35;
+  opacity: 0.85;
 }
 
 .request-actions {

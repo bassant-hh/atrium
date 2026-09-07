@@ -18,30 +18,52 @@
         <article class="request-card shadow-card" aria-label="Order Request">
           <div class="request-top">
             <div>
+              @if (order.title || order.category) {
+                <span class="order-category-tag">{{ order.title || order.category }}</span>
+              }
               <h3 class="customer-name font-headline">{{ order.customerName }}</h3>
               <span class="order-chip">#{{ order.id }}</span>
             </div>
             <div class="request-financials">
               <span class="earnings-pill font-headline">{{ order.earnings }}</span>
               <span class="distance-text">{{ order.distance }}</span>
+              @if (order.estimatedTime) {
+                <span class="est-time-text">Est. {{ order.estimatedTime }}</span>
+              }
             </div>
           </div>
 
           <div class="route-summary">
             <p class="route-point"><strong>Pickup:</strong> {{ order.pickup }}</p>
             <p class="route-point"><strong>Dropoff:</strong> {{ order.destination }}</p>
+
             <div class="payment-summary-pill">
               @if (order.paymentMethod === 'CASH') {
-                <span class="pay-tag pay-cash"
-                  >💵 Cash on Delivery ({{ order.amount || 0 }} EGP)</span
-                >
+                <div class="pay-banner pay-cash">
+                  <span class="pay-banner-title"
+                    >💵 Cash on Delivery ({{ order.amount || 0 }} EGP)</span
+                  >
+                  <span class="pay-banner-subtext"
+                    >Collect the displayed amount from the customer.</span
+                  >
+                </div>
               } @else {
-                <span class="pay-tag pay-online"
-                  >💳 Prepaid Online ({{ order.amount || 0 }} EGP)</span
-                >
+                <div class="pay-banner pay-online">
+                  <span class="pay-banner-title"
+                    >💳 Prepaid Online ({{ order.amount || 0 }} EGP)</span
+                  >
+                  <span class="pay-banner-subtext"
+                    >Payment already completed — Do not collect cash.</span
+                  >
+                </div>
               }
             </div>
           </div>
+
+          <p class="accept-helper-text">
+            Accepting this order means you will be responsible for picking it up and delivering it
+            to the customer.
+          </p>
 
           <div class="request-actions">
             <button

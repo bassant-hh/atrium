@@ -10,5 +10,5 @@ export class DashboardStatsComponent {
   @Input() earnings: string = '';
   @Input() completed: number = 0;
   @Input() onlineHours: string = '';
-  @Input() rating: string = '';
+  @Input() loading: boolean = false;
 }

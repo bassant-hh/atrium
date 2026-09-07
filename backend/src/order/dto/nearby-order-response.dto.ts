@@ -3,9 +3,12 @@ export class NearbyOrderResponseDto {
   customerName: string;
   pickup: string;
   destination: string;
-  distance: string;
+  distance?: string;
   earnings: string;
   paymentMethod?: string;
   paymentStatus?: string;
   amount?: number;
+  title?: string;
+  category?: string;
+  estimatedTime?: string;
 }

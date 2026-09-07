@@ -35,7 +35,7 @@ export class Dashboard {
   readonly earnings = this.dashboardService.earnings;
   readonly completed = this.dashboardService.completed;
   readonly onlineHours = this.dashboardService.onlineHours;
-  readonly rating = this.dashboardService.rating;
+  readonly statsLoading = this.dashboardService.statsLoading;
   readonly activeDelivery = this.dashboardService.activeDelivery;
   readonly nearbyOrders = this.dashboardService.nearbyOrders;
   readonly submittingOrderId = this.dashboardService.submittingOrderId;

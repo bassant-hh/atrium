@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,11 +10,9 @@ import { CommonModule } from '@angular/common';
   styleUrl: './rejected.css',
 })
 export class Rejected {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private dashboardService = inject(DashboardService);
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.dashboardService.logout();
   }
 }

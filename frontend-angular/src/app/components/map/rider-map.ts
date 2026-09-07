@@ -163,7 +163,7 @@ export class RiderMapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
       this.mapReady.set(true);
 
-      (window as any).__RIDER_MAP_DIAGNOSTICS__ = {
+      (window as unknown as Record<string, unknown>)['__RIDER_MAP_DIAGNOSTICS__'] = {
         mapInstance: this.mapInstance,
         container: this.mapContainer?.nativeElement,
         pickup: this.pickupCoords,
@@ -173,7 +173,7 @@ export class RiderMapComponent implements AfterViewInit, OnChanges, OnDestroy {
       };
       console.log(
         '[RiderMap Diagnostic] Map initialized successfully:',
-        (window as any).__RIDER_MAP_DIAGNOSTICS__,
+        (window as unknown as Record<string, unknown>)['__RIDER_MAP_DIAGNOSTICS__'],
       );
 
       setTimeout(() => {
@@ -232,9 +232,12 @@ export class RiderMapComponent implements AfterViewInit, OnChanges, OnDestroy {
       bounds.push(dPos);
     }
 
-    if (bounds.length > 0 && !(this.mapInstance as any)._initialFitted) {
+    if (
+      bounds.length > 0 &&
+      !(this.mapInstance as unknown as { _initialFitted?: boolean })._initialFitted
+    ) {
       this.mapInstance.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
-      (this.mapInstance as any)._initialFitted = true;
+      (this.mapInstance as unknown as { _initialFitted?: boolean })._initialFitted = true;
     }
   }
 

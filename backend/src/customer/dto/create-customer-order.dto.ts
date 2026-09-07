@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
@@ -5,8 +6,10 @@ import {
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { PaymentMethod } from '../../order/enums/payment-method.enum';
+import { LocationDetailsDto } from '../../order/dto/create-order.dto';
 
 export class CreateCustomerOrderDto {
   @IsNotEmpty()
@@ -18,20 +21,14 @@ export class CreateCustomerOrderDto {
   destination: string;
 
   @IsOptional()
-  pickupLocationDetails?: {
-    type: string;
-    address: Record<string, any>;
-    coordinates: { latitude: number; longitude: number };
-    formattedAddress: string;
-  };
+  @ValidateNested()
+  @Type(() => LocationDetailsDto)
+  pickupLocationDetails?: LocationDetailsDto;
 
   @IsOptional()
-  destinationLocationDetails?: {
-    type: string;
-    address: Record<string, any>;
-    coordinates: { latitude: number; longitude: number };
-    formattedAddress: string;
-  };
+  @ValidateNested()
+  @Type(() => LocationDetailsDto)
+  destinationLocationDetails?: LocationDetailsDto;
 
   @IsOptional()
   @IsString()

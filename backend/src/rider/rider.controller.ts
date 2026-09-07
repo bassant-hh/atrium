@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -30,5 +31,12 @@ export class RiderController {
     @Body() dto: UpdateDutyStatusDto,
   ): Promise<RiderStatusResponseDto> {
     return this.riderService.updateDutyStatus(req.user._id, dto);
+  }
+
+  @Post('heartbeat')
+  async recordHeartbeat(
+    @Request() req: { user: JwtUserPayload },
+  ): Promise<{ success: boolean; riderStatus: string }> {
+    return this.riderService.recordHeartbeat(req.user._id);
   }
 }

@@ -63,12 +63,12 @@
       </div>
     }
 
-    <!-- Today's Performance Statistics -->
+    <!-- Rider Performance Statistics -->
     <app-dashboard-stats
       [earnings]="earnings()"
       [completed]="completed()"
       [onlineHours]="onlineHours()"
-      [rating]="rating()"
+      [loading]="statsLoading()"
     />
 
     <!-- Two-Column Operations Grid -->

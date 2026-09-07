@@ -8,6 +8,7 @@ export interface ActiveDelivery {
   paymentMethod?: string;
   paymentStatus?: string;
   amount?: number;
+  notes?: string;
   pickupCoordinates?: { latitude: number; longitude: number };
   destinationCoordinates?: { latitude: number; longitude: number };
 }
@@ -22,6 +23,9 @@ export interface NearbyOrder {
   paymentMethod?: string;
   paymentStatus?: string;
   amount?: number;
+  title?: string;
+  category?: string;
+  estimatedTime?: string;
 }
 
 export interface AcceptOrderResponse {

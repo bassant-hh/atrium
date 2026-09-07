@@ -37,10 +37,10 @@ export class User {
   @Prop({ required: true })
   idBack: string;
 
-  @Prop({ default: 'PENDING' })
+  @Prop({ type: String, default: 'PENDING' })
   status: VerificationStatus;
 
-  @Prop({ default: 'OFFLINE' })
+  @Prop({ type: String, default: 'OFFLINE' })
   dutyStatus: RiderDutyStatus;
 
   @Prop({ required: false })
