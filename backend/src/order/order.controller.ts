@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtUserPayload } from '../auth/interfaces/jwt-payload.interface';
 import { OrderService } from './order.service';
+import { HeatmapPointDto } from './dto/heatmap-response.dto';
 import { NearbyOrderResponseDto } from './dto/nearby-order-response.dto';
 import {
   AcceptOrderResponseDto,
@@ -37,6 +38,11 @@ export class OrderController {
     @Request() req: { user: JwtUserPayload },
   ): Promise<CreateOrderResponseDto> {
     return this.orderService.createOrder(dto, req.user._id);
+  }
+
+  @Get('heatmap')
+  async getHeatmap(): Promise<HeatmapPointDto[]> {
+    return this.orderService.getHeatmapData();
   }
 
   @Get('nearby')

@@ -11,6 +11,7 @@ import {
   ActiveDelivery,
   DeclineOrderResponse,
   DeliverOrderResponse,
+  HeatmapPoint,
   NearbyOrder,
   PickupOrderResponse,
 } from '../../models/dashboard/order.models';
@@ -47,6 +48,7 @@ export class DashboardService {
     deliverOrder: (id: string) => `${environment.apiUrl}/orders/${id}/deliver`,
     dashboardStats: `${environment.apiUrl}/dashboard/stats`,
     activeOrder: `${environment.apiUrl}/orders/active`,
+    heatmap: `${environment.apiUrl}/orders/heatmap`,
   };
 
   // ==========================================================================
@@ -69,6 +71,9 @@ export class DashboardService {
 
   readonly activeDelivery = signal<ActiveDelivery | null>(null);
   readonly nearbyOrders = signal<NearbyOrder[]>([]);
+  readonly heatmapPoints = signal<HeatmapPoint[]>([]);
+  readonly heatmapLoading = signal<boolean>(false);
+  readonly heatmapError = signal<string | null>(null);
 
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private statsRefreshTimer: ReturnType<typeof setInterval> | null = null;
@@ -79,6 +84,7 @@ export class DashboardService {
     this.loadNearbyOrders();
     this.loadDashboardStats();
     this.loadActiveDelivery();
+    this.fetchHeatmapData();
     this.initRealtimeOrderEvents();
   }
 

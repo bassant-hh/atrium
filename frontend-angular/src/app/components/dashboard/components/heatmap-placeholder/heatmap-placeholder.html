@@ -1,10 +1,70 @@
-<section class="map-placeholder-card shadow-card">
-  <div class="map-icon-circle" aria-hidden="true">
-    <span class="material-symbols-outlined">map</span>
+<section class="heatmap-card shadow-card" aria-label="Campus Demand Heatmap">
+  <!-- Heatmap Card Header -->
+  <header class="heatmap-header">
+    <div class="heatmap-title-wrap">
+      <i class="bi bi-fire heatmap-header-icon" aria-hidden="true"></i>
+      <div>
+        <h3 class="heatmap-title font-headline">Campus Demand Heatmap</h3>
+        <p class="heatmap-subtitle">Real-Time Pickup Demand Concentration</p>
+      </div>
+    </div>
+    <button
+      class="btn-refresh-heatmap"
+      type="button"
+      (click)="refreshData()"
+      [attr.aria-label]="'Refresh Heatmap'"
+      [disabled]="loading()"
+    >
+      <i class="bi bi-arrow-clockwise" [class.spin]="loading()" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <!-- Interactive Map Canvas Surface -->
+  <div class="map-wrapper">
+    <div #mapContainer class="heatmap-map-surface"></div>
+
+    <!-- Loading Overlay -->
+    @if (loading()) {
+      <div class="heatmap-status-overlay loading-overlay">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span>Updating demand map...</span>
+      </div>
+    }
+
+    <!-- Error State Overlay -->
+    @if (error() && !loading()) {
+      <div class="heatmap-status-overlay error-overlay">
+        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+        <span>{{ error() }}</span>
+        <button class="btn-retry-sm" (click)="refreshData()">Retry</button>
+      </div>
+    }
+
+    <!-- Empty State Notice (No active/recent demand) -->
+    @if (!loading() && !error() && points().length === 0) {
+      <div class="heatmap-status-overlay empty-overlay">
+        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+        <span>No recent demand data</span>
+      </div>
+    }
   </div>
-  <h3 class="map-title font-headline">Campus Heatmap</h3>
-  <p class="map-subtitle">Coming Soon</p>
-  <p class="map-description">
-    Real-time high-demand delivery zones map will be enabled in Phase 3.
-  </p>
+
+  <!-- Demand Intensity Legend Footer -->
+  <footer class="heatmap-legend">
+    <span class="legend-title">Demand Level:</span>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="legend-dot dot-low"></span>
+        <span>Low</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot dot-med"></span>
+        <span>Medium</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot dot-high"></span>
+        <span>High</span>
+      </div>
+    </div>
+  </footer>
 </section>

@@ -22,6 +22,7 @@ import {
   CustomerOrderDetailsDto,
   CustomerOrderDto,
 } from './dto/customer-order-response.dto';
+import { HeatmapPointDto } from './dto/heatmap-response.dto';
 import { User, UserDocument } from '../schemas/user.schema';
 import { VerificationStatus } from '../rider/enums/verification-status.enum';
 import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
