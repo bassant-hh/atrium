@@ -13,7 +13,10 @@ import { OrderStatus } from '../order/enums/order-status.enum';
 import { PaymentMethod } from '../order/enums/payment-method.enum';
 import { PaymentStatus } from '../order/enums/payment-status.enum';
 import { CreateCustomerOrderDto } from './dto/create-customer-order.dto';
-import { CustomerOrderDto } from './dto/customer-order-response.dto';
+import {
+  ConfirmDeliveryResponseDto,
+  CustomerOrderDto,
+} from './dto/customer-order-response.dto';
 import {
   DEFAULT_CUSTOMER_ORDER_EARNINGS,
   DEFAULT_DELIVERY_FEE,
@@ -70,6 +73,8 @@ export class CustomerOrderService {
       createdAt: order.createdAt || new Date(),
       acceptedAt: order.acceptedAt,
       deliveredAt: order.deliveredAt,
+      customerConfirmed: order.customerConfirmed === true,
+      customerConfirmedAt: order.customerConfirmedAt,
     };
   }
 
@@ -267,5 +272,79 @@ export class CustomerOrderService {
     this.realtimeGateway.notifyOrderUnavailable(orderId);
 
     return this.mapToDto(updatedOrder);
+  }
+
+  async confirmDelivery(
+    orderId: string,
+    customerId: string,
+  ): Promise<ConfirmDeliveryResponseDto> {
+    const confirmedAt = new Date();
+
+    const updatedOrder = await this.orderModel
+      .findOneAndUpdate(
+        {
+          _id: orderId,
+          clientId: customerId,
+          status: OrderStatus.DELIVERED,
+          customerConfirmed: { $ne: true },
+        },
+        {
+          $set: {
+            customerConfirmed: true,
+            customerConfirmedAt: confirmedAt,
+          },
+        },
+        { returnDocument: 'after' },
+      )
+      .exec();
+
+    if (!updatedOrder) {
+      const existingOrder = await this.orderModel.findById(orderId).exec();
+
+      if (!existingOrder) {
+        throw new NotFoundException('Order not found.');
+      }
+
+      if (
+        !existingOrder.clientId ||
+        String(existingOrder.clientId) !== String(customerId)
+      ) {
+        throw new ForbiddenException(
+          'You do not have permission to confirm this order.',
+        );
+      }
+
+      if (existingOrder.status !== OrderStatus.DELIVERED) {
+        throw new ConflictException(
+          'Order must be in DELIVERED status before confirming receipt.',
+        );
+      }
+
+      if (existingOrder.customerConfirmed === true) {
+        throw new ConflictException(
+          'Delivery receipt has already been confirmed for this order.',
+        );
+      }
+    }
+
+    if (updatedOrder && updatedOrder.riderId) {
+      this.realtimeGateway.notifyCustomerConfirmed(
+        updatedOrder.riderId.toString(),
+        {
+          orderId: updatedOrder._id.toString(),
+          riderId: updatedOrder.riderId.toString(),
+          paymentMethod: updatedOrder.paymentMethod || 'CASH',
+          earnings: updatedOrder.earnings || 'EGP 0',
+          amount: updatedOrder.amount ?? 0,
+        },
+      );
+    }
+
+    return {
+      orderId: orderId,
+      customerConfirmed: true,
+      customerConfirmedAt: confirmedAt,
+      message: 'Delivery receipt confirmed successfully.',
+    };
   }
 }

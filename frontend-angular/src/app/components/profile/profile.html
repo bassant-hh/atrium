@@ -1,3 +1,153 @@
-<div class="page-container">
-  <h1 class="font-headline page-title">Profile</h1>
+<div class="profile-page-wrapper animate-in">
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1 class="page-title font-headline">Rider Profile</h1>
+    <p class="page-subtitle">Manage your account overview and duty status</p>
+  </header>
+
+  <!-- 2-column profile layout -->
+  <div class="profile-layout">
+    <!-- LEFT — Hero Card -->
+    <aside class="hero-card" aria-label="Rider Profile Summary">
+      <!-- 96px initials avatar -->
+      <div class="hero-avatar font-headline" aria-hidden="true">
+        {{ riderInitials() }}
+      </div>
+
+      <!-- verification badge -->
+      <span
+        class="verification-badge"
+        [class.badge-approved]="verificationStatus() === 'APPROVED'"
+        [class.badge-pending]="verificationStatus() === 'PENDING'"
+        [class.badge-rejected]="verificationStatus() === 'REJECTED'"
+      >
+        <i class="bi bi-patch-check-fill" aria-hidden="true"></i>
+        <span>{{ verificationStatusLabel() }}</span>
+      </span>
+
+      <!-- full name -->
+      <h2 class="hero-name font-headline">{{ fullName() || 'Campus Delivery Rider' }}</h2>
+
+      <!-- role pill -->
+      <span class="role-pill">Campus Delivery Rider</span>
+
+      <!-- contact info with Bootstrap icons -->
+      <div class="hero-contact">
+        @if (email()) {
+          <div class="hero-contact-item">
+            <i class="bi bi-envelope" aria-hidden="true"></i>
+            <span>{{ email() }}</span>
+          </div>
+        }
+        @if (phone()) {
+          <div class="hero-contact-item">
+            <i class="bi bi-telephone" aria-hidden="true"></i>
+            <span>{{ phone() }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Logout button -->
+      <button class="btn-logout" type="button" (click)="onLogout()" aria-label="Logout of Account">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        <span>Logout</span>
+      </button>
+    </aside>
+
+    <!-- RIGHT — Main Content -->
+    <main class="main-content">
+      <!-- Personal Information Card -->
+      <section class="section-card" aria-label="Personal Information">
+        <div class="section-header">
+          <i class="bi bi-person-badge-fill" aria-hidden="true"></i>
+          <h2 class="section-title font-headline">Personal Information</h2>
+        </div>
+
+        <div class="fields-grid">
+          <!-- First Name -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-person" aria-hidden="true"></i> First Name
+            </span>
+            <span class="field-value">{{ firstName() || '—' }}</span>
+          </div>
+
+          <!-- Last Name -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-person" aria-hidden="true"></i> Last Name
+            </span>
+            <span class="field-value">{{ lastName() || '—' }}</span>
+          </div>
+
+          <!-- Email Address -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-envelope" aria-hidden="true"></i> Email Address
+            </span>
+            <span class="field-value">{{ email() || '—' }}</span>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-telephone" aria-hidden="true"></i> Phone Number
+            </span>
+            <span class="field-value">{{ phone() || '—' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rider & Duty Information Card -->
+      <section class="section-card" aria-label="Rider & Duty Information">
+        <div class="section-header">
+          <i class="bi bi-truck-front-fill" aria-hidden="true"></i>
+          <h2 class="section-title font-headline">Rider & Duty Information</h2>
+        </div>
+
+        <div class="fields-grid">
+          <!-- University / Campus -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-building" aria-hidden="true"></i> University / Campus
+            </span>
+            <span class="field-value">{{ university() || 'Campus Delivery' }}</span>
+          </div>
+
+          <!-- Verification Status -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-patch-check-fill" aria-hidden="true"></i> Verification Status
+            </span>
+            <div class="field-value">
+              <span
+                class="status-badge"
+                [class.badge-success]="verificationStatus() === 'APPROVED'"
+                [class.badge-warning]="verificationStatus() === 'PENDING'"
+                [class.badge-error]="verificationStatus() === 'REJECTED'"
+              >
+                {{ verificationStatusLabel() }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Duty Status -->
+          <div class="field-box">
+            <span class="field-label">
+              <i class="bi bi-circle-fill" aria-hidden="true"></i> Duty Status
+            </span>
+            <div class="field-value">
+              <span
+                class="status-badge"
+                [class.badge-success]="riderStatus() === 'ONLINE' || riderStatus() === 'DELIVERING'"
+                [class.badge-muted]="riderStatus() === 'OFFLINE'"
+              >
+                {{ riderStatusLabel() }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>

@@ -8,6 +8,7 @@ import { NearbyOrder } from '../../../../models/dashboard/order.models';
   styleUrl: './nearby-orders.css',
 })
 export class NearbyOrdersComponent {
+  @Input() mode: 'compact' | 'full' = 'compact';
   @Input() orders: NearbyOrder[] = [];
   @Input() submittingId: string | null = null;
 

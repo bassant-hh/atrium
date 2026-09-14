@@ -38,4 +38,13 @@ export class CustomerOrderDto {
   createdAt: Date;
   acceptedAt?: Date;
   deliveredAt?: Date;
+  customerConfirmed: boolean;
+  customerConfirmedAt?: Date;
+}
+
+export class ConfirmDeliveryResponseDto {
+  orderId: string;
+  customerConfirmed: boolean;
+  customerConfirmedAt: Date;
+  message: string;
 }

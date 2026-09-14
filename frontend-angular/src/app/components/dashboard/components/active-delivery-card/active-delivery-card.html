@@ -14,23 +14,27 @@
   </header>
 
   <div class="delivery-details">
-    <div class="detail-row">
-      <span class="material-symbols-outlined loc-icon icon-pickup" aria-hidden="true"
-        >storefront</span
-      >
-      <div>
-        <span class="detail-label">Pickup Point</span>
-        <p class="detail-value">{{ activeDelivery.pickup }}</p>
+    <div class="delivery-locations-container">
+      <div class="location-row pickup-row">
+        <div class="location-badge pickup-badge" aria-hidden="true">
+          <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+        </div>
+        <div class="location-info">
+          <span class="location-type-label">Pickup Point</span>
+          <p class="location-address-text">{{ activeDelivery.pickup }}</p>
+        </div>
       </div>
-    </div>
 
-    <div class="detail-row">
-      <span class="material-symbols-outlined loc-icon icon-dropoff" aria-hidden="true"
-        >location_on</span
-      >
-      <div>
-        <span class="detail-label">Destination</span>
-        <p class="detail-value">{{ activeDelivery.dropoff }}</p>
+      <div class="route-line-connector" aria-hidden="true"></div>
+
+      <div class="location-row destination-row">
+        <div class="location-badge destination-badge" aria-hidden="true">
+          <i class="bi bi-flag-fill" aria-hidden="true"></i>
+        </div>
+        <div class="location-info">
+          <span class="location-type-label">Destination</span>
+          <p class="location-address-text">{{ activeDelivery.dropoff }}</p>
+        </div>
       </div>
     </div>
 
@@ -47,20 +51,31 @@
 
     <div class="meta-strip">
       <div class="meta-item">
-        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <i class="bi bi-person-fill" aria-hidden="true"></i>
         <span>{{ activeDelivery.customerName }}</span>
       </div>
 
+      @if (showCallCustomer && activeDelivery.customerPhone) {
+        <a
+          [href]="'tel:' + activeDelivery.customerPhone"
+          class="btn-call-customer"
+          aria-label="Call Customer"
+        >
+          <i class="bi bi-telephone-fill" aria-hidden="true"></i>
+          <span>Call Customer</span>
+        </a>
+      }
+
       @if (distanceText()) {
         <div class="meta-item">
-          <span class="material-symbols-outlined" aria-hidden="true">near_me</span>
+          <i class="bi bi-cursor-fill" aria-hidden="true"></i>
           <span>{{ distanceText() }}</span>
         </div>
       }
 
       @if (durationText() || activeDelivery.estimatedTime) {
         <div class="meta-item">
-          <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+          <i class="bi bi-clock-fill" aria-hidden="true"></i>
           <span>{{
             durationText() ? durationText() : 'Est. ' + activeDelivery.estimatedTime
           }}</span>
@@ -72,7 +87,7 @@
     @if (activeDelivery.notes) {
       <div class="delivery-instructions-box">
         <div class="instructions-header">
-          <span class="material-symbols-outlined" aria-hidden="true">description</span>
+          <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
           <span>Delivery Instructions</span>
         </div>
         <p class="instructions-text">"{{ activeDelivery.notes }}"</p>
@@ -85,15 +100,18 @@
       [class.banner-cash]="activeDelivery.paymentMethod === 'CASH'"
       [class.banner-online]="activeDelivery.paymentMethod !== 'CASH'"
     >
-      <span class="material-symbols-outlined" aria-hidden="true">
-        {{ activeDelivery.paymentMethod === 'CASH' ? 'payments' : 'credit_card' }}
-      </span>
+      <i
+        class="bi"
+        [class.bi-cash-stack]="activeDelivery.paymentMethod === 'CASH'"
+        [class.bi-credit-card]="activeDelivery.paymentMethod !== 'CASH'"
+        aria-hidden="true"
+      ></i>
       <div class="payment-banner-details">
         <span class="payment-banner-title">
           {{
             activeDelivery.paymentMethod === 'CASH'
-              ? '💵 Cash on Delivery (' + (activeDelivery.amount || 0) + ' EGP)'
-              : '💳 Prepaid Online (' + (activeDelivery.amount || 0) + ' EGP Paid)'
+              ? 'Cash on Delivery (' + (activeDelivery.amount || 0) + ' EGP)'
+              : 'Prepaid Online (' + (activeDelivery.amount || 0) + ' EGP Paid)'
           }}
         </span>
         <span class="payment-banner-subtext">
@@ -109,7 +127,9 @@
     </div>
 
     @if (routeError()) {
-      <div class="route-warning-banner">⚠️ {{ routeError() }}</div>
+      <div class="route-warning-banner">
+        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> {{ routeError() }}
+      </div>
     }
   </div>
 
@@ -121,6 +141,13 @@
           : 'Confirm after you have received the order from the pickup location.'
       }}
     </p>
+
+    @if (activeDelivery.status === 'PICKED_UP') {
+      <p class="action-helper-text">
+        <i class="bi bi-coin" aria-hidden="true"></i> Your delivery earnings will be added after the
+        customer confirms receipt.
+      </p>
+    }
 
     <button
       class="btn-primary btn-delivery-action"

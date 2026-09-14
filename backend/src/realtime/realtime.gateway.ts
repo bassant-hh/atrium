@@ -21,6 +21,14 @@ interface AuthenticatedSocketData {
   role: string;
 }
 
+interface JwtPayload {
+  _id?: string;
+  customerId?: string;
+  sub?: string;
+  type?: string;
+  role?: string;
+}
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -61,7 +69,7 @@ export class RealtimeGateway
       const secret =
         this.configService.get<string>('JWT_SECRET') ?? 'somesecretkey';
 
-      const payload = jwt.verify(token, secret) as any;
+      const payload = jwt.verify(token, secret) as JwtPayload;
 
       const userId = payload._id || payload.customerId || payload.sub;
       const role = payload.type || payload.role || 'GUEST';
@@ -82,6 +90,7 @@ export class RealtimeGateway
 
       if (formattedRole === 'RIDER' || formattedRole === 'DELIVERY') {
         client.join('riders');
+        client.join(`rider:${userId}`);
       }
     } catch {
       client.emit('order:tracking:error', {
@@ -110,6 +119,22 @@ export class RealtimeGateway
   notifyOrderUnavailable(orderId: string): void {
     if (!this.server || !orderId) return;
     this.server.to('riders').emit('order:unavailable', { orderId });
+  }
+
+  notifyCustomerConfirmed(
+    riderId: string,
+    payload: {
+      orderId: string;
+      riderId: string;
+      paymentMethod: string;
+      earnings: string;
+      amount?: number;
+    },
+  ): void {
+    if (!this.server || !riderId || !payload?.orderId) return;
+    this.server
+      .to(`rider:${riderId}`)
+      .emit('order:customer-confirmed', payload);
   }
 
   @SubscribeMessage('order:tracking:join')

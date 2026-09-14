@@ -28,6 +28,12 @@ export const cancelOrder = async (id) => {
   });
 };
 
+export const confirmDelivery = async (id) => {
+  return authFetch(`customer/orders/${id}/confirm-delivery`, {
+    method: 'PATCH',
+  });
+};
+
 export const verifyPayment = async (orderId, transactionId) => {
   return authFetch(`payment/verify/${orderId}`, {
     method: 'POST',

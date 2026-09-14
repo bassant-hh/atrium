@@ -1,8 +1,194 @@
-.page-container {
-  padding: 1rem 0;
+.active-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  margin-bottom: 0.5rem;
 }
 
 .page-title {
-  color: var(--on-surface);
+  color: var(--on-surface, #1a252c);
   margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+/* Empty State Card */
+.empty-active-card {
+  background: var(--surface-container-lowest, #ffffff);
+  border: 1px solid var(--outline-variant, #d8eef5);
+  border-radius: var(--radius-xl, 16px);
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.empty-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-container-low, #f4fbfd);
+  color: var(--primary, #156b82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.empty-icon-circle .bi {
+  font-size: 2rem;
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--on-surface, #1a252c);
+}
+
+.empty-subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--on-surface-variant, #607d8b);
+}
+
+/* Post-Delivery Customer Confirmation Pending Card */
+.pending-confirmation-card {
+  background: var(--surface-container-lowest, #ffffff);
+  border: 1px solid var(--outline-variant, #d8eef5);
+  border-radius: var(--radius-xl, 16px);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pending-header-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pending-icon-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #e6f7f0;
+  color: #2e9e6b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pending-icon-circle .bi {
+  font-size: 1.75rem;
+}
+
+.pending-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pending-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--on-surface, #1a252c);
+}
+
+.pending-order-chip {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary, #156b82);
+  background: var(--surface-container-low, #f4fbfd);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.pending-status-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pending-status-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #15803d;
+}
+
+.pending-status-header .bi {
+  font-size: 1.15rem;
+}
+
+.pending-status-desc {
+  margin: 0;
+  font-size: 0.925rem;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.pending-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+.pending-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.925rem;
+  color: var(--on-surface-variant, #607d8b);
+}
+
+.pending-info-item .bi-check-lg {
+  color: #2e9e6b;
+  font-weight: bold;
+}
+
+.pending-info-item .bi-info-circle {
+  color: var(--primary, #156b82);
+}
+
+.btn-dismiss-pending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant, #d8eef5);
+  background: var(--surface-container-low, #f4fbfd);
+  color: var(--primary, #156b82);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+  width: fit-content;
+}
+
+.btn-dismiss-pending:hover {
+  background: #e8effd;
+  border-color: var(--primary, #156b82);
 }

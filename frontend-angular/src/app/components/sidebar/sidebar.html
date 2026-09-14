@@ -1,18 +1,18 @@
 <aside class="sidebar-container" role="navigation" aria-label="Main Navigation">
   <div class="brand">
     <div class="logo-icon-wrapper" aria-hidden="true">
-      <span class="material-symbols-outlined">pedal_bike</span>
+      <i class="bi bi-bicycle"></i>
     </div>
     <span class="logo-text font-headline">Makook</span>
   </div>
 
   <nav class="nav-menu">
     <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" aria-label="Dashboard">
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">dashboard</span>
+      <i class="bi bi-speedometer2 nav-icon" aria-hidden="true"></i>
       <span class="nav-label">Dashboard</span>
     </a>
     <a routerLink="/requests" routerLinkActive="active" class="nav-link" aria-label="Requests">
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">local_shipping</span>
+      <i class="bi bi-truck nav-icon" aria-hidden="true"></i>
       <span class="nav-label">Requests</span>
     </a>
     <a
@@ -21,22 +21,22 @@
       class="nav-link"
       aria-label="Active Deliveries"
     >
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">directions_run</span>
+      <i class="bi bi-person-walking nav-icon" aria-hidden="true"></i>
       <span class="nav-label">Active</span>
     </a>
     <a routerLink="/history" routerLinkActive="active" class="nav-link" aria-label="Order History">
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">history</span>
+      <i class="bi bi-clock-history nav-icon" aria-hidden="true"></i>
       <span class="nav-label">History</span>
     </a>
     <a routerLink="/profile" routerLinkActive="active" class="nav-link" aria-label="Profile">
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">account_circle</span>
+      <i class="bi bi-person-circle nav-icon" aria-hidden="true"></i>
       <span class="nav-label">Profile</span>
     </a>
   </nav>
 
   <div class="sidebar-footer">
     <button class="logout-btn" (click)="logout()" aria-label="Logout">
-      <span class="material-symbols-outlined nav-icon" aria-hidden="true">logout</span>
+      <i class="bi bi-box-arrow-right nav-icon" aria-hidden="true"></i>
       <span class="nav-label">Logout</span>
     </button>
   </div>

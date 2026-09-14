@@ -12,9 +12,11 @@
       [class.wrap-rejected]="verificationStatus === 'REJECTED'"
       aria-hidden="true"
     >
-      <span class="material-symbols-outlined">
-        {{ verificationStatus === 'PENDING' ? 'hourglass_top' : 'gpp_bad' }}
-      </span>
+      <i
+        class="bi"
+        [class.bi-hourglass-split]="verificationStatus === 'PENDING'"
+        [class.bi-x-circle-fill]="verificationStatus !== 'PENDING'"
+      ></i>
     </div>
 
     <h2 id="overlay-title" class="overlay-title font-headline">

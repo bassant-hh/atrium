@@ -28,6 +28,7 @@ export class DashboardService {
         $match: {
           riderId: riderId,
           status: OrderStatus.DELIVERED,
+          customerConfirmed: true,
         },
       },
       {

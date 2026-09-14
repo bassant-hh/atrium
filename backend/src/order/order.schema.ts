@@ -100,6 +100,12 @@ export class Order {
   deliveredAt?: Date;
 
   @Prop({ required: false })
+  customerConfirmed?: boolean;
+
+  @Prop({ required: false })
+  customerConfirmedAt?: Date;
+
+  @Prop({ required: false })
   createdAt?: Date;
 
   @Prop({ required: false })

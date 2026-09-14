@@ -27,15 +27,13 @@
     (click)="onToggle()"
     aria-label="Toggle Online Duty Status"
   >
-    <span class="material-symbols-outlined" aria-hidden="true">
-      {{
-        status === 'ONLINE'
-          ? 'power_settings_new'
-          : status === 'DELIVERING'
-            ? 'local_shipping'
-            : 'play_arrow'
-      }}
-    </span>
+    <i
+      class="bi"
+      [class.bi-power]="status === 'ONLINE'"
+      [class.bi-truck]="status === 'DELIVERING'"
+      [class.bi-play-fill]="status === 'OFFLINE'"
+      aria-hidden="true"
+    ></i>
     <span>{{
       status === 'ONLINE' ? 'Go Offline' : status === 'DELIVERING' ? 'Delivering' : 'Go Online'
     }}</span>

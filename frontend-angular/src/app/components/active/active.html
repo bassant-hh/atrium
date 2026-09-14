@@ -1,3 +1,61 @@
-<div class="page-container">
-  <h1 class="font-headline page-title">Active Deliveries</h1>
+<div class="active-page-wrapper animate-in">
+  <header class="page-header">
+    <h1 class="font-headline page-title">Active Deliveries</h1>
+  </header>
+
+  @if (activeDelivery()) {
+    <app-active-delivery-card
+      [activeDelivery]="activeDelivery()!"
+      [riderCoords]="riderCoords()"
+      [submitting]="loading()"
+      (pickup)="onPickupOrder()"
+      (deliver)="onDeliverOrder()"
+    />
+  } @else if (pendingConfirmationOrderId()) {
+    <div class="pending-confirmation-card shadow-card" aria-label="Customer Confirmation Pending">
+      <div class="pending-header-banner">
+        <div class="pending-icon-circle" aria-hidden="true">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="pending-title-wrap">
+          <h2 class="pending-title font-headline">Delivery Completed</h2>
+          <span class="pending-order-chip">#{{ pendingConfirmationOrderId() }}</span>
+        </div>
+      </div>
+
+      <div class="pending-status-box">
+        <div class="pending-status-header">
+          <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+          <span>Waiting for customer confirmation</span>
+        </div>
+        <p class="pending-status-desc">
+          Your delivery has been successfully marked as delivered. Earnings will be added to your
+          account after the customer confirms receipt.
+        </p>
+      </div>
+
+      <div class="pending-info-list">
+        <div class="pending-info-item">
+          <i class="bi bi-check-lg" aria-hidden="true"></i>
+          <span>The order was handed to the customer.</span>
+        </div>
+        <div class="pending-info-item">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <span>No further action is required from you.</span>
+        </div>
+      </div>
+
+      <button class="btn-dismiss-pending" type="button" (click)="onDismissPending()">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Return to Requests
+      </button>
+    </div>
+  } @else {
+    <div class="empty-active-card shadow-card">
+      <div class="empty-icon-circle" aria-hidden="true">
+        <i class="bi bi-person-walking"></i>
+      </div>
+      <h2 class="empty-title font-headline">No active delivery right now.</h2>
+      <p class="empty-subtitle">Check Requests or Dashboard to accept an order.</p>
+    </div>
+  }
 </div>

@@ -19,7 +19,7 @@
         </div>
         <div class="header-greeting-text">
           <h1 class="greeting-headline font-headline">
-            Welcome back, {{ firstName() || 'Rider' }} 👋
+            Welcome back, {{ firstName() || 'Rider' }}
           </h1>
           <p class="greeting-subtitle">{{ currentDateFormatted }} • Campus Delivery Rider</p>
         </div>
@@ -38,7 +38,7 @@
 
         @if (verificationStatus() === 'APPROVED') {
           <div class="header-verified-chip" aria-label="Verified Rider Status">
-            <span class="material-symbols-outlined check-icon" aria-hidden="true">verified</span>
+            <i class="bi bi-patch-check-fill check-icon" aria-hidden="true"></i>
             <span>Verified Rider</span>
           </div>
         }
@@ -51,7 +51,9 @@
     <!-- Error Alert Notification Banner -->
     @if (apiError()) {
       <div class="api-error-alert" role="alert">
-        <span>⚠️ {{ apiError() }}</span>
+        <span
+          ><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i> {{ apiError() }}</span
+        >
         <button
           class="btn-dismiss-alert"
           type="button"
@@ -80,6 +82,7 @@
             [activeDelivery]="activeDelivery()!"
             [riderCoords]="riderCoords()"
             [submitting]="loading()"
+            [showCallCustomer]="false"
             (pickup)="onPickupOrder()"
             (deliver)="onDeliverOrder()"
           />

@@ -8,6 +8,28 @@
   <div class="content-wrapper">
     <app-topbar></app-topbar>
 
+    @if (notification(); as notif) {
+      <div class="global-toast-notification animate-in" role="alert" aria-live="assertive">
+        <div class="toast-content-wrap">
+          <div class="toast-icon-circle" aria-hidden="true">
+            <i class="bi bi-patch-check-fill"></i>
+          </div>
+          <div class="toast-text-body">
+            <h4 class="toast-title font-headline">{{ notif.title }}</h4>
+            <p class="toast-message">{{ notif.message }}</p>
+          </div>
+        </div>
+        <button
+          class="btn-toast-close"
+          type="button"
+          (click)="onDismissNotification()"
+          aria-label="Dismiss notification"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+
     <main class="page-content" role="main">
       <router-outlet></router-outlet>
     </main>
@@ -20,7 +42,7 @@
         class="mobile-nav-link"
         aria-label="Dashboard"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+        <i class="bi bi-speedometer2" aria-hidden="true"></i>
         <span class="label">Dashboard</span>
       </a>
       <a
@@ -29,11 +51,11 @@
         class="mobile-nav-link"
         aria-label="Requests"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+        <i class="bi bi-truck" aria-hidden="true"></i>
         <span class="label">Requests</span>
       </a>
       <a routerLink="/active" routerLinkActive="active" class="mobile-nav-link" aria-label="Active">
-        <span class="material-symbols-outlined" aria-hidden="true">directions_run</span>
+        <i class="bi bi-person-walking" aria-hidden="true"></i>
         <span class="label">Active</span>
       </a>
       <a
@@ -42,7 +64,7 @@
         class="mobile-nav-link"
         aria-label="History"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">history</span>
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
         <span class="label">History</span>
       </a>
       <a
@@ -51,7 +73,7 @@
         class="mobile-nav-link"
         aria-label="Profile"
       >
-        <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+        <i class="bi bi-person-circle" aria-hidden="true"></i>
         <span class="label">Profile</span>
       </a>
     </nav>

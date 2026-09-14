@@ -13,6 +13,7 @@ export class ActiveDeliveryCardComponent {
   @Input() activeDelivery!: ActiveDelivery;
   @Input() riderCoords: { latitude: number; longitude: number } | null = null;
   @Input() submitting: boolean = false;
+  @Input() showCallCustomer: boolean = true;
 
   @Output() pickup = new EventEmitter<void>();
   @Output() deliver = new EventEmitter<void>();

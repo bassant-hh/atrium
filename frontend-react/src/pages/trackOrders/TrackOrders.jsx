@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOrderById, cancelOrder } from '../../services/order.service';
+import { getOrderById, cancelOrder, confirmDelivery } from '../../services/order.service';
 import {
   startRealtimeTracking,
   stopRealtimeTracking,
@@ -40,6 +40,7 @@ const TrackOrders = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
   const [error, setError] = useState(null);
   const [riderCoords, setRiderCoords] = useState(null);
 
@@ -222,6 +223,30 @@ const TrackOrders = () => {
     }
   };
 
+  const handleConfirmDelivery = async () => {
+    if (!order || currentStatus !== 'DELIVERED' || order.customerConfirmed || isConfirmingDelivery)
+      return;
+
+    try {
+      setIsConfirmingDelivery(true);
+      setError(null);
+      const res = await confirmDelivery(order.id || order._id);
+      setOrder((prev) =>
+        prev
+          ? {
+              ...prev,
+              customerConfirmed: true,
+              customerConfirmedAt: res.customerConfirmedAt,
+            }
+          : prev,
+      );
+    } catch (err) {
+      setError(err.message || 'Failed to confirm delivery receipt. Please try again.');
+    } finally {
+      setIsConfirmingDelivery(false);
+    }
+  };
+
   const currentStatus = order?.status || 'AVAILABLE';
   const statusConfig = statusDisplayMap[currentStatus] || {
     label: currentStatus,
@@ -359,6 +384,76 @@ const TrackOrders = () => {
               type="error"
               message="This order has been cancelled and will not proceed through delivery."
             />
+          )}
+
+          {/* Customer Delivery Confirmation Action Card */}
+          {currentStatus === 'DELIVERED' && !order?.customerConfirmed && (
+            <div
+              style={{
+                background: '#E6F7F0',
+                border: '1px solid #7ED3A9',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#1B5E3F' }}>
+                  🛵 Delivery Completed
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#2E9E6B' }}>
+                  Have you received your order package from the rider?
+                </p>
+              </div>
+
+              <button
+                onClick={handleConfirmDelivery}
+                disabled={isConfirmingDelivery}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: '#2E9E6B',
+                  color: '#ffffff',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  cursor: isConfirmingDelivery ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 2px 6px rgba(46,158,107,0.3)',
+                }}
+              >
+                {isConfirmingDelivery ? 'Confirming...' : 'Confirm Receipt'}
+              </button>
+            </div>
+          )}
+
+          {/* Customer Delivery Receipt Confirmed Banner */}
+          {currentStatus === 'DELIVERED' && order?.customerConfirmed && (
+            <div
+              style={{
+                background: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}
+            >
+              <span style={{ fontSize: '20px', color: '#16A34A', fontWeight: 'bold' }}>✓</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '15px', color: '#15803D' }}>Receipt Confirmed</h4>
+                <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#166534' }}>
+                  Thank you for confirming receipt of your delivery!
+                  {order.customerConfirmedAt && (
+                    <span> • {formatDate(order.customerConfirmedAt)}</span>
+                  )}
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Integrated Track Order Delivery Map */}

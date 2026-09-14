@@ -9,6 +9,7 @@ export class ActiveDeliveryDto {
   paymentStatus?: string;
   amount?: number;
   notes?: string;
+  customerPhone?: string;
   pickupCoordinates?: { latitude: number; longitude: number };
   destinationCoordinates?: { latitude: number; longitude: number };
 }

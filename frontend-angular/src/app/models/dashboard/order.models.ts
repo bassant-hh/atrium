@@ -9,6 +9,7 @@ export interface ActiveDelivery {
   paymentStatus?: string;
   amount?: number;
   notes?: string;
+  customerPhone?: string;
   pickupCoordinates?: { latitude: number; longitude: number };
   destinationCoordinates?: { latitude: number; longitude: number };
 }
@@ -48,4 +49,10 @@ export interface PickupOrderResponse {
 export interface DeliverOrderResponse {
   success: boolean;
   message: string;
+}
+
+export interface HeatmapPoint {
+  latitude: number;
+  longitude: number;
+  intensity: number;
 }

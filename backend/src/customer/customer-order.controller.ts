@@ -11,7 +11,10 @@ import {
 import { Request } from 'express';
 import { CustomerOrderService } from './customer-order.service';
 import { CreateCustomerOrderDto } from './dto/create-customer-order.dto';
-import { CustomerOrderDto } from './dto/customer-order-response.dto';
+import {
+  ConfirmDeliveryResponseDto,
+  CustomerOrderDto,
+} from './dto/customer-order-response.dto';
 import { CustomerJwtGuard } from './guards/customer-jwt.guard';
 import { CustomerJwtPayload } from './interfaces/customer-jwt-payload.interface';
 
@@ -49,5 +52,13 @@ export class CustomerOrderController {
     @Req() req: Request & { customer: CustomerJwtPayload },
   ): Promise<CustomerOrderDto> {
     return this.customerOrderService.cancelOrder(id, req.customer._id);
+  }
+
+  @Patch(':id/confirm-delivery')
+  async confirmDelivery(
+    @Param('id') id: string,
+    @Req() req: Request & { customer: CustomerJwtPayload },
+  ): Promise<ConfirmDeliveryResponseDto> {
+    return this.customerOrderService.confirmDelivery(id, req.customer._id);
   }
 }
