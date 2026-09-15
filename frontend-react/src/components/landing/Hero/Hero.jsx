@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaGraduationCap, FaUtensils, FaPrint } from 'react-icons/fa';
+import { FaGraduationCap, FaUtensils, FaPrint, FaPencilAlt } from 'react-icons/fa';
 import { usePublicAuthNavigation } from '../../../hooks/usePublicAuthNavigation';
 import SwitchAccountModal from '../SwitchAccountModal/SwitchAccountModal';
 import './Hero.css';
@@ -80,15 +80,21 @@ const Hero = () => {
 
               <div className="hero-card-list">
                 <div className="hero-card-item">
-                  <span>🍕 Chicken Shawarma Combo</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <FaUtensils /> Chicken Shawarma Combo
+                  </span>
                   <span>25 SAR</span>
                 </div>
                 <div className="hero-card-item">
-                  <span>🖨️ CS Lecture Slides (12 pgs)</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <FaPrint /> CS Lecture Slides (12 pgs)
+                  </span>
                   <span>6 SAR</span>
                 </div>
                 <div className="hero-card-item">
-                  <span>✏️ Blue Ink Pen Pack</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <FaPencilAlt /> Blue Ink Pen Pack
+                  </span>
                   <span>4 SAR</span>
                 </div>
               </div>

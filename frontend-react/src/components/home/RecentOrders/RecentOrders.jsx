@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaChevronRight, FaExclamationTriangle, FaBoxOpen } from 'react-icons/fa';
 import { ROUTES } from '../../../constants/routes';
 import RecentOrderItem from './RecentOrderItem';
 import './RecentOrders.css';
@@ -13,7 +14,7 @@ const RecentOrders = ({ orders = [], loading = false, error = null, onRetry }) =
         <h2 className="recent-orders__title">Recent Orders</h2>
         {!loading && !error && displayOrders.length > 0 && (
           <Link to={ROUTES.MY_ORDERS} className="recent-orders__see-all">
-            See all →
+            See all <FaChevronRight style={{ marginLeft: '4px', fontSize: '0.85em' }} />
           </Link>
         )}
       </div>
@@ -29,7 +30,9 @@ const RecentOrders = ({ orders = [], loading = false, error = null, onRetry }) =
       {/* State 2: Error State */}
       {!loading && error && (
         <div className="recent-orders-error">
-          <p className="recent-orders-error__text">⚠️ {error}</p>
+          <p className="recent-orders-error__text">
+            <FaExclamationTriangle style={{ marginRight: '6px' }} /> {error}
+          </p>
           {onRetry && (
             <button type="button" className="recent-orders-error__retry" onClick={onRetry}>
               Retry
@@ -42,7 +45,7 @@ const RecentOrders = ({ orders = [], loading = false, error = null, onRetry }) =
       {!loading && !error && displayOrders.length === 0 && (
         <div className="recent-orders-empty">
           <span className="recent-orders-empty__icon" aria-hidden="true">
-            📦
+            <FaBoxOpen />
           </span>
           <h3 className="recent-orders-empty__title">No orders yet</h3>
           <p className="recent-orders-empty__subtitle">

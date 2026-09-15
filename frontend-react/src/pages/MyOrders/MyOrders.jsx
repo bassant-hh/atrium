@@ -13,6 +13,7 @@ import {
   FaMoneyBillWave,
   FaCreditCard,
   FaWallet,
+  FaArrowDown,
 } from 'react-icons/fa';
 import { getMyOrders, cancelOrder } from '../../services/order.service';
 import './MyOrders.css';
@@ -144,7 +145,9 @@ const OrderCard = ({ order, onCancelOrder }) => {
           </div>
         </div>
 
-        <div className="route-arrow-connector">↓</div>
+        <div className="route-arrow-connector">
+          <FaArrowDown />
+        </div>
 
         <div className="route-step">
           <span className="route-icon route-icon--dropoff">

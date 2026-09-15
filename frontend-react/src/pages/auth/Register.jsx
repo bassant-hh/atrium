@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FaExclamationCircle } from 'react-icons/fa';
 import { registerCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
 import { saveRole } from '../../utils/role';
@@ -82,7 +83,9 @@ const Register = () => {
             aria-live="polite"
             id="register-error-alert"
           >
-            <span>⚠️</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <FaExclamationCircle />
+            </span>
             <span>{error}</span>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { FaExclamationCircle } from 'react-icons/fa';
 import { loginCustomer } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
 import { saveRole } from '../../utils/role';
@@ -69,7 +70,9 @@ const Login = () => {
 
         {error && (
           <div className="auth-alert-error" role="alert" aria-live="polite" id="login-error-alert">
-            <span>⚠️</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <FaExclamationCircle />
+            </span>
             <span>{error}</span>
           </div>
         )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { FaMotorcycle, FaBell } from 'react-icons/fa';
 import { ROUTES } from '../constants/routes.js';
 import { useNotification } from '../context/NotificationContext.jsx';
 import HeaderDestinationSearch from '../components/navigation/HeaderDestinationSearch/HeaderDestinationSearch.jsx';
@@ -24,7 +25,7 @@ const MainLayout = () => {
       <header className={styles.navbar}>
         <div className={styles.navbarLogo}>
           <span className={styles.logoIcon}>
-            <i className="fa-solid fa-person-biking"></i>
+            <FaMotorcycle />
           </span>
           <span className={styles.logoText}>Makook</span>
         </div>
@@ -42,7 +43,7 @@ const MainLayout = () => {
           }
           aria-label="Notifications"
         >
-          <i className="fa-regular fa-bell"></i>
+          <FaBell />
           {unreadCount > 0 && (
             <span className={styles.bellBadge}>{formatBadgeCount(unreadCount)}</span>
           )}

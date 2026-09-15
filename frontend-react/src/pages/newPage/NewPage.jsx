@@ -16,6 +16,8 @@ import {
   FaCheckCircle,
   FaSpinner,
   FaExclamationCircle,
+  FaShoppingBag,
+  FaMotorcycle,
 } from 'react-icons/fa';
 import { createOrder } from '../../services/order.service';
 import LocationPickerMap from '../../components/map/LocationPickerMap';
@@ -64,7 +66,8 @@ const LOCATION_TYPES = [
 
 const SAVED_ADDRESS_PRESETS = [
   {
-    label: '🎓 Campus Main Gate',
+    label: 'Campus Main Gate',
+    Icon: FaGraduationCap,
     type: 'campus',
     fields: {
       university: 'South Valley University',
@@ -74,7 +77,8 @@ const SAVED_ADDRESS_PRESETS = [
     coords: { latitude: 26.1551, longitude: 32.716 },
   },
   {
-    label: '🏠 Home - Univ. Street',
+    label: 'Home - Univ. Street',
+    Icon: FaHome,
     type: 'home',
     fields: {
       street: 'University Street',
@@ -86,7 +90,8 @@ const SAVED_ADDRESS_PRESETS = [
     coords: { latitude: 26.158, longitude: 32.72 },
   },
   {
-    label: '🏢 Office - Admin Bldg',
+    label: 'Office - Admin Bldg',
+    Icon: FaBuilding,
     type: 'office',
     fields: {
       officeName: 'Student Services',
@@ -508,7 +513,8 @@ const NewOrder = () => {
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
                 <h2 className="no-card__title">
-                  <FaMapMarkerAlt style={{ color: '#156B82' }} /> 🛍️ 3. Pickup Location
+                  <FaMapMarkerAlt style={{ color: '#156B82' }} /> <FaShoppingBag /> 3. Pickup
+                  Location
                 </h2>
                 <span className="no-card__step-badge">Step A</span>
               </div>
@@ -517,16 +523,20 @@ const NewOrder = () => {
 
             {/* Quick Pick Presets */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {SAVED_ADDRESS_PRESETS.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleApplyPreset('pickup', preset)}
-                  className="no-preset-chip"
-                >
-                  {preset.label}
-                </button>
-              ))}
+              {SAVED_ADDRESS_PRESETS.map((preset, idx) => {
+                const PresetIcon = preset.Icon;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleApplyPreset('pickup', preset)}
+                    className="no-preset-chip"
+                  >
+                    <PresetIcon style={{ marginRight: '6px' }} />
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Location Type Selector */}
@@ -682,7 +692,9 @@ const NewOrder = () => {
 
             {/* Interactive Pickup Map Picker */}
             <div className="no-field">
-              <label className="no-field__label">📍 PICKUP POINT ON MAP</label>
+              <label className="no-field__label">
+                <FaMapMarkerAlt style={{ marginRight: '6px' }} /> PICKUP POINT ON MAP
+              </label>
               <p className="no-field__helper">
                 Move the pin to the exact place where the rider should collect your order.
               </p>
@@ -698,7 +710,9 @@ const NewOrder = () => {
           <div className="no-route-connector">
             <div className="no-route-connector__line" />
             <span className="no-route-connector__badge">
-              🛍️ Pickup → 🛵 Rider → 🏠 Delivery Route
+              <FaShoppingBag style={{ marginRight: '4px' }} /> Pickup →{' '}
+              <FaMotorcycle style={{ margin: '0 4px' }} /> Rider →{' '}
+              <FaHome style={{ margin: '0 4px' }} /> Delivery Route
             </span>
           </div>
 
@@ -709,7 +723,8 @@ const NewOrder = () => {
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
                 <h2 className="no-card__title">
-                  <FaFlagCheckered style={{ color: '#2E9E6B' }} /> 🏠 4. Delivery Destination
+                  <FaFlagCheckered style={{ color: '#2E9E6B' }} /> <FaHome /> 4. Delivery
+                  Destination
                 </h2>
                 <span className="no-card__step-badge no-card__step-badge--dest">Step B</span>
               </div>
@@ -739,7 +754,8 @@ const NewOrder = () => {
                       letterSpacing: '0.04em',
                     }}
                   >
-                    📍 PRE-SELECTED DESTINATION FROM SEARCH
+                    <FaMapMarkerAlt style={{ marginRight: '4px' }} /> PRE-SELECTED DESTINATION FROM
+                    SEARCH
                   </div>
                   <div
                     style={{
@@ -777,16 +793,20 @@ const NewOrder = () => {
 
             {/* Quick Pick Presets */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {SAVED_ADDRESS_PRESETS.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleApplyPreset('destination', preset)}
-                  className="no-preset-chip"
-                >
-                  {preset.label}
-                </button>
-              ))}
+              {SAVED_ADDRESS_PRESETS.map((preset, idx) => {
+                const PresetIcon = preset.Icon;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleApplyPreset('destination', preset)}
+                    className="no-preset-chip"
+                  >
+                    <PresetIcon style={{ marginRight: '6px' }} />
+                    {preset.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Location Type Selector */}
@@ -923,7 +943,9 @@ const NewOrder = () => {
 
             {/* Interactive Destination Map Picker */}
             <div className="no-field">
-              <label className="no-field__label">🏁 DELIVERY POINT ON MAP</label>
+              <label className="no-field__label">
+                <FaFlagCheckered style={{ marginRight: '6px' }} /> DELIVERY POINT ON MAP
+              </label>
               <p className="no-field__helper">
                 Move the pin to the exact place where you want to receive your order.
               </p>
@@ -1053,14 +1075,16 @@ const NewOrder = () => {
               <strong style={{ color: '#156B82' }}>Pick up from:</strong>
               <div style={{ color: '#263238' }}>{formattedPickup}</div>
               <div style={{ color: '#607D8B', fontSize: '11px', marginTop: '2px' }}>
-                📍 ({pickupCoords.latitude}, {pickupCoords.longitude})
+                <FaMapMarkerAlt style={{ marginRight: '4px' }} /> ({pickupCoords.latitude},{' '}
+                {pickupCoords.longitude})
               </div>
             </div>
             <div style={{ borderTop: '1px solid #D8EEF5', paddingTop: '6px' }}>
               <strong style={{ color: '#2E9E6B' }}>Deliver to:</strong>
               <div style={{ color: '#263238' }}>{formattedDestination}</div>
               <div style={{ color: '#607D8B', fontSize: '11px', marginTop: '2px' }}>
-                🏁 ({destCoords.latitude}, {destCoords.longitude})
+                <FaFlagCheckered style={{ marginRight: '4px' }} /> ({destCoords.latitude},{' '}
+                {destCoords.longitude})
               </div>
             </div>
           </div>

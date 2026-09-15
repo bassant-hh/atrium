@@ -1,8 +1,9 @@
 import React from 'react';
+import { FaBoxOpen } from 'react-icons/fa';
 import './EmptyState.css';
 
 const EmptyState = ({
-  icon = '📦',
+  icon = <FaBoxOpen />,
   title = 'No items found',
   description,
   action,

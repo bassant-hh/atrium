@@ -1,3 +1,4 @@
+import { FaMapMarkerAlt, FaFlagCheckered, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 import MapAdapter from './MapAdapter';
 
 const TrackOrderMap = ({
@@ -62,7 +63,7 @@ const TrackOrderMap = ({
           gap: '8px',
         }}
       >
-        <h3 style={{ margin: 0, fontSize: '16px', color: '#263238' }}>🗺️ Order Delivery Map</h3>
+        <h3 style={{ margin: 0, fontSize: '16px', color: '#263238' }}>Order Delivery Map</h3>
         <span
           style={{
             fontSize: '12px',
@@ -95,7 +96,7 @@ const TrackOrderMap = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>{etaError ? '⚠️' : '⏱️'}</span>
+            <span>{etaError ? <FaExclamationTriangle /> : <FaClock />}</span>
             <span>{etaMessage}</span>
           </div>
           {etaLoading && (
@@ -119,15 +120,16 @@ const TrackOrderMap = ({
       <div style={{ fontSize: '12px', color: '#607D8B', wordBreak: 'break-word' }}>
         {hasCoords ? (
           <span>
-            📍 Pickup:{' '}
+            <FaMapMarkerAlt style={{ marginRight: '4px' }} /> Pickup:{' '}
             {pickupCoords ? `(${pickupCoords.latitude}, ${pickupCoords.longitude})` : pickupString}{' '}
-            • 🏁 Destination:{' '}
+            • <FaFlagCheckered style={{ margin: '0 4px' }} /> Destination:{' '}
             {destCoords ? `(${destCoords.latitude}, ${destCoords.longitude})` : destinationString}
           </span>
         ) : (
           <span>
-            📍 Pickup: {pickupString || 'Pickup Location'} • 🏁 Destination:{' '}
-            {destinationString || 'Destination Location'}
+            <FaMapMarkerAlt style={{ marginRight: '4px' }} /> Pickup:{' '}
+            {pickupString || 'Pickup Location'} • <FaFlagCheckered style={{ margin: '0 4px' }} />{' '}
+            Destination: {destinationString || 'Destination Location'}
           </span>
         )}
       </div>

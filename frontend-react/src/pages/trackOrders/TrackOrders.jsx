@@ -8,6 +8,7 @@ import {
 import { fetchRouteAndETA, shouldRecalculateRoute } from '../../services/routing.service';
 import { Spinner, Alert, EmptyState } from '../../components/ui';
 import TrackOrderMap from '../../components/map/TrackOrderMap';
+import { FaCheckCircle, FaCheck } from 'react-icons/fa';
 
 const statusDisplayMap = {
   AVAILABLE: { label: 'Waiting for Rider', color: '#C9A227', background: '#FEF9E3' },
@@ -443,7 +444,16 @@ const TrackOrders = () => {
                 gap: '12px',
               }}
             >
-              <span style={{ fontSize: '20px', color: '#16A34A', fontWeight: 'bold' }}>✓</span>
+              <span
+                style={{
+                  fontSize: '20px',
+                  color: '#16A34A',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                <FaCheckCircle />
+              </span>
               <div>
                 <h4 style={{ margin: 0, fontSize: '15px', color: '#15803D' }}>Receipt Confirmed</h4>
                 <p style={{ margin: '2px 0 0 0', fontSize: '13px', color: '#166534' }}>
@@ -517,7 +527,7 @@ const TrackOrders = () => {
                       flexShrink: 0,
                     }}
                   >
-                    ✓
+                    <FaCheck />
                   </div>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>Order Placed</h4>
@@ -544,7 +554,7 @@ const TrackOrders = () => {
                       flexShrink: 0,
                     }}
                   >
-                    {isAcceptedDone ? '✓' : '2'}
+                    {isAcceptedDone ? <FaCheck /> : '2'}
                   </div>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>
@@ -573,7 +583,7 @@ const TrackOrders = () => {
                       flexShrink: 0,
                     }}
                   >
-                    {isInTransitDone ? '✓' : '3'}
+                    {isInTransitDone ? <FaCheck /> : '3'}
                   </div>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>In Transit</h4>
@@ -604,7 +614,7 @@ const TrackOrders = () => {
                       flexShrink: 0,
                     }}
                   >
-                    {isDeliveredDone ? '✓' : '4'}
+                    {isDeliveredDone ? <FaCheck /> : '4'}
                   </div>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>Delivered</h4>

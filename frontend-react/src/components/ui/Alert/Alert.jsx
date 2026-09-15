@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
+import {
+  FaInfoCircle,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+  FaTimes,
+} from 'react-icons/fa';
 import './Alert.css';
 
 const defaultIcons = {
-  info: 'ℹ️',
-  success: '✅',
-  warning: '⚠️',
-  error: '❌',
+  info: <FaInfoCircle />,
+  success: <FaCheckCircle />,
+  warning: <FaExclamationTriangle />,
+  error: <FaTimesCircle />,
 };
 
 const Alert = ({
@@ -46,7 +53,7 @@ const Alert = ({
           onClick={handleDismiss}
           aria-label="Dismiss alert"
         >
-          ✕
+          <FaTimes />
         </button>
       )}
     </div>

@@ -116,7 +116,10 @@ const OrderConfirmation = () => {
         <FaCheckCircle size={40} />
       </div>
 
-      <h1 className="order-conf-title">✓ Order Confirmed</h1>
+      <h1 className="order-conf-title">
+        <FaCheckCircle style={{ marginRight: '8px', fontSize: '0.9em', verticalAlign: 'middle' }} />
+        Order Confirmed
+      </h1>
       <p className="order-conf-subtitle">Your order details and financial summary</p>
 
       {/* Financial & Order Summary Card */}

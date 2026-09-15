@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { FaMotorcycle, FaBox, FaCheckCircle, FaBell } from 'react-icons/fa';
 import {
   getCustomerNotifications,
   markNotificationAsRead,
@@ -26,13 +27,13 @@ const formatTimeAgo = (dateString) => {
 const getNotificationIconConfig = (type) => {
   switch (type) {
     case 'ORDER_ACCEPTED':
-      return { icon: '🛵', bg: '#E8EFFD', color: '#5B8DEF' };
+      return { icon: <FaMotorcycle />, bg: '#E8EFFD', color: '#5B8DEF' };
     case 'ORDER_PICKED_UP':
-      return { icon: '📦', bg: '#BAEAFF', color: '#0C6780' };
+      return { icon: <FaBox />, bg: '#BAEAFF', color: '#0C6780' };
     case 'ORDER_DELIVERED':
-      return { icon: '🎉', bg: '#E6F7F0', color: '#2E9E6B' };
+      return { icon: <FaCheckCircle />, bg: '#E6F7F0', color: '#2E9E6B' };
     default:
-      return { icon: '🔔', bg: '#F4FBFD', color: '#156B82' };
+      return { icon: <FaBell />, bg: '#F4FBFD', color: '#156B82' };
   }
 };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FaMapMarkerAlt, FaCrosshairs } from 'react-icons/fa';
 import MapAdapter from './MapAdapter';
 import { useCustomerLocation } from '../../hooks/useCustomerLocation';
 
@@ -67,7 +68,9 @@ const LocationPickerMap = ({
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>📍 Select Location on Map</h4>
+        <h4 style={{ margin: 0, fontSize: '15px', color: '#263238' }}>
+          <FaMapMarkerAlt style={{ marginRight: '6px' }} /> Select Location on Map
+        </h4>
         <button
           type="button"
           onClick={handleGetCurrentLocation}
@@ -81,9 +84,18 @@ const LocationPickerMap = ({
             fontSize: '12px',
             fontWeight: '600',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          {isLocating ? 'Locating...' : '🎯 Use My Current Location'}
+          {isLocating ? (
+            'Locating...'
+          ) : (
+            <>
+              <FaCrosshairs /> Use My Current Location
+            </>
+          )}
         </button>
       </div>
 
