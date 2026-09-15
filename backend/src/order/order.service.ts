@@ -24,6 +24,7 @@ import {
 } from './dto/customer-order-response.dto';
 import { HeatmapPointDto } from './dto/heatmap-response.dto';
 import { User, UserDocument } from '../schemas/user.schema';
+import { Customer, CustomerDocument } from '../customer/customer.schema';
 import { VerificationStatus } from '../rider/enums/verification-status.enum';
 import { RiderDutyStatus } from '../rider/enums/rider-duty-status.enum';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
@@ -44,6 +45,8 @@ export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(Customer.name)
+    private readonly customerModel: Model<CustomerDocument>,
     private readonly realtimeGateway: RealtimeGateway,
     private readonly notificationService: NotificationService,
   ) {}
@@ -136,6 +139,7 @@ export class OrderService {
 
   private async mapActiveDelivery(order: {
     _id: { toString(): string } | string;
+    clientId?: string;
     customerName: string;
     pickup: string;
     destination: string;
@@ -187,6 +191,34 @@ export class OrderService {
       routeEstimatedTime = calculated.estimatedTime;
     }
 
+    let customerPhone: string | undefined = undefined;
+
+    if (
+      (order.status === OrderStatus.ACCEPTED ||
+        order.status === OrderStatus.PICKED_UP) &&
+      order.clientId
+    ) {
+      const user = await this.userModel
+        .findById(order.clientId)
+        .select('phone')
+        .lean()
+        .exec();
+
+      if (user?.phone) {
+        customerPhone = user.phone;
+      } else {
+        const customer = await this.customerModel
+          .findById(order.clientId)
+          .select('phone')
+          .lean()
+          .exec();
+
+        if (customer?.phone) {
+          customerPhone = customer.phone;
+        }
+      }
+    }
+
     return {
       orderId: order._id.toString(),
       customerName: order.customerName,
@@ -198,6 +230,7 @@ export class OrderService {
       paymentStatus: order.paymentStatus ?? 'PENDING',
       amount: order.amount ?? 0,
       notes: order.notes,
+      customerPhone: customerPhone,
       pickupCoordinates: pickupCoords,
       destinationCoordinates: destinationCoords,
     };
@@ -694,6 +727,7 @@ export class OrderService {
         status: { $in: [OrderStatus.ACCEPTED, OrderStatus.PICKED_UP] },
       })
       .select({
+        clientId: 1,
         customerName: 1,
         pickup: 1,
         destination: 1,
@@ -714,5 +748,75 @@ export class OrderService {
     }
 
     return await this.mapActiveDelivery(activeOrder);
+  }
+
+  // ==========================================================================
+  // Campus Heatmap Endpoint Data Aggregation
+  // ==========================================================================
+  async getHeatmapData(): Promise<HeatmapPointDto[]> {
+    const twoHoursAgo = new Date(Date.now() - 120 * 60 * 1000);
+
+    const orders = await this.orderModel
+      .find({
+        $or: [
+          { status: OrderStatus.AVAILABLE },
+          {
+            status: OrderStatus.DELIVERED,
+            $or: [
+              { deliveredAt: { $gte: twoHoursAgo } },
+              { updatedAt: { $gte: twoHoursAgo } },
+            ],
+          },
+        ],
+      })
+      .select({
+        status: 1,
+        'pickupLocationDetails.coordinates': 1,
+        updatedAt: 1,
+        deliveredAt: 1,
+      })
+      .lean()
+      .exec();
+
+    const cellMap = new Map<
+      string,
+      { latitude: number; longitude: number; intensity: number }
+    >();
+
+    for (const order of orders) {
+      const coords = order.pickupLocationDetails?.coordinates;
+      if (
+        !coords ||
+        typeof coords.latitude !== 'number' ||
+        typeof coords.longitude !== 'number' ||
+        !Number.isFinite(coords.latitude) ||
+        !Number.isFinite(coords.longitude)
+      ) {
+        continue;
+      }
+
+      const weight = order.status === OrderStatus.AVAILABLE ? 1.0 : 0.25;
+
+      const latGrid = Number(coords.latitude.toFixed(3));
+      const lngGrid = Number(coords.longitude.toFixed(3));
+      const key = `${latGrid},${lngGrid}`;
+
+      const existing = cellMap.get(key);
+      if (existing) {
+        existing.intensity += weight;
+      } else {
+        cellMap.set(key, {
+          latitude: latGrid,
+          longitude: lngGrid,
+          intensity: weight,
+        });
+      }
+    }
+
+    return Array.from(cellMap.values()).map((point) => ({
+      latitude: point.latitude,
+      longitude: point.longitude,
+      intensity: Number(point.intensity.toFixed(2)),
+    }));
   }
 }

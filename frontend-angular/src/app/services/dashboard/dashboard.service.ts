@@ -20,6 +20,14 @@ import {
   RiderStatusResponse,
 } from '../../models/dashboard/dashboard.models';
 
+export interface OrderCustomerConfirmedNotification {
+  id: string;
+  orderId: string;
+  title: string;
+  message: string;
+  createdAt: Date;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -61,6 +69,9 @@ export class DashboardService {
 
   readonly firstName = signal<string>('');
   readonly lastName = signal<string>('');
+  readonly email = signal<string>('');
+  readonly phone = signal<string>('');
+  readonly university = signal<string>('');
 
   readonly verificationStatus = signal<VerificationStatus>('APPROVED');
   readonly riderStatus = signal<RiderDutyStatus>('OFFLINE');
@@ -70,6 +81,8 @@ export class DashboardService {
   readonly onlineHours = signal<string>('0 hrs');
 
   readonly activeDelivery = signal<ActiveDelivery | null>(null);
+  readonly pendingConfirmationOrderId = signal<string | null>(null);
+  readonly customerConfirmedNotification = signal<OrderCustomerConfirmedNotification | null>(null);
   readonly nearbyOrders = signal<NearbyOrder[]>([]);
   readonly heatmapPoints = signal<HeatmapPoint[]>([]);
   readonly heatmapLoading = signal<boolean>(false);
@@ -136,17 +149,28 @@ export class DashboardService {
   }
 
   fetchUserProfile(): void {
-    this.http.get<{ firstName?: string; lastName?: string }>(this.endpoints.userProfile).subscribe({
-      next: (profile) => {
-        if (profile) {
-          if (profile.firstName) this.firstName.set(profile.firstName);
-          if (profile.lastName) this.lastName.set(profile.lastName);
-        }
-      },
-      error: (_err) => {
-        // Non-blocking profile load error
-      },
-    });
+    this.http
+      .get<{
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phone?: string;
+        university?: string;
+      }>(this.endpoints.userProfile)
+      .subscribe({
+        next: (profile) => {
+          if (profile) {
+            if (profile.firstName) this.firstName.set(profile.firstName);
+            if (profile.lastName) this.lastName.set(profile.lastName);
+            if (profile.email) this.email.set(profile.email);
+            if (profile.phone) this.phone.set(profile.phone);
+            if (profile.university) this.university.set(profile.university);
+          }
+        },
+        error: (_err) => {
+          // Non-blocking profile load error
+        },
+      });
   }
 
   // ==========================================================================
@@ -196,10 +220,50 @@ export class DashboardService {
       if (!payload?.orderId) return;
       this.nearbyOrders.update((current) => current.filter((item) => item.id !== payload.orderId));
     });
+
+    this.socket.on(
+      'order:customer-confirmed',
+      (payload: {
+        orderId: string;
+        riderId: string;
+        paymentMethod: string;
+        earnings: string;
+        amount?: number;
+      }) => {
+        if (!payload || !payload.orderId) return;
+
+        // 1. Immediately refresh statistics (earnings count updated)
+        this.loadDashboardStats();
+
+        // 2. Clear activeDelivery if confirmed order matches currently retained active delivery
+        if (this.activeDelivery()?.orderId === payload.orderId) {
+          this.activeDelivery.set(null);
+        }
+
+        // 3. Format title and message based on payment method
+        const isCash = payload.paymentMethod === 'CASH';
+        const title = 'Delivery Confirmed';
+        const message = isCash
+          ? `The customer has confirmed receipt of order #${payload.orderId}. The amount collected from the customer (${payload.amount ?? 0} EGP) is now counted as your delivery earnings.`
+          : `The customer has confirmed receipt of order #${payload.orderId}. Your earnings for this delivery are now counted in your total earnings.`;
+
+        this.customerConfirmedNotification.set({
+          id: `${payload.orderId}_${Date.now()}`,
+          orderId: payload.orderId,
+          title,
+          message,
+          createdAt: new Date(),
+        });
+      },
+    );
   }
 
   dismissError(): void {
     this.apiError.set(null);
+  }
+
+  dismissCustomerConfirmedNotification(): void {
+    this.customerConfirmedNotification.set(null);
   }
 
   // ==========================================================================
@@ -260,6 +324,7 @@ export class DashboardService {
         this.apiError.set(null);
         if (active) {
           this.activeDelivery.set(active);
+          this.pendingConfirmationOrderId.set(null);
           this.riderStatus.set('DELIVERING');
           this.riderTrackingService.startTracking(active.orderId);
         } else {
@@ -318,6 +383,7 @@ export class DashboardService {
 
         // 1. Remove accepted order from nearbyOrders list reactively
         this.nearbyOrders.update((current) => current.filter((item) => item.id !== order.id));
+        this.pendingConfirmationOrderId.set(null);
 
         // 2. Update activeDelivery signal reactively & start live GPS tracking
         if (res.activeDelivery) {
@@ -332,11 +398,13 @@ export class DashboardService {
             paymentStatus: res.activeDelivery.paymentStatus,
             amount: res.activeDelivery.amount,
             notes: res.activeDelivery.notes,
+            customerPhone: res.activeDelivery.customerPhone,
             pickupCoordinates: res.activeDelivery.pickupCoordinates,
             destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
           this.riderStatus.set('DELIVERING');
           this.riderTrackingService.startTracking(res.activeDelivery.orderId);
+          this.router.navigate(['/active']);
         }
       },
       error: (err) => {
@@ -396,6 +464,7 @@ export class DashboardService {
             paymentStatus: res.activeDelivery.paymentStatus,
             amount: res.activeDelivery.amount,
             notes: res.activeDelivery.notes,
+            customerPhone: res.activeDelivery.customerPhone,
             pickupCoordinates: res.activeDelivery.pickupCoordinates,
             destinationCoordinates: res.activeDelivery.destinationCoordinates,
           });
@@ -411,6 +480,9 @@ export class DashboardService {
   }
 
   deliverOrder(orderId: string): void {
+    const currentActive = this.activeDelivery();
+    const deliveredId = currentActive?.orderId || orderId;
+
     this.loading.set(true);
     this.http.patch<DeliverOrderResponse>(this.endpoints.deliverOrder(orderId), {}).subscribe({
       next: (_res) => {
@@ -423,9 +495,17 @@ export class DashboardService {
         // 2. Set riderStatus signal to ONLINE
         this.riderStatus.set('ONLINE');
 
-        // 3. Stop GPS tracking & clear activeDelivery signal
+        // 3. Stop GPS tracking & preserve activeDelivery signal with DELIVERED status
         this.riderTrackingService.stopTracking();
-        this.activeDelivery.set(null);
+        if (currentActive) {
+          this.activeDelivery.set({
+            ...currentActive,
+            status: 'DELIVERED',
+          });
+        }
+
+        // 4. Record pending confirmation order ID for post-delivery UX state
+        this.pendingConfirmationOrderId.set(deliveredId);
       },
       error: (err) => {
         this.loading.set(false);
@@ -433,6 +513,26 @@ export class DashboardService {
         this.apiError.set(message);
       },
     });
+  }
+
+  fetchHeatmapData(): void {
+    this.heatmapLoading.set(true);
+    this.heatmapError.set(null);
+
+    this.http.get<HeatmapPoint[]>(this.endpoints.heatmap).subscribe({
+      next: (points) => {
+        this.heatmapLoading.set(false);
+        this.heatmapPoints.set(points || []);
+      },
+      error: (_err) => {
+        this.heatmapLoading.set(false);
+        this.heatmapError.set('Unable to load demand data');
+      },
+    });
+  }
+
+  dismissPendingConfirmation(): void {
+    this.pendingConfirmationOrderId.set(null);
   }
 
   logout(): void {
