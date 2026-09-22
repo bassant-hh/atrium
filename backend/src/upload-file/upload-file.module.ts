@@ -3,17 +3,14 @@ import { UploadFileService } from './upload-file.service';
 import { UploadFileController } from './upload-file.controller';
 
 import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 
 @Module({
-  imports: [MulterModule.register({
-      storage: diskStorage({
-          destination: './uploads',
-          filename: (req,file,cb) => {
-              cb(null,Date.now()+'.'+file.originalname);
-          }
-      })
-  })],
+  imports: [
+    MulterModule.register({
+      storage: memoryStorage(),
+    }),
+  ],
   controllers: [UploadFileController],
   providers: [UploadFileService],
 })
