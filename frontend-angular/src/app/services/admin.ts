@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AdminRider } from '../models/admin-rider';
 
 @Injectable({
@@ -8,21 +9,21 @@ import { AdminRider } from '../models/admin-rider';
 })
 export class AdminService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000/';
+  private readonly baseUrl = environment.apiUrl;
 
   getRiders(): Observable<AdminRider[]> {
-    return this.http.get<AdminRider[]>(`${this.baseUrl}admin/riders`);
+    return this.http.get<AdminRider[]>(`${this.baseUrl}/admin/riders`);
   }
 
   getPendingRiders(): Observable<AdminRider[]> {
-    return this.http.get<AdminRider[]>(`${this.baseUrl}admin/riders/pending`);
+    return this.http.get<AdminRider[]>(`${this.baseUrl}/admin/riders/pending`);
   }
 
   approveRider(id: string): Observable<AdminRider> {
-    return this.http.patch<AdminRider>(`${this.baseUrl}admin/riders/${id}/approve`, {});
+    return this.http.patch<AdminRider>(`${this.baseUrl}/admin/riders/${id}/approve`, {});
   }
 
   rejectRider(id: string): Observable<AdminRider> {
-    return this.http.patch<AdminRider>(`${this.baseUrl}admin/riders/${id}/reject`, {});
+    return this.http.patch<AdminRider>(`${this.baseUrl}/admin/riders/${id}/reject`, {});
   }
 }
