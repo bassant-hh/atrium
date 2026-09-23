@@ -608,20 +608,120 @@
   line-height: 1.5;
 }
 
+.no-summary__row,
+.no-summary__total {
+  min-width: 0;
+  word-break: break-word;
+}
+
 @media (max-width: 768px) {
   .new-order {
-    padding: 16px;
+    padding: 16px 12px;
+  }
+  .new-order__title {
+    font-size: 20px;
+    margin-bottom: 12px;
   }
   .new-order__layout {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .no-card {
+    padding: 16px;
+    border-radius: 16px;
   }
   .no-category-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .no-calc-box {
     grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
   }
   .no-summary {
     position: static;
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .no-summary__place-btn {
+    padding: 14px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 430px) {
+  .new-order {
+    padding: 12px 8px;
+  }
+  .no-progress-bar {
+    padding: 10px 10px;
+    gap: 4px;
+  }
+  .no-progress-step {
+    font-size: 11px;
+    gap: 4px;
+  }
+  .no-progress-step__num {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+  .no-progress-divider {
+    min-width: 4px;
+  }
+  .no-card {
+    padding: 14px 10px;
+    gap: 14px;
+  }
+  .no-card__title {
+    font-size: 15px;
+  }
+  .no-location-types {
+    gap: 6px;
+  }
+  .no-location-type-btn {
+    padding: 10px 4px;
+    font-size: 11px;
+    gap: 4px;
+    min-width: 0;
+  }
+  .no-location-type-btn svg {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .no-field__input,
+  .no-field__textarea {
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+  .no-preset-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .no-route-connector__badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 95%;
+    text-align: center;
+  }
+  .no-payment-item {
+    padding: 12px;
+  }
+  .no-payment-item__left {
+    gap: 10px;
+  }
+  .no-payment-item__label {
+    font-size: 13px;
+  }
+  .no-payment-item__desc {
+    font-size: 11px;
+  }
+  .no-summary__total-value {
+    font-size: 18px;
   }
 }
