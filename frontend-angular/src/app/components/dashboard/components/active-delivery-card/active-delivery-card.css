@@ -193,6 +193,8 @@ app-rider-map {
   border: 1px solid rgba(34, 197, 94, 0.25);
   transition: all 0.2s ease;
   cursor: pointer;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .btn-call-customer:hover {
@@ -301,6 +303,11 @@ app-rider-map {
     flex-direction: column;
     gap: 0.6rem;
   }
+
+  .btn-call-customer {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 640px) {
@@ -318,10 +325,5 @@ app-rider-map {
   .tag-title {
     font-size: 1.05rem;
     word-break: break-word;
-  }
-
-  .btn-call-customer {
-    width: 100%;
-    justify-content: center;
   }
 }
