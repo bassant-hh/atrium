@@ -174,13 +174,49 @@
 
 @media (max-width: 640px) {
   .dashboard-header-card {
-    padding: 1.25rem;
+    padding: 1rem;
+    gap: 1rem;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .header-greeting-text {
+    min-width: 0;
+  }
+
+  .greeting-headline {
+    font-size: 1.25rem;
+    word-break: break-word;
+  }
+
+  .greeting-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .rider-avatar-circle {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .header-identity-left {
+    gap: 0.85rem;
   }
 
   .header-status-right {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 430px) {
+  .dashboard-surface {
+    gap: 1rem;
+  }
+
+  .header-duty-badge,
+  .header-verified-chip {
+    font-size: 0.775rem;
+    padding: 0.35rem 0.75rem;
   }
 }

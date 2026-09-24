@@ -207,3 +207,24 @@
     min-height: 240px;
   }
 }
+
+@media (max-width: 480px) {
+  .heatmap-card {
+    padding: 1rem;
+    min-height: 320px;
+  }
+
+  .heatmap-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .heatmap-legend {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .legend-items {
+    gap: 0.6rem;
+  }
+}

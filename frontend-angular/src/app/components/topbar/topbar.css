@@ -62,3 +62,12 @@
   outline: 2px solid var(--error);
   outline-offset: 2px;
 }
+
+@media (max-width: 767px) {
+  .topbar-container {
+    padding: 0 1rem;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+  }
+}

@@ -302,3 +302,26 @@ app-rider-map {
     gap: 0.6rem;
   }
 }
+
+@media (max-width: 640px) {
+  .active-delivery-card {
+    padding: 1rem;
+  }
+
+  .card-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-title {
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+
+  .btn-call-customer {
+    width: 100%;
+    justify-content: center;
+  }
+}
